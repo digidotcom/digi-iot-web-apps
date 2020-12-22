@@ -1,0 +1,127 @@
+{% extends "sidebar.html" %}
+{% load static %}
+{% block title %}
+Digi Demo - Historic data
+{% endblock %}
+{% block inner_content %}
+            <div class="row justify-content-lg-center">
+                <div class="col-lg-12 col-xl-12">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">Historic data: Irrigation controller</h5>
+                            <div class="row">
+                                <div class="col-xl-4 chart-container">
+                                    <div class="d-flex justify-content-center align-items-center">
+                                        <span class="fas fa-wind fa-2x mr-3"></span>
+                                        <span>Wind speed</span>
+                                    </div>
+                                    <div class="chart-wrapper">
+                                        <div id="wind-chart" class="big-chart"></div>
+                                        <div id="wind-chart-loading" class="chart-loading">
+                                            <img class="loading-chart-image" src="{% static 'images/loading.gif' %}" alt="Loading..." />
+                                        </div>
+                                    </div>
+                                    <div class="btn-group btn-group-toggle d-flex justify-content-center" data-toggle="buttons">
+                                        <label class="btn btn-secondary btn-sm active">
+                                            <input type="radio" name="wind-interval" value="1" checked> Hour
+                                        </label>
+                                        <label class="btn btn-secondary btn-sm">
+                                            <input type="radio" name="wind-interval" value="24"> Day
+                                        </label>
+                                        <label class="btn btn-secondary btn-sm">
+                                            <input type="radio" name="wind-interval" value="168"> Week
+                                        </label>
+                                        <label class="btn btn-secondary btn-sm">
+                                            <input type="radio" name="wind-interval" value="720"> Month
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-xl-4 chart-container">
+                                    <div class="d-flex justify-content-center align-items-center">
+                                        <span class="fas fa-cloud-rain fa-2x mr-3"></span>
+                                        <span>Rain</span>
+                                    </div>
+                                    <div class="chart-wrapper">
+                                        <div id="rain-chart" class="big-chart"></div>
+                                        <div id="rain-chart-loading" class="chart-loading">
+                                            <img class="loading-chart-image" src="{% static 'images/loading.gif' %}" alt="Loading..." />
+                                        </div>
+                                    </div>
+                                    <div class="btn-group btn-group-toggle d-flex justify-content-center" data-toggle="buttons">
+                                        <label class="btn btn-secondary btn-sm active">
+                                            <input type="radio" name="rain-interval" value="1" checked> Hour
+                                        </label>
+                                        <label class="btn btn-secondary btn-sm">
+                                            <input type="radio" name="rain-interval" value="24"> Day
+                                        </label>
+                                        <label class="btn btn-secondary btn-sm">
+                                            <input type="radio" name="rain-interval" value="168"> Week
+                                        </label>
+                                        <label class="btn btn-secondary btn-sm">
+                                            <input type="radio" name="rain-interval" value="720"> Month
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-xl-4 chart-container">
+                                    <div class="d-flex justify-content-center align-items-center">
+                                        <span class="fas fa-sun fa-2x mr-3"></span>
+                                        <span>Solar radiation</span>
+                                    </div>
+                                    <div class="chart-wrapper">
+                                        <div id="radiation-chart" class="big-chart"></div>
+                                        <div id="radiation-chart-loading" class="chart-loading">
+                                            <img class="loading-chart-image" src="{% static 'images/loading.gif' %}" alt="Loading..." />
+                                        </div>
+                                    </div>
+                                    <div class="btn-group btn-group-toggle d-flex justify-content-center" data-toggle="buttons">
+                                        <label class="btn btn-secondary btn-sm active">
+                                            <input type="radio" name="radiation-interval" value="1" checked> Hour
+                                        </label>
+                                        <label class="btn btn-secondary btn-sm">
+                                            <input type="radio" name="radiation-interval" value="24"> Day
+                                        </label>
+                                        <label class="btn btn-secondary btn-sm">
+                                            <input type="radio" name="radiation-interval" value="168"> Week
+                                        </label>
+                                        <label class="btn btn-secondary btn-sm">
+                                            <input type="radio" name="radiation-interval" value="720"> Month
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="stations-cards"></div>
+{% endblock %}
+{% block javascript_inner %}
+    <script>
+    $(document).ready(function() {
+        initCharts();
+    });
+
+    // Registers the callbacks for the controller charts interval buttons.
+    $(function() {
+        $("input[type=radio][name=wind-interval]").change(function() {
+            windInterval = this.value;
+            drawWindChart(true, true);
+        });
+
+        $("input[type=radio][name=rain-interval]").change(function() {
+            rainInterval = this.value;
+            drawRainChart(true, true);
+        });
+
+        $("input[type=radio][name=radiation-interval]").change(function() {
+            radiationInterval = this.value;
+            drawRadiationChart(true, true);
+        });
+    });
+
+    // Re-draws all the charts when the window is resized.
+    $(window).resize(function() {
+        drawAllCharts();
+    });
+    </script>
+{% endblock %}

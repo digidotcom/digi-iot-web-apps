@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/css/bootstrap4-toggle.min.css" rel="stylesheet">
+    {% load static %}
+    <link rel="stylesheet"  href="{% static 'css/access.css' %}">
+    <link rel="stylesheet"  href="{% static 'css/general.css' %}">
+    <link rel="stylesheet"  href="{% static 'css/toastr.css' %}">
+
+    <!-- JS, Popper.js, and jQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
+    <script src="https://kit.fontawesome.com/1e66c78073.js" crossorigin="anonymous"></script>
+    <script defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA_bL-HKU8aZ-xSO8DPkXYd98c1MQoJHGY"></script>
+    <script src="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/js/bootstrap4-toggle.min.js"></script>
+    <script defer src="https://cdn.sobekrepository.org/includes/gmaps-markerwithlabel/1.9.1/gmaps-markerwithlabel-1.9.1.js"></script>
+    <script src="https://www.gstatic.com/charts/loader.js"></script>
+    <script>
+        google.charts.load("current", {"packages":["line"]});
+    </script>
+</head>
+<body>
+    <nav id="topBar" class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="nav-container">
+            <a id="banner-link" class="navbar-brand align-middle" href="{% url 'index' %}">
+                <div class="d-flex align-items-baseline">
+                    <img id="banner-logo" class="banner-icon" src="{% static 'images/Digi_logo_banner.png' %}">
+                    <p id="banner-text">Smart Agriculture Demo</p>
+                </div>
+            </a>
+            {% block profile %}{% endblock %}
+        </div>
+    </nav>
+
+    <div class="bg-light" id="body-row">
+        {% block sidebar %}{% endblock %}
+        <div class="container-fluid">
+            {% block page_content %}{% endblock %}
+        </div>
+    </div>
+
+    <script>
+    function getCookie(cName) {
+        if (document.cookie.length > 0) {
+            cStart = document.cookie.indexOf(cName + "=");
+            if (cStart != -1) {
+                cStart = cStart + cName.length + 1;
+                cEnd = document.cookie.indexOf(";", cStart);
+                if (cEnd == -1)
+                    cEnd = document.cookie.length;
+                return unescape(document.cookie.substring(cStart, cEnd));
+            }
+        }
+        return "";
+    }
+
+    $.ajaxSetup({
+        headers: {
+            "X-CSRFToken": getCookie("csrftoken")
+        }
+    });
+
+    $(document).ready(function() {
+        $("#banner-link").on({
+            "mouseover" : function() {
+                $("#banner-logo").attr("src", "{% static 'images/Digi_logo_banner_gray.png' %}");
+            },
+            "mouseout" : function() {
+                $("#banner-logo").attr("src", "{% static 'images/Digi_logo_banner.png' %}");
+            }
+        });
+    });
+
+    // Enable the tooltip library.
+    $(function() {
+        $('[data-toggle="tooltip"]').tooltip();
+    });
+    </script>
+
+    <!-- Local JS files and functions -->
+    <script type="text/javascript" src="{% static 'js/sidebar.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/jquery.pjax.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/jquery.matchHeight-min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/toastr.min.js' %}"></script>
+    {% block javascript_outer %}{% endblock %}
+</body>
+</html>

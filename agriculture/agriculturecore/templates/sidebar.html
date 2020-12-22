@@ -1,0 +1,249 @@
+{% extends "base_logged_in_sidebar.html" %}
+{% load static %}
+{% block nav_widgets %}
+        <div>
+            <img src="{% static 'images/status_farm.png' %}" class="farm-title-img" title="Farm">
+        </div>
+        <div id="farm_name"></div>
+        <div>
+            <img src="{% static 'images/status_offline.png' %}" id="farm-connection-status" class="farm-title-img" title="Offline">
+        </div>
+        <div class="vertical-separator"></div>
+        <div>
+            <button id="map" class="btn widget-button" type="button" value="0" onclick="window.open('/','_self');">
+                <img src="{% static 'images/map_gray.png' %}" id="map-icon" class="map-icon" data-toggle="tooltip" data-placement="bottom" title="Open Smart Farms map">
+            </button>
+        </div>
+        <div class="vertical-separator"></div>
+        <div class="dropdown digi-gray" id="simulation-container">
+            <button class="btn dropdown-toggle" type="button" id="simulationMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <img id="simulation-logo" class="banner-icon" src="{% static 'images/simulation.png' %}">
+            </button>
+            <div class="dropdown-menu shadow-sm simulation-controls-container" aria-labelledby="simulationMenuButton">
+                <p>Simulation controls</p>
+                <div class="card">
+                    <p class="widget-title">Weather condition</p>
+                    <p class="widget-desc">Control the weather condition of the farm. You can change it to see different temperature and moisture values.</p>
+                    <div class="widget-button-container">
+                        <button id="weather-sunny" class="btn widget-button weather-button" type="button" value="0">
+                            <span id="weather-sunny-logo" class="icon-widget weather-icon fas fa-sun fa-2x" title="Change weather to sunny"></span>
+                        </button>
+                        <button id="weather-cloudy" class="btn widget-button weather-button" type="button" value="1">
+                            <span id="weather-cloudy-logo" class="icon-widget weather-icon fas fa-cloud fa-2x" title="Change weather to cloudy"></span>
+                        </button>
+                        <button id="weather-rainy" class="btn widget-button weather-button" type="button" value="2">
+                            <span id="weather-rainy-logo" class="icon-widget weather-icon fas fa-cloud-rain fa-2x" title="Change weather to rainy"></span>
+                        </button>
+                    </div>
+                </div>
+                <div class="card">
+                    <p class="widget-title">Time</p>
+                    <p class="widget-desc">Control how the time elapses in the farm. You can change it to see the irrigation events faster.</p>
+                    <div class="widget-button-container">
+                        <p id="current-time">00:00:00</p>
+                        <div>
+                            <button id="time-1" class="btn widget-button time-button" type="button" value="1">
+                                <span id="time-speed1-logo" class="icon-widget time-icon fas fa-play fa-2x" title="Change speed to normal"></span>
+                            </button>
+                            <button id="time-2" class="btn widget-button time-button" type="button" value="50">
+                                <span id="time-speed2-logo" class="icon-widget time-icon fas fa-forward fa-2x" title="Change speed to fast"></span>
+                            </button>
+                            <button id="time-3" class="btn widget-button time-button" type="button" value="250">
+                                <span id="time-speed3-logo" class="icon-widget time-icon fas fa-fast-forward fa-2x" title="Change speed to faster"></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="vertical-separator"></div>
+{% endblock %}
+{% block sidebar_content %}
+            <ul id="sections" data-pjax class="list-group">
+                <li>
+                    <a data-pjax href="/dashboard/" class="list-group-item list-group-item-action d-flex align-items-center">
+                        <div class="d-flex w-100 justify-content-start align-items-center">
+                            <span class="digi-menu-icon fas fa-tachometer-alt fa-fw fa-lg mr-3"></span>
+                            <span class="menu-collapsed">Dashboard</span>
+                        </div>
+                    </a>
+                </li>
+                <li>
+                    <a data-pjax href="/history/" class="list-group-item list-group-item-action d-flex align-items-center">
+                        <div class="d-flex w-100 justify-content-start align-items-center">
+                            <span class="digi-menu-icon fas fa-chart-area fa-fw fa-lg mr-3"></span>
+                            <span class="menu-collapsed">Historic data</span>
+                        </div>
+                    </a>
+                </li>
+                <li>
+                    <a data-pjax href="/schedule/" class="list-group-item list-group-item-action d-flex align-items-center">
+                        <div class="d-flex w-100 justify-content-start align-items-center">
+                            <span class="digi-menu-icon fas fa-clock fa-fw fa-lg mr-3"></span>
+                            <span class="menu-collapsed">Schedule</span>
+                        </div>
+                    </a>
+                </li>
+            </ul>
+{% endblock %}
+
+{% block page_content %}
+        <div id="loading">
+            <img id="loading-image" src="/static/images/loading.gif" alt="Loading..." />
+        </div>
+        <div id="pjax-container">
+            {% block inner_content %}{% endblock %}
+            {% block javascript_inner %}{% endblock %}
+        </div>
+{% endblock %}
+
+{% block javascript %}
+    <!-- Local JS files and functions -->
+    <script type="text/javascript" src="{% static 'js/widgets.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/schedule.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/dashboard.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/history.js' %}"></script>
+    <script>
+    $(document).ready(function() {
+        // Don't show the loading spinner at the beginning. Initial page
+        // load is full, so not relying on AJAX.
+        $("#loading").hide();
+
+        verifyParameters();
+
+        // Set up PJAX.
+        if ($.support.pjax) {
+            $.pjax.defaults.timeout = 20000;
+            $.pjax.defaults.fragment = "#pjax-container";
+            $(document).pjax("a[data-pjax]", "#pjax-container");
+
+            $(document).on("pjax:beforeSend", function() {
+                // Do not load new content if there are unsaved changes.
+                if ($("#save-schedule").length && !$("#save-schedule").attr("disabled") && !confirm("There are unsaved changes. Do you want to exit?"))
+                    return false;
+            });
+
+            $(document).on("pjax:send", function(e) {
+                setSelectedSection(e.currentTarget.activeElement);
+                $("#pjax-container").hide();
+                $("#loading").show();
+            });
+
+            $(document).on("pjax:complete", function() {
+                $("#loading").hide();
+                $("#pjax-container").show();
+                verifyParameters();
+            });
+        }
+
+        // Append the URL parameters to the section links.
+        var params = new URLSearchParams(window.location.search).toString();
+        if (params) {
+            $("#sections li").each(function(i, n) {
+                n.children[0].href += "?" + params;
+            });
+        }
+
+        // Set the selected section.
+        setSelectedSection();
+
+        // Set the name of the selected farm.
+        $("#farm_name").html("{{ farm_name }}".toUpperCase());
+
+        // Change the color of the map icon when hovering.
+        $("#map").on({
+            "mouseover" : function() {
+                $("#map-icon").attr("src", "{% static 'images/map_green.png' %}");
+            },
+            "mouseout" : function() {
+                $("#map-icon").attr("src", "{% static 'images/map_gray.png' %}");
+            }
+        });
+
+        // Do not close the simulation dropdown when clicking inside.
+        $(".simulation-controls-container").click(function(e) {
+            e.stopPropagation();
+        });
+
+        // Change the simulation button behavior when the mouse is in or out.
+        $("#simulation-container").on({
+            "mouseover" : function() {
+                $("#simulation-logo").attr("src", "{% static 'images/simulation_selected.png' %}");
+                if (!$("#simulation-container").hasClass("digi-green")) {
+                    $("#simulation-container").addClass("digi-green");
+                }
+                if ($("#simulation-container").hasClass("digi-gray")) {
+                    $("#simulation-container").removeClass("digi-gray");
+                }
+            },
+            "mouseout" : function() {
+                $("#simulation-logo").attr("src", "{% static 'images/simulation.png' %}");
+                if (!$("#simulation-container").hasClass("digi-gray")) {
+                    $("#simulation-container").addClass("digi-gray");
+                }
+                if ($("#simulation-container").hasClass("digi-green")) {
+                    $("#simulation-container").removeClass("digi-green");
+                }
+            }
+        });
+
+        // Add 'click' callbacks to the weather and time buttons.
+        $(".weather-button").click(setWeatherCondition);
+        $(".time-button").click(setTimeFactor);
+
+        // Check the farm connection status.
+        checkFarmConnectionStatus();
+
+        // Get the weather condition and time factor from the irrigation controller.
+        getWeatherCondition();
+        getTimeFactor();
+
+        // Check farm connectivity in 5 secs.
+        setTimeout(checkFarmConnected, 5000, "schedule");
+    });
+
+    // Sets the selected section.
+    function setSelectedSection(element=null) {
+        // First, unselect all the sections.
+        $("#sections li").each(function(i, n) {
+            n.children[0].classList.remove("selected");
+        });
+
+        // Select the corresponding section.
+        if (element != null) {
+            element.classList.add("selected");
+        } else {
+            $("#sections li").each(function(i, n) {
+                if (window.location.pathname == n.children[0].pathname) {
+                    n.children[0].classList.add("selected");
+                    return false;
+                }
+            });
+        }
+    }
+
+    // Returns the controller ID.
+    function getControllerID() {
+        return '{{ controller_id }}';
+    }
+    
+    // Gets the status of the farm.
+    function verifyParameters() {
+        let url = new URL(window.location.href);
+        let controller_id = url.searchParams.get("controller_id");
+        let farm_name = url.searchParams.get("farm_name");
+
+        $.post(
+            "{% url 'verify_parameters' %}",
+            JSON.stringify({
+                "controller_id": controller_id,
+                "farm_name": farm_name
+            }),
+            function(data) {
+                if (data["redirect"])
+                    window.location.replace(data["redirect"]);
+            }
+        );
+    }
+    </script>
+{% endblock %}

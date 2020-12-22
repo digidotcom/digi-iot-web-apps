@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}
+Digi Demo - Logout
+{% endblock %}
+{% block page_content %}
+<div class="wrapper fadeIn">
+    <div id="formContent">
+        <h4 class="login-title">Logout</h4>
+        <p class="logout-text">
+            Didn't want to log out? <a href="{% url 'login' %}">Log in again.</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

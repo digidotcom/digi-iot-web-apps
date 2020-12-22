@@ -1,0 +1,61 @@
+{% extends "base_logged_in_sidebar.html" %}
+{% load static %}
+{% block title %}
+Digi Demo - Map
+{% endblock %}
+{% block sidebar_content %}
+            <div class="farms-list-title">
+                Smart farms
+            </div>
+            <div id="farms-list">
+            </div>
+{% endblock %}
+{% block page_content %}
+            <div class="row justify-content-lg-center">
+                <div class="col-lg-12 col-xl-12">
+                    <div class="column main-row">
+                        <div class="card shadow-sm main-map-card">
+                            <div class="card-body">
+                                <h6 class="card-title">Select the farm to manage:</h6>
+                                <div class="main-map">
+                                    <div class="popup popup-loading shadow">
+                                        <img class="popup-item" src="{% static 'images/loading.gif' %}" alt="Loading..." />
+                                        <div class="popup-text">Loading smart farms...</div>
+                                    </div>
+                                    <div class="popup popup-info shadow d-none">
+                                        <div id="info-title" class="popup-title">Error</div>
+                                        <div id="info-message" class="popup-text">-</div>
+                                    </div>
+                                    <div class="map-loading-wrapper element-grayed">
+                                        <div id="map" class="farms-map"></div>
+                                    </div>
+                                </div>
+                                <div id="map-error" class="map-error">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+{% endblock %}
+
+{% block javascript %}
+    <!-- Local JS files and functions -->
+    <script type="text/javascript" src="{% static 'js/main-map.js' %}"></script>
+    <script>
+    // Ready method.
+    $(document).ready(function() {
+        // Hide the sidebar collapsator.
+        $("#collapsator").hide();
+
+        // Get smart farms and place them in the map.
+        $.post(
+            "{% url 'get_smart_farms' %}",
+            getSmartFarmsCallback
+        );
+
+        // Initialize the map.
+        initMap();
+    });
+    </script>
+{% endblock %}

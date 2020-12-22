@@ -1,0 +1,16 @@
+arrow==0.12.1
+asgiref==3.2.10
+backports.functools-lru-cache==1.6.1
+certifi==2018.4.16
+chardet==3.0.4
+devicecloud==0.5.7
+Django==3.1
+idna==2.10
+python-dateutil==2.7.5
+pytz==2020.1
+requests==2.20.1
+six==1.14.0
+sqlparse==0.3.1
+urllib3==1.25.10
+
+django-pjax~=1.7
