@@ -1,0 +1,254 @@
+{% extends "sidebar.html" %}
+{% load static %}
+{% block title %}
+Digi Demo - Dashboard
+{% endblock %}
+{% block inner_content %}
+            <div class="row justify-content-lg-center">
+                <div class="col-lg-12 col-xl-9">
+                    <div class="column main-row">
+                        <div class="card shadow-sm dashboard-map-card">
+                            <div class="card-body">
+                                <div class="dashboard-map">
+                                    <div id="popup-loading-map" class="popup popup-loading shadow">
+                                        <img class="popup-item" src="{% static 'images/loading.gif' %}" alt="Loading..." />
+                                        <div class="popup-text">Loading irrigation stations...</div>
+                                    </div>
+                                    <div id="popup-info-map" class="popup popup-info shadow d-none">
+                                        <div id="info-title" class="popup-title">Error</div>
+                                        <div id="info-message" class="popup-text">-</div>
+                                    </div>
+                                    <div class="map-loading-wrapper element-grayed">
+                                        <div class="stations-map">
+                                            <div class="stations-map-toolbar">
+                                                <div id="stations-map-status" class="stations-map-status">
+                                                    <i class="fas fa-circle-notch fa-spin" style="margin-right: 2px;"></i> Refreshing values...
+                                                </div>
+                                                <div id="map-button-center" class="stations-map-button" onclick="centerStations()">
+                                                    <img id="map-button-center-img" src="{% static 'images/map_center.png' %}" width="32px" data-toggle="tooltip" data-placement="bottom" title="Center stations in the map">
+                                                </div>
+                                                <div id="map-button-show-info" class="stations-map-button" onclick="setInfoWindowsVisible(true)">
+                                                    <img id="map-button-show-info-img" src="{% static 'images/map_show_info.png' %}" width="32px" data-toggle="tooltip" data-placement="bottom" title="Show all stations information panels">
+                                                </div>
+                                                <div id="map-button-hide-info" class="stations-map-button" onclick="setInfoWindowsVisible(false)">
+                                                    <img id="map-button-hide-info-img" src="{% static 'images/map_hide_info.png' %}" width="32px" data-toggle="tooltip" data-placement="bottom" title="Hide all stations information panels">
+                                                </div>
+                                            </div>
+                                            <div id="stations-map" class="stations-map-control"></div>
+                                        </div>
+                                        <div id="map-error" class="map-error">
+                                        </div>
+                                    </div>
+                                    <div class="map-card farm-status shadow-sm">
+                                        <div class="small-title">General status:</div>
+                                        <div class="status">Online stations: <span id="online-stations" class="status-value"><i class="fas fa-circle-notch fa-spin"></i></span></div>
+                                        <div class="status">Irrigating stations: <span id="irrigating-stations" class="status-value"><i class="fas fa-circle-notch fa-spin"></i></span></div>
+                                    </div>
+                                    <div class="map-card map-legend shadow-sm">
+                                        <table>
+                                            <tbody>
+                                                <tr>
+                                                    <td class="legend-img"><img class="box" src="{% static 'images/marker_station_off.png' %}"/></td>
+                                                    <td class="legend-text">Online</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="legend-img"><img class="box" src="{% static 'images/marker_station_offline.png' %}"/></td>
+                                                    <td class="legend-text">Offline</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="legend-img"><img class="box" src="{% static 'images/marker_station_on.png' %}"/></td>
+                                                    <td class="legend-text">Irrigating</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-12 col-xl-3">
+                    <div class="column main-row">
+                        <div class="row weather-row">
+                            <div class="col-12">
+                                <div class="card shadow-sm">
+                                    <div class="card-body">
+                                        <h6 class="card-title">Weather station</h6>
+                                        <div class="weather-station-container">
+                                            <div class="weather-widget">
+                                                <div class="current">
+                                                    <div class="current-element current-icon"><span id="current-weather"><i class="fas fa-circle-notch fa-spin"></i></span></div>
+                                                    <div class="current-element current-info"><span id="current-temp">-</span> ºC<br><span id="current-status">unknown</span></div>
+                                                    <div class="weather-station-sensors">
+                                                        <table>
+                                                            <tbody>
+                                                                <tr>
+                                                                    <td><span class="digi-icon-color fas fa-wind fa-2x"></span></td>
+                                                                    <td><span class="digi-icon-color fas fa-cloud-rain fa-2x"></span></td>
+                                                                    <td><span class="digi-icon-color fas fa-sun fa-2x"></span></td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td><span id="wind"><i class="fas fa-circle-notch fa-spin"></i></span> km/h</td>
+                                                                    <td><span id="rain"><i class="fas fa-circle-notch fa-spin"></i></span> L/m²</td>
+                                                                    <td><span id="radiation"><i class="fas fa-circle-notch fa-spin"></i></span> W/m²</td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                                <div class="forecast">
+                                                    <table>
+                                                        <tbody>
+                                                            <tr>
+                                                                <td id="day-1" class="forecast-day">
+                                                                    <table>
+                                                                        <tbody>
+                                                                            <tr class="forecast-day">
+                                                                                <td><span id="day-1-name"><i class="fas fa-circle-notch fa-spin"></i></span></td>
+                                                                            </tr>
+                                                                            <tr class="forecast-icon">
+                                                                                <td><span id="day-1-weather"><i class="fas fa-circle-notch fa-spin"></i></span></td>
+                                                                            </tr>
+                                                                            <tr class="forecast-max-temp">
+                                                                                <td><span id="day-1-max">-</span> ºC</td>
+                                                                            </tr>
+                                                                            <tr class="forecast-min-temp">
+                                                                                <td><span id="day-1-min">-</span> ºC</td>
+                                                                            </tr>
+                                                                        </tbody>
+                                                                    </table>
+                                                                </td>
+                                                                <td id="day-2" class="forecast-day">
+                                                                    <table>
+                                                                        <tbody>
+                                                                            <tr class="forecast-day">
+                                                                                <td><span id="day-2-name"><i class="fas fa-circle-notch fa-spin"></i></span></td>
+                                                                            </tr>
+                                                                            <tr class="forecast-icon">
+                                                                                <td><span id="day-2-weather"><i class="fas fa-circle-notch fa-spin"></i></span></td>
+                                                                            </tr>
+                                                                            <tr class="forecast-max-temp">
+                                                                                <td><span id="day-2-max">-</span> ºC</td>
+                                                                            </tr>
+                                                                            <tr class="forecast-min-temp">
+                                                                                <td><span id="day-2-min">-</span> ºC</td>
+                                                                            </tr>
+                                                                        </tbody>
+                                                                    </table>
+                                                                </td>
+                                                                <td id="day-3" class="forecast-day">
+                                                                    <table>
+                                                                        <tbody>
+                                                                            <tr class="forecast-day">
+                                                                                <td><span id="day-3-name"><i class="fas fa-circle-notch fa-spin"></i></span></td>
+                                                                            </tr>
+                                                                            <tr class="forecast-icon">
+                                                                                <td><span id="day-3-weather"><i class="fas fa-circle-notch fa-spin"></i></span></td>
+                                                                            </tr>
+                                                                            <tr class="forecast-max-temp">
+                                                                                <td><span id="day-3-max">-</span> ºC</td>
+                                                                            </tr>
+                                                                            <tr class="forecast-min-temp">
+                                                                                <td><span id="day-3-min">-</span> ºC</td>
+                                                                            </tr>
+                                                                        </tbody>
+                                                                    </table>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row water-tank-row">
+                            <div class="col-12">
+                                <div class="card shadow-sm">
+                                    <div id="popup-info-tank" class="popup popup-info shadow d-none">
+                                        <div id="info-title-tank" class="popup-title">Farm offline</div>
+                                        <div id="info-message-tank" class="popup-text">You cannot interact with the water tank controls until the farm is back online.</div>
+                                    </div>
+                                    <div class="card-body water-tank-card">
+                                        <h6 class="card-title">Water tank</h6>
+                                        <div class="water-tank-container row">
+                                            <div class="water-tank col-6">
+                                                <div id="tank-spinner" class="popup shadow">
+                                                    <i class="fas fa-circle-notch fa-spin"></i>
+                                                    <div class="popup-text">Loading...</div>
+                                                </div>
+                                                <div class="tank-img-loading-container element-grayed">
+                                                    <img class="static-image" src="{% static 'images/water_tank.png' %}">
+                                                    <div class="water-container">
+                                                        <div class="water-space">
+                                                            <div id="water"></div>
+                                                        </div>
+                                                    </div>
+                                                    <p class="tank-level"><span id="level">-</span> %</p>
+                                                </div>
+                                            </div>
+                                            <div class="tank-valve col-6">
+                                                <div class="title">General valve:</div>
+                                                <div id="toggle-spinner" class="popup shadow">
+                                                    <i class="fas fa-circle-notch fa-spin"></i>
+                                                    <div class="popup-text">Loading...</div>
+                                                </div>
+                                                <div class="tank-valve-loading-container d-flex align-items-center justify-content-center element-grayed">
+                                                    <img id="tank-valve-img" class="static-image" src="{% static 'images/valve-closed.png' %}">
+                                                    <div class="tank-valve-loader" onclick="toggleTankValve()" data-toggle="tooltip" data-placement="bottom" title="Force open/closing">
+                                                        <input id="toggle-valve" type="checkbox" data-toggle="toggle" data-on="Open" data-off="Closed" data-onstyle="digi" data-offstyle="danger">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="refill-button" onclick="refillTank()">REFILL TANK</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+{% endblock %}
+{% block javascript_inner %}
+    <script>
+    $(document).ready(function() {
+        // Initialize the valve toggle button and add action to do when toggled.
+        $("#toggle-valve").bootstrapToggle();
+
+        // Initialize the map.
+        initMap();
+
+        // Change the color of the map toolbar icons when hovering.
+        $("#map-button-center").on({
+            "mouseover" : function() {
+                $("#map-button-center-img").attr("src", "{% static 'images/map_center_green.png' %}");
+            },
+            "mouseout" : function() {
+                $("#map-button-center-img").attr("src", "{% static 'images/map_center.png' %}");
+            }
+        });
+        $("#map-button-hide-info").on({
+            "mouseover" : function() {
+                $("#map-button-hide-info-img").attr("src", "{% static 'images/map_hide_info_green.png' %}");
+            },
+            "mouseout" : function() {
+                $("#map-button-hide-info-img").attr("src", "{% static 'images/map_hide_info.png' %}");
+            }
+        });
+        $("#map-button-show-info").on({
+            "mouseover" : function() {
+                $("#map-button-show-info-img").attr("src", "{% static 'images/map_show_info_green.png' %}");
+            },
+            "mouseout" : function() {
+                $("#map-button-show-info-img").attr("src", "{% static 'images/map_show_info.png' %}");
+            }
+        });
+
+        // Get farm status.
+        getFarmStatus();
+    });
+    </script>
+{% endblock %}

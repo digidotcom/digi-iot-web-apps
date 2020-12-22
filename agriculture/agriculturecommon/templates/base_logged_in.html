@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block profile %}
+        <div class="nav-right-container">
+            {% block nav_widgets %}{% endblock %}
+            <div class="dropdown digi-gray" id="profile-container">
+                <button class="btn dropdown-toggle" type="button" id="profileMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <img id="profile-logo" class="banner-icon" src="{% static 'images/profile_gray.png' %}">
+                </button>
+                <div class="dropdown-menu shadow-sm" aria-labelledby="profileMenuButton">
+                    <a class="dropdown-item" href="{% url 'logout' %}">Log out</a>
+                </div>
+            </div>
+        </div>
+{% endblock %}
+
+{% block javascript_outer %}
+<script>
+$( document ).ready(function() {
+    $("#profile-container").on({
+        "mouseover" : function() {
+            $("#profile-logo").attr("src", "{% static 'images/profile_green.png' %}");
+            if (!$("#profile-container").hasClass("digi-green")) {
+                $("#profile-container").addClass("digi-green");
+            }
+            if ($("#profile-container").hasClass("digi-gray")) {
+                $("#profile-container").removeClass("digi-gray");
+            }
+        },
+        "mouseout" : function() {
+            $("#profile-logo").attr("src", "{% static 'images/profile_gray.png' %}");
+            if (!$("#profile-container").hasClass("digi-gray")) {
+                $("#profile-container").addClass("digi-gray");
+            }
+            if ($("#profile-container").hasClass("digi-green")) {
+                $("#profile-container").removeClass("digi-green");
+            }
+        }
+    });
+});
+</script>
+{% block javascript %}{% endblock %}
+{% endblock %}

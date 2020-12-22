@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}
+Digi Demo - Login
+{% endblock %}
+{% block page_content %}
+<div class="wrapper fadeIn">
+    <div id="formContent">
+        <h4 class="login-title">Login</h4>
+        <p class="login-desc">Log in with your Digi Remote Manager account:</p>
+        <form method="POST">
+            {% csrf_token %}
+            {{ form.as_table }}
+            <button type="submit" class="login-button">Login</button>
+        </form>
+        <span class="create-account">Don't have a DRM account? <a href="https://myaccount.digi.com/" target="_blank">Create one</a></span>
+    </div>
+</div>
+{% endblock %}

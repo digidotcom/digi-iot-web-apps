@@ -1,0 +1,80 @@
+{% extends "sidebar.html" %}
+{% load static %}
+{% block title %}
+Digi Demo - Schedule
+{% endblock %}
+{% block inner_content %}
+            <div class="row justify-content-lg-center" >
+                <div class="col-lg-12 col-xl-12">
+                    <div class="card shadow-sm" >
+                        <div class="card-body schedule-body">
+                            <div class="popup popup-loading shadow">
+                                <img class="popup-item" src="{% static 'images/loading.gif' %}" alt="Loading..." />
+                                <div class="popup-text">Loading schedules...</div>
+                            </div>
+                            <div class="popup popup-info shadow d-none">
+                                <div id="info-title" class="popup-title">Farm offline.</div>
+                                <div id="info-message" class="popup-text">Make sure the irrigation controller of your installation is connected to Internet.</div>
+                            </div>
+                            <div id="schedule-container" style="display: none;">
+                                <h5 class="card-title">Irrigation cycles</h5>
+                                <table id="cycles-table" class="table table-striped table-bordered table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th class="th-sm" style="width: 45%">Start time</th>
+                                            <th class="th-sm" style="width: 45%">Duration per station</th>
+                                            <th class="th-sm" style="width: 10%"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                </table>
+    
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-outline-primary" data-toggle="modal" data-target="#add-cycle-modal">Add cycle</button>
+                                    <button type="button" id="save-schedule" class="btn btn-primary">Save</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="add-cycle-modal" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Add irrigation cycle</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Configure the starting time and irrigation duration per station.</p>
+                            <div class="cycle-modal-container">
+                                <label for="start" class="cycle-modal-label">Start time:</label>
+                                <input type="time" id="start" class="modal-input" name="start" required>
+                                <label for="duration" class="cycle-modal-label">Duration per station:</label>
+                                <input type="number" id="duration" class="modal-input" name="duration" min="1" required> minutes
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" id="cancel-cycle" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                            <button type="button" id="add-cycle" class="btn btn-primary">Add</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+{% endblock %}
+{% block javascript_inner %}
+    <script>
+    $(document).ready(function() {
+        initSchedule();
+    });
+
+    // Prevent exiting or reloading the page if there are unsaved changed.
+    window.onbeforeunload = function() {
+        if ($("#save-schedule").length && !$("#save-schedule").attr("disabled"))
+            return "There are unsaved changes.";
+    }
+    </script>
+{% endblock %}
