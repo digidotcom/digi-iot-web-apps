@@ -1,0 +1,165 @@
+{% extends "sidebar.html" %}
+{% load static %}
+{% block title %}
+Digi Demo - Dashboard
+{% endblock %}
+{% block inner_content %}
+            <div class="row justify-content-lg-center">
+                <div class="col-lg-12 col-xl-9">
+                    <div class="column main-row">
+                        <div class="card shadow-sm dashboard-map-card">
+                            <div class="card-body">
+                                <div class="dashboard-map">
+                                    <div id="popup-loading-map" class="popup popup-loading shadow">
+                                        <img class="popup-item" src="{% static 'images/loading.gif' %}" alt="Loading..." />
+                                        <div class="popup-text">Loading tanks...</div>
+                                    </div>
+                                    <div id="popup-info-map" class="popup popup-info shadow d-none">
+                                        <div id="info-title" class="popup-title">Error</div>
+                                        <div id="info-message" class="popup-text">-</div>
+                                    </div>
+                                    <div class="map-loading-wrapper element-grayed">
+                                        <div class="tanks-map">
+                                            <div class="tanks-map-toolbar">
+                                                <div id="tanks-map-status" class="tanks-map-status">
+                                                    <i class="fas fa-circle-notch fa-spin" style="margin-right: 2px;"></i> Refreshing values...
+                                                </div>
+                                                <div id="map-button-center" class="tanks-map-button" onclick="centerTanks()">
+                                                    <img id="map-button-center-img" src="{% static 'images/map_center.png' %}" width="32px" data-toggle="tooltip" data-placement="bottom" title="Center tanks in the map">
+                                                </div>
+                                                <div class="tanks-map-selector">
+                                                    <select id="tank-selector" name="tank-selector" class="tanks-map-select form-control-sm">
+                                                        <option value="" selected disabled hidden>Select a tank</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div id="tanks-map" class="tanks-map-control"></div>
+                                        </div>
+                                        <div id="map-error" class="map-error">
+                                        </div>
+                                    </div>
+                                    <div class="map-card installation-status shadow-sm">
+                                        <div class="small-title">General status:</div>
+                                        <div class="status">Online tanks: <span id="online-tanks" class="status-value"><i class="fas fa-circle-notch fa-spin"></i></span></div>
+                                    </div>
+                                    <div class="map-card map-legend shadow-sm">
+                                        <table>
+                                            <tbody>
+                                                <tr>
+                                                    <td class="legend-img"><img class="box" src="{% static 'images/marker_tank.png' %}"/></td>
+                                                    <td class="legend-text">Online</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="legend-img"><img class="box" src="{% static 'images/marker_tank_offline.png' %}"/></td>
+                                                    <td class="legend-text">Offline</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-12 col-xl-3">
+                    <div class="column main-row">
+                        <div class="row water-tank-row">
+                            <div class="col-12">
+                                <div class="card shadow-sm">
+                                    <div id="popup-offline-tank" class="popup popup-info shadow d-none">
+                                        <div class="popup-title">Tank offline</div>
+                                        <div class="popup-text">You cannot interact with the water tank controls until it is back online.</div>
+                                    </div>
+                                    <div id="popup-select-tank" class="popup popup-info shadow d-none">
+                                        <img src="{% static 'images/info.png' %}" />
+                                        <div class="popup-text">Select a tank from the map to inspect it.</div>
+                                    </div>
+                                    <div class="card-body water-tank-card">
+                                        <h6 id="tank-name" class="card-title">-</h6>
+                                        <div class="water-tank-wrapper">
+                                            <div class="water-tank-container row">
+                                                <div class="water-tank col-12">
+                                                    <div id="tank-spinner" class="popup shadow">
+                                                        <i class="fas fa-circle-notch fa-spin"></i>
+                                                        <div class="popup-text">Loading...</div>
+                                                    </div>
+                                                    <div class="tank-img-loading-container element-grayed">
+                                                        <img class="static-image" src="{% static 'images/water_tank.png' %}">
+                                                        <div class="water-container">
+                                                            <div class="water-space">
+                                                                <div id="water"></div>
+                                                            </div>
+                                                        </div>
+                                                        <p class="tank-level"><span id="level">-</span> %</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="temp-container row">
+                                                <div class="tank-temperature col-12">
+                                                    <img class="static-image" src="{% static 'images/thermometer.png' %}" />
+                                                    <p><span id="temperature">-</span> ºC</p>
+                                                </div>
+                                            </div>
+                                            <div class="valve-container row">
+                                                <div id="toggle-spinner" class="popup shadow">
+                                                    <i class="fas fa-circle-notch fa-spin"></i>
+                                                    <div class="popup-text">Loading...</div>
+                                                </div>
+                                                <div class="tank-valve col-6">
+                                                    <div class="title">General valve:</div>
+                                                    <div class="tank-valve-loading-container d-flex align-items-center justify-content-center element-grayed">
+                                                        <div class="tank-valve-loader" onclick="toggleTankValve()" data-toggle="tooltip" data-placement="bottom" title="Force open/closing">
+                                                            <input id="toggle-valve" type="checkbox" data-toggle="toggle" data-on="Open" data-off="Closed" data-onstyle="digi" data-offstyle="danger">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="tank-valve col-6">
+                                                    <div class="tank-valve-loading-container d-flex align-items-center justify-content-center element-grayed">
+                                                        <img id="tank-valve-img" class="static-image" src="{% static 'images/valve-closed.png' %}">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="refill-button" onclick="refillTank()">REFILL TANK</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+{% endblock %}
+{% block javascript_inner %}
+    <script>
+    $(document).ready(function() {
+        // Initialize the valve toggle button and add action to do when toggled.
+        $("#toggle-valve").bootstrapToggle();
+
+        // Initialize the map.
+        initMap();
+
+        // Change the color of the map toolbar icons when hovering.
+        $("#map-button-center").on({
+            "mouseover" : function() {
+                $("#map-button-center-img").attr("src", "{% static 'images/map_center_green.png' %}");
+            },
+            "mouseout" : function() {
+                $("#map-button-center-img").attr("src", "{% static 'images/map_center.png' %}");
+            }
+        });
+
+        // Select the tank when the selector changes.
+        $("#tank-selector").on("change", function() {
+            selectTank(this.value, true);
+        });
+
+        // Show the popup to select a tank and hide the loading ones.
+        showPopup($(".water-tank-card"), $("#popup-select-tank"));
+        hidePopup($(".tank-img-loading-container"), $("#tank-spinner"));
+        hidePopup($(".tank-valve-loading-container"), $("#toggle-spinner"));
+
+        // Get installation status.
+        getInstallationStatus();
+    });
+    </script>
+{% endblock %}

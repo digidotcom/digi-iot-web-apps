@@ -15,7 +15,8 @@ demo.
 The best place to get started is the documentation of the specific demo you want
 to run:
 
-* [Smart Agriculture](http://www.digi.com/resources/documentation/digidocs/90002422/).
+* [Smart Agriculture](http://www.digi.com/resources/documentation/digidocs/90002422/#containers/cont_demo_title.htm).
+* [Tank Monitoring](http://www.digi.com/resources/documentation/digidocs/90002422/#containers/cont_demo_tank.htm).
 
 
 ## How to Contribute
@@ -27,7 +28,7 @@ document.
 
 ## License
 
-Copyright 2020, Digi International Inc.
+Copyright 2020-2021, Digi International Inc.
 
 This Source Code Form is subject to the terms of the Mozilla Public
 License, v. 2.0. If a copy of the MPL was not distributed with this

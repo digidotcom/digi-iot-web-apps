@@ -1,0 +1,87 @@
+{% extends "sidebar.html" %}
+{% load static %}
+{% block title %}
+Digi Demo - Configuration
+{% endblock %}
+{% block inner_content %}
+            <div class="row justify-content-lg-center" >
+                <div class="col-md-12">
+                    <div class="card shadow-sm" >
+                        <div class="card-body">
+                            <h5 class="card-title">Installation configuration</h5>
+                            <p>Select a tank from the list to manage its settings. You can check multiple tanks to configure them with the same settings.</p>
+                            <div class="row justify-content-lg-center" >
+                                <div id="loading-configuration" class="popup popup-loading shadow d-none">
+                                    <img class="popup-item" src="{% static 'images/loading.gif' %}" alt="Loading..." />
+                                    <div id="popup-configuration" class="popup-text">Loading configuration...</div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div id="loading-tanks" class="popup popup-loading">
+                                        <img class="popup-item" src="{% static 'images/loading.gif' %}" alt="Loading..." />
+                                        <div class="popup-text">Loading tanks...</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <h6>Tanks list</h6>
+                                        <div id="tanks-list-disable-panel" class="tanks-list-disable-panel"></div>
+                                        <div id="tanks-list" class="tanks-list">
+                                        </div>
+                                        <div class="drm-connection-buttons">
+                                            <button id="checkAllButton" class="btn btn-primary" onclick="checkAllTanks()">Check all</button>
+                                            <button id="unCheckAllButton" class="btn btn-primary" onclick="unCheckAllTanks()">Uncheck all</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="form-group">
+                                        <h6>DRM connection</h6>
+                                        <hr>
+                                        <div class="drm-connection-form">
+                                            <div class="form-check mb-2">
+                                                <input class="form-check-input" type="radio" name="drmConnectRadio" onchange="drmConnectionOptionChanged()" id="connectAlwaysRadio" value="always" checked>
+                                                <label class="form-check-label" for="connectAlwaysRadio">
+                                                    Always connected to DRM
+                                                </label>
+                                            </div>
+                                            <div class="form-check mb-3">
+                                                <input class="form-check-input" type="radio" name="drmConnectRadio" onchange="drmConnectionOptionChanged()" id="connectPollingRatio" value="polling">
+                                                <label class="form-check-label" for="connectPollingRatio">
+                                                    Connect to DRM periodically
+                                                </label>
+                                            </div>
+                                            <div class="form-inline ml-4 mt-2">
+                                                <label id="drmPollLabel" for="drmPollMinutes" class="mr-sm-2">Polling rate:</label>
+                                                <input id="drmPollMinutes" type="text" class="form-control mr-sm-2" value="15">
+                                                <label id="drmPollUnitsLabel" for="drmPollMinutes" class="mr-sm-2">minutes</label>
+                                            </div>
+                                            <div class="ml-4 mt-2">
+                                                <label id="drmPollDescriptionLabel" for="drmPollMinutes"><i>How often the XBee performs a status check to Remote Manager.</i></label>
+                                            </div>
+                                        </div>
+                                        <hr>
+                                        <div class="drm-connection-buttons">
+                                            <button id="saveButton" class="btn btn-primary" onclick="saveConfiguration()">Save</button>
+                                            <button id="refreshButton" class="btn btn-primary" onclick="refreshSelectedTank()">Refresh</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+{% endblock %}
+{% block javascript_inner %}
+    <script>
+    $(document).ready(function() {
+        // Fill the list of tanks.
+        fillTanksList();
+
+        // Disable all controls but the tanks list.
+        setConfigurationControlsEnabled(false);
+        setTanksListEnabled(true);
+        let tanksSelect = document.getElementById("tanksSelect");
+        if (tanksSelect != null)
+            tanksSelect.disabled = false;
+    });
+    </script>
+{% endblock %}
