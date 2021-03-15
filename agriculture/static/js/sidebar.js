@@ -123,6 +123,8 @@ function updateFarmConnectionStatus(response) {
         farmConnectionStatus = response["status"];
     }
 
+    checkFarmConnected();
+
     // Schedule a new connection status update in 30 seconds.
     setTimeout(checkFarmConnectionStatus, 30000);
 }
@@ -142,6 +144,4 @@ function checkFarmConnected() {
             showPopup($(".water-tank-card"), $("#popup-info-tank"));
     }
     prevFarmConnectionStatus = farmConnectionStatus;
-
-    setTimeout(checkFarmConnected, 5000);
 }

@@ -197,9 +197,6 @@
         // Get the weather condition and time factor from the irrigation controller.
         getWeatherCondition();
         getTimeFactor();
-
-        // Check farm connectivity in 5 secs.
-        setTimeout(checkFarmConnected, 5000, "schedule");
     });
 
     // Sets the selected section.
