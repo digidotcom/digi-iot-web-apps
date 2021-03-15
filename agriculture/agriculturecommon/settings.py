@@ -1,4 +1,4 @@
-# Copyright 2020, Digi International Inc.
+# Copyright 2020, 2021, Digi International Inc.
 #
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'login',
     'agriculturecore',
+    'channels',
 ]
 
 MIDDLEWARE = [
@@ -144,3 +145,6 @@ LOGIN_URL = '/access/login/'
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # Expire when the browser closes
 SESSION_COOKIE_AGE = 10 * 60  # Expire after 10 minutes
 SESSION_SAVE_EVERY_REQUEST = True  # Refresh the session on every request
+
+# Channels
+ASGI_APPLICATION = 'agriculturecommon.asgi.application'

@@ -1,4 +1,4 @@
-# Copyright 2020, Digi International Inc.
+# Copyright 2020, 2021, Digi International Inc.
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -15,6 +15,7 @@
 import argparse
 import os
 import pathlib
+import platform
 import subprocess
 import sys
 import venv
@@ -24,12 +25,18 @@ import webbrowser
 # Constants.
 FOLDER_DEMO = "."
 FOLDER_VENV = ".venv"
+FOLDER_WHEELS = "../digi_wheels"
 
 FILE_REQUIREMENTS = "requirements.txt"
 FILE_MANAGE = "manage.py"
 FILE_CONFIGURED = ".configured"
 
-PATTERN_SERVER = "^Starting development server at (.*)$"
+PY_VENV_LINUX = "python%d.%d-venv"
+
+PATTERN_SERVER = "^Starting (?:.*)development server at (.*)$"
+
+TWISTED_32 = "Twisted-20.3.0-cp{0}{1}-cp{0}{1}-win32.whl"
+TWISTED_64 = "Twisted-20.3.0-cp{0}{1}-cp{0}{1}-win_amd64.whl"
 
 # Variables.
 null_output = open(os.devnull, "w")
@@ -81,6 +88,25 @@ def get_venv(venv_path):
     return venv_context
 
 
+def run_python_cmd(command, enable_debug=True):
+    """
+    Executes the given command using the installed Python interpreter used to
+    run this script.
+
+    Args:
+        command (List): The command to execute. Contains the Python file name
+            and arguments.
+        enable_debug (Boolean): `True` to display the output of the command,
+            `False` otherwise.
+
+    Returns:
+        Integer: The status code of the execution.
+    """
+    return subprocess.check_call(command,
+                                 stdout=None if enable_debug else null_output,
+                                 stderr=None if enable_debug else null_output)
+
+
 def run_venv_python(venv_context, command, enable_debug=True):
     """
     Executes the given command using the Python interpreter of the virtual
@@ -130,7 +156,7 @@ def run_web_server(venv_context, command):
     """
     Executes the command to run the WEB server and parser the log to open
     the WEB browser.
-    
+
     Args:
         venv_context (:class:`SimpleNamespace`): The context of the virtual
             environment.
@@ -162,6 +188,17 @@ def run_web_server(venv_context, command):
         process.kill()
 
 
+def is_64_bits_python():
+    """
+    Returns whether the python architecture is 64 bits or not.
+
+    Returns:
+         Boolean: `True` if the python architecture is 64 bits, or `False`
+             otherwise.
+    """
+    return platform.architecture()[0] == "64bit"
+
+
 def print_success():
     """
     Prints success message.
@@ -189,11 +226,18 @@ def main():
     args = parser.parse_args()
     debug = args.debug
 
+    # Get Python version.
+    py_major_version = sys.version_info[0]
+    py_minor_version = sys.version_info[1]
+
     # Print header.
     print(" +-----------------------------------------+")
     print(" | XBee IoT Smart Agriculture demo WEB app |")
     print(" +-----------------------------------------+")
     print("")
+    if py_major_version < 3 or py_minor_version < 5:
+        print_error("Python 3.5 required to launch this script.")
+        sys.exit(-1)
     print(" Please, wait while the script prepares the virtual environment\n"
           " and runs the WEB server...")
     print("")
@@ -227,6 +271,13 @@ def main():
     if not configured:
         print("- Generating virtual environment... ", end="")
         sys.stdout.flush()
+        # If this is a Linux distribution, install the correct venv package for
+        # the selected python interpreter.
+        if sys.platform == "linux" or sys.platform == "linux2":
+            run_python_cmd(["sudo", "apt-get", "--yes", "install",
+                            PY_VENV_LINUX % (
+                                py_major_version, py_minor_version)])
+
         venv_context = create_venv(venv_path)
         print_success()
 
@@ -238,6 +289,21 @@ def main():
             print_error()
             sys.exit(-1)
         print_success()
+
+        # If Python version is greater than 3.7, install the corresponding
+        # Twisted wheel so the channels module can be installed later on.
+        if sys.platform == "win32" and py_minor_version > 7:
+            twisted = TWISTED_64 if is_64_bits_python() else TWISTED_32
+            twisted_path = os.path.join(
+                FOLDER_WHEELS,
+                twisted.format(py_major_version, py_minor_version))
+            print("- Installing Twisted wheel (%s)... " % twisted_path, end="")
+            sys.stdout.flush()
+            if run_venv_python(venv_context, ['-m', 'pip', 'install',
+                                              twisted_path], debug) != 0:
+                print_error()
+                sys.exit(-1)
+            print_success()
 
         # Install the application requirements.
         print("- Installing application requirements: ")

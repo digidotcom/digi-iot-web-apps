@@ -2,6 +2,7 @@ arrow==0.12.1
 asgiref==3.2.10
 backports.functools-lru-cache==1.6.1
 certifi==2018.4.16
+channels==3.0.2
 chardet==3.0.4
 devicecloud==0.5.7
 Django==3.1

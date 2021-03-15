@@ -151,6 +151,8 @@ var bounds;
 
 var markersZIndex = 0;
 
+subscribeValves();
+
 // Initialize and add the map.
 function initMap() {
     // Create the marker icon (normal).
@@ -1056,4 +1058,27 @@ function calculateTempDeltas(prevWeatherIcon, weatherIcon) {
 // Returns whether the dashboard page is showing or not.
 function isDashboardShowing() {
     return window.location.pathname.indexOf("dashboard") > -1;
+}
+
+// Subscribes to any valve change.
+function subscribeValves() {
+    var farmName = new URLSearchParams(window.location.search).get("farm_name");
+
+    // Create the web socket.
+    var ws = new WebSocket("ws://" + window.location.host + "/ws/valves/" + farmName);
+
+    // Define the callback to be notified when data is received in the web socket.
+    ws.onmessage = function(e) {
+        if (isDashboardShowing()) {
+            var event = JSON.parse(e.data);
+            var device = event["device"];
+            // Update the status of the appropriate valve (tank or station).
+            if (device == "tank") {
+                tankValve = event["value"];
+                updateTankValveStatus();
+            } else {
+                updateValveStatus(event, device);
+            }
+        }
+    };
 }
