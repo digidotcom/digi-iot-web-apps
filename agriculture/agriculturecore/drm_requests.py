@@ -1,4 +1,4 @@
-# Copyright 2020, Digi International Inc.
+# Copyright 2020, 2021, Digi International Inc.
 #
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -19,6 +19,8 @@ from datetime import datetime, timedelta, timezone
 from xml.etree.ElementTree import ParseError
 
 from devicecloud import DeviceCloud, DeviceCloudHttpException
+from devicecloud.monitor import MonitorAPI
+from devicecloud.monitor_tcp import TCPClientManager
 from devicecloud.sci import DeviceTarget
 from django.http import JsonResponse
 
@@ -83,6 +85,10 @@ PREFIX_STATION = "ST_"
 STREAM_FORMAT_CONTROLLER = "{}/{}"
 STREAM_FORMAT = "{}/{}/{}"
 
+WS_REMOVE_MONITOR = "/ws/Monitor/{}"
+
+monitor_managers = {}
+
 
 def is_authenticated(request):
     """
@@ -114,7 +120,23 @@ def get_device_cloud(request):
         :class:`.DeviceCloud`: The Device Cloud instance for the corresponding
             user and password stored in the request session.
     """
-    user = request.session.get("user")
+    return get_device_cloud_session(request.session)
+
+
+def get_device_cloud_session(session):
+    """
+    Returns the Device Cloud instance for the given session.
+
+    Args:
+         session (:class:`.SessionStore`): The Django session containing the
+            user and password to generate the corresponding Device Cloud
+            instance.
+
+    Returns:
+        :class:`.DeviceCloud`: The Device Cloud instance for the corresponding
+            user and password stored in the session.
+    """
+    user = session.get("user")
     if user is None:
         return None
     user_serialized = DeviceCloudUser.from_json(json.loads(user))
@@ -661,3 +683,92 @@ def is_device_online(request, controller_id):
             continue
         return device.is_connected()
     return False
+
+
+def subscribe_valves(session, farm_name, consumer):
+    """
+    Creates a Device Cloud monitor to be notified when any valve of the given
+    farm, either from the tank or from any irrigation station, changes.
+
+    Args:
+        session (:class:`.SessionStore`): The Django session.
+        farm_name (String): The name of the farm.
+        consumer (:class:`.WsConsumer`): The web socket consumer.
+
+    Returns:
+        The ID of the created monitor.
+    """
+    dc = get_device_cloud_session(session)
+    if dc is None:
+        return -1
+
+    global monitor_managers
+
+    # Get or create the monitor manager for the given session.
+    session_key = session.session_key
+    if session_key in monitor_managers:
+        monitor_manager = monitor_managers.get(session_key)
+    else:
+        monitor_manager = MonitorManager(dc.get_connection())
+        monitor_managers[session_key] = monitor_manager
+
+    # Create a monitor for the valves.
+    monitor = monitor_manager.create_tcp_monitor(["[group={}{}]DataPoint".format(models.SMART_FARM_PREFIX, farm_name)])
+
+    # Define the monitor callback.
+    def monitor_callback(json_data):
+        stream_id = json_data["Document"]["Msg"]["DataPoint"]["streamId"]
+        valve = json_data["Document"]["Msg"]["DataPoint"]["data"]
+
+        # Only process data streams for any valve.
+        if stream_id.endswith(ID_VALVE):
+            parts = stream_id.split("/")
+            device = parts[1] if len(parts) == 3 else ID_TANK
+            consumer.send(text_data=json.dumps({"device": device, "value": valve}))
+
+        return True
+
+    # Add the monitor callback.
+    monitor.add_callback(monitor_callback)
+
+    return monitor.get_id()
+
+
+def unsubscribe_valves(session, monitor_id):
+    """
+    Disconnects and deletes the Device Cloud monitor with the given ID that was
+    listening for valve changes.
+
+    Args:
+        session (:class:`.SessionStore`): The Django session.
+        monitor_id (int): The ID of the monitor to delete.
+    """
+    dc = get_device_cloud_session(session)
+    if dc is None:
+        return
+
+    global monitor_managers
+
+    # Get or create the monitor manager for the given session.
+    session_key = session.session_key
+    if session_key not in monitor_managers:
+        return
+    monitor_manager = monitor_managers.pop(session_key)
+
+    # Stop the monitor.
+    monitor_manager.stop_listeners()
+
+    # Delete the monitor.
+    try:
+        dc.get_connection().delete(WS_REMOVE_MONITOR.format(monitor_id))
+    except DeviceCloudHttpException as e:
+        print(e)
+
+
+class MonitorManager(MonitorAPI):
+    """
+    Class used to manage the use of Device Cloud monitors.
+    """
+    def __init__(self, conn):
+        MonitorAPI.__init__(self, conn)
+        self._tcp_client_manager = TCPClientManager(self._conn, secure=False)

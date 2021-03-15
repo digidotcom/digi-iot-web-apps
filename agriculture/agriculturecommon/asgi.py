@@ -1,4 +1,4 @@
-# Copyright 2020, Digi International Inc.
+# Copyright 2020, 2021, Digi International Inc.
 #
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -23,8 +23,15 @@ https://docs.djangoproject.com/en/3.1/howto/deployment/asgi/
 
 import os
 
+from channels.auth import AuthMiddlewareStack
+from channels.routing import URLRouter, ProtocolTypeRouter
 from django.core.asgi import get_asgi_application
+
+import agriculturecore.routing
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'agriculturecommon.settings')
 
-application = get_asgi_application()
+application = ProtocolTypeRouter({
+    "http": get_asgi_application(),
+    "websocket": AuthMiddlewareStack(URLRouter(agriculturecore.routing.websocket_urlpatterns)),
+})

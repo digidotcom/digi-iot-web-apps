@@ -25,7 +25,7 @@ import webbrowser
 # Constants.
 FOLDER_DEMO = "."
 FOLDER_VENV = ".venv"
-FOLDER_WHEELS = "digi_wheels"
+FOLDER_WHEELS = "../digi_wheels"
 
 FILE_REQUIREMENTS = "requirements.txt"
 FILE_MANAGE = "manage.py"
