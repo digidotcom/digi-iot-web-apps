@@ -28,6 +28,8 @@ function setWeatherCondition(e) {
     $.post("/ajax/set_condition", getJsonData(selected)).fail(function(response) {
         // If the operation fails, get the real condition.
         getWeatherCondition();
+    }).fail(function(response) {
+        processErrorResponse(response);
     });
 }
 
@@ -38,6 +40,8 @@ function getWeatherCondition() {
     $.post("/ajax/get_condition", getJsonData(), function(response) {
         var resp = response["data"];
         selectWeatherIcon(resp);
+    }).fail(function(response) {
+        processErrorResponse(response);
     });
 }
 
@@ -55,6 +59,8 @@ function setTimeFactor(e) {
     $.post("/ajax/set_factor", getJsonData(selected)).fail(function(response) {
         // If the operation fails, get the real factor.
         getTimeFactor();
+    }).fail(function(response) {
+        processErrorResponse(response);
     });
 }
 
@@ -66,6 +72,8 @@ function getTimeFactor() {
             selectTimeIcon(currentTimeFactor);
             getCurrentTime();
         }
+    }).fail(function(response) {
+        processErrorResponse(response);
     });
 }
 
@@ -80,6 +88,8 @@ function getCurrentTime() {
             };
             timeWorker.postMessage(currentTime + "@@@" + currentTimeFactor);
         }
+    }).fail(function(response) {
+        processErrorResponse(response);
     });
 }
 

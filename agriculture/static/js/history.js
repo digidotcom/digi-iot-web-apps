@@ -183,6 +183,8 @@ function drawWindChart(refresh=false, showProgress=false) {
             windData = response.data;
             drawWindChart();
             $("#wind-chart-loading").hide();
+        }).fail(function(response) {
+            processErrorResponse(response);
         });
     } else {
         drawChart("wind-chart", windData, "Wind", "km/h", "#4F4F4F");
@@ -198,6 +200,8 @@ function drawRainChart(refresh=false, showProgress=false) {
             rainData = response.data;
             drawRainChart();
             $("#rain-chart-loading").hide();
+        }).fail(function(response) {
+            processErrorResponse(response);
         });
     } else {
         drawChart("rain-chart", rainData, "Rain", "mm", "#3399FF");
@@ -213,6 +217,8 @@ function drawRadiationChart(refresh=false, showProgress=false) {
             radiationData = response.data;
             drawRadiationChart();
             $("#radiation-chart-loading").hide();
+        }).fail(function(response) {
+            processErrorResponse(response);
         });
     } else {
         drawChart("radiation-chart", radiationData, "Radiation", "W/m2", "#FFD500");
@@ -228,6 +234,8 @@ function drawTemperatureChart(macAddr, refresh=false, showProgress=false) {
             temperatureData[macAddr] = response.data;
             drawTemperatureChart(macAddr);
             $("#temperature-" + macAddr + "-chart-loading").hide();
+        }).fail(function(response) {
+            processErrorResponse(response);
         });
     } else {
         drawChart("temperature-" + macAddr + "-chart", temperatureData[macAddr], "Temperature", "ºC", "#FF0000");
@@ -243,6 +251,8 @@ function drawMoistureChart(macAddr, refresh=false, showProgress=false) {
             moistureData[macAddr] = response.data;
             drawMoistureChart(macAddr);
             $("#moisture-" + macAddr + "-chart-loading").hide();
+        }).fail(function(response) {
+            processErrorResponse(response);
         });
     } else {
         drawChart("moisture-" + macAddr + "-chart", moistureData[macAddr], "Moisture", "%", "#33CC66");
@@ -258,6 +268,8 @@ function drawValveChart(macAddr, refresh=false, showProgress=false) {
             valveData[macAddr] = response.data;
             drawValveChart(macAddr);
             $("#valve-" + macAddr + "-chart-loading").hide();
+        }).fail(function(response) {
+            processErrorResponse(response);
         });
     } else {
         drawChart("valve-" + macAddr + "-chart", valveData[macAddr], "Valve", "Closed/Open", "#0000CC");
@@ -341,6 +353,8 @@ function drawStationsCharts() {
             drawMoistureChart(macAddr, true, true);
             drawValveChart(macAddr, true, true);
         }
+    }).fail(function(response) {
+        processErrorResponse(response);
     });
 }
 

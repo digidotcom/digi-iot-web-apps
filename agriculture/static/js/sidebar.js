@@ -145,3 +145,24 @@ function checkFarmConnected() {
     }
     prevFarmConnectionStatus = farmConnectionStatus;
 }
+
+// Processes the error response of the AJAX request.
+function processErrorResponse(response) {
+    if (response.status == 400) {
+        let errorMessage = response.responseJSON["error"];
+        // Show the error message (if any).
+        if (errorMessage != null)
+            toastr.error(errorMessage);
+    } else if (response.status == 401) {
+        redirectToLogin();
+    }
+}
+
+// Redirects to the login page.
+function redirectToLogin() {
+    var url = "/access/login?dest=" + window.location.pathname.replaceAll("/", "");
+    var params = new URLSearchParams(window.location.search);
+    for (let param of params)
+        url += "&" + param[0] + "=" + param[1];
+    window.location.href = url;
+}

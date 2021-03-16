@@ -263,7 +263,9 @@ function getFarmStatus(first=true) {
                 return;
             processFarmStatusResponse(data, first);
         }
-    );
+    ).fail(function(response) {
+        processErrorResponse(response);
+    });
 }
 
 // Processes the response of the farm status request.
@@ -709,7 +711,9 @@ function toggleValve(stationID) {
             if (isValveON(stationID) && !isTankValveON())
                 toggleTankValve();
         }
-    );
+    ).fail(function(response) {
+        processErrorResponse(response);
+    });
 }
 
 // Updates the status of the valve with the given ID.
@@ -821,7 +825,9 @@ function refillTank() {
             waterLevel = data["value"];
             updateWaterTankLevel();
         }
-    );
+    ).fail(function(response) {
+        processErrorResponse(response);
+    });
 }
 
 // Updates the status of the tank valve toggle button.
@@ -881,7 +887,9 @@ function toggleTankValve() {
                 }
             }
         }
-    );
+    ).fail(function(response) {
+        processErrorResponse(response);
+    });
 }
 
 // Returns the number of irrigating stations.

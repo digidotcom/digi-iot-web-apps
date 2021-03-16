@@ -52,7 +52,9 @@ Digi Demo - Map
         $.post(
             "{% url 'get_smart_farms' %}",
             getSmartFarmsCallback
-        );
+        ).fail(function(response) {
+            processErrorResponse(response);
+        });
 
         // Initialize the map.
         initMap();

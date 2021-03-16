@@ -94,6 +94,8 @@ function initSchedule() {
         e.preventDefault();
         $.post("/ajax/set_schedule", getJsonData(tableToJson()), function(response) {
             $this.html($this.data("original-text"));
+        }).fail(function(response) {
+            processErrorResponse(response);
         });
     });
 
@@ -127,6 +129,8 @@ function getSchedule() {
         hideLoadingPanel();
         // Show the schedule container.
         $("#schedule-container").show();
+    }).fail(function(response) {
+        processErrorResponse(response);
     });
 }
 

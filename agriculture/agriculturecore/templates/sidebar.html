@@ -240,7 +240,9 @@
                 if (data["redirect"])
                     window.location.replace(data["redirect"]);
             }
-        );
+        ).fail(function(response) {
+            processErrorResponse(response);
+        });
     }
     </script>
 {% endblock %}
