@@ -1110,10 +1110,57 @@ def subscribe_alerts(session, installation_name, consumer):
     return monitor.get_id()
 
 
-def unsubscribe_alerts(session, monitor_id):
+def subscribe_valves(session, installation_name, consumer):
     """
-    Disconnects and deletes the Device Cloud monitor with the given ID that was
-    listening for alert changes.
+    Creates a Device Cloud monitor to be notified when any valve of the given
+    installation changes.
+    Args:
+        session (:class:`.SessionStore`): The Django session.
+        installation_name (String): The name of the installation.
+        consumer (:class:`.WsConsumer`): The web socket consumer.
+    Returns:
+        The ID of the created monitor.
+    """
+    dc = get_device_cloud_session(session)
+    if dc is None:
+        return -1
+
+    global monitor_managers
+
+    # Get or create the monitor manager for the given session.
+    session_key = session.session_key
+    if session_key in monitor_managers:
+        monitor_manager = monitor_managers.get(session_key)
+    else:
+        monitor_manager = MonitorManager(dc.get_connection())
+        monitor_managers[session_key] = monitor_manager
+
+    # Create a monitor for the valves.
+    monitor = monitor_manager.create_tcp_monitor(["[group={}{}]DataPoint".format(models.SMART_TANKS_PREFIX,
+                                                                                 installation_name)])
+
+    # Define the monitor callback.
+    def monitor_callback(json_data):
+        stream_id = json_data["Document"]["Msg"]["DataPoint"]["streamId"]
+        valve = json_data["Document"]["Msg"]["DataPoint"]["data"]
+
+        # Only process data streams for any valve.
+        if stream_id.endswith(ID_VALVE):
+            parts = stream_id.split("/")
+            device = parts[0]
+            consumer.send(text_data=json.dumps({"device": device, "value": valve}))
+
+        return True
+
+    # Add the monitor callback.
+    monitor.add_callback(monitor_callback)
+
+    return monitor.get_id()
+
+
+def unsubscribe_monitor(session, monitor_id):
+    """
+    Disconnects and deletes the Device Cloud monitor with the given ID.
 
     Args:
         session (:class:`.SessionStore`): The Django session.

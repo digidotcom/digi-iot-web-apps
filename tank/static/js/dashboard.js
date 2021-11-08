@@ -74,6 +74,8 @@ var bounds;
 
 var markersZIndex = 0;
 
+subscribeValves();
+
 // Initialize and add the map.
 function initMap() {
     // Create the marker icon (normal).
@@ -569,4 +571,25 @@ function toggleTankValve() {
 // Returns whether the dashboard page is showing or not.
 function isDashboardShowing() {
     return window.location.pathname.indexOf("dashboard") > -1;
+}
+
+// Subscribes to any valve change.
+function subscribeValves() {
+    var installationName = new URLSearchParams(window.location.search).get("installation_name");
+
+    // Create the web socket.
+    var ws = new WebSocket("ws://" + window.location.host + "/ws/valves/" + installationName);
+
+    // Define the callback to be notified when data is received in the web socket.
+    ws.onmessage = function(e) {
+        if (isDashboardShowing()) {
+            var event = JSON.parse(e.data);
+            var device = event["device"];
+            var newValveStatus = event["value"];
+            // Update the status of the appropriate valve.
+            tankValves[device] = newValveStatus;
+            if (selectedTankID == device)
+                updateTankValveStatus(newValveStatus);
+        }
+    };
 }

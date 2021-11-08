@@ -17,7 +17,7 @@ from channels.generic.websocket import WebsocketConsumer
 from tankscore import drm_requests
 
 
-class WsConsumer(WebsocketConsumer):
+class WsConsumerAlerts(WebsocketConsumer):
     """
     Class to manage web socket connections.
     """
@@ -40,5 +40,32 @@ class WsConsumer(WebsocketConsumer):
     def disconnect(self, close_code):
         if self._monitor_id != -1:
             # Unsubscribe from alert changes.
-            drm_requests.unsubscribe_alerts(self.scope["session"], self._monitor_id)
+            drm_requests.unsubscribe_monitor(self.scope["session"], self._monitor_id)
+            self._monitor_id = -1
+
+
+class WsConsumerValves(WebsocketConsumer):
+    """
+    Class to manage web socket connections.
+    """
+    def __init__(self):
+        WebsocketConsumer.__init__(self)
+        self._monitor_id = -1
+
+    def connect(self):
+        session = self.scope["session"]
+        installation_name = self.scope["url_route"]["kwargs"]["installation_name"]
+        if session is None or session.session_key is None or installation_name is None:
+            return
+
+        # Accept the connection.
+        self.accept()
+
+        # Subscribe to any valve change.
+        self._monitor_id = drm_requests.subscribe_valves(session, installation_name, self)
+
+    def disconnect(self, close_code):
+        if self._monitor_id != -1:
+            # Unsubscribe from valve changes.
+            drm_requests.unsubscribe_monitor(self.scope["session"], self._monitor_id)
             self._monitor_id = -1

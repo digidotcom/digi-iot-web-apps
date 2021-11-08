@@ -17,5 +17,6 @@ from django.urls import re_path
 from . import consumers
 
 websocket_urlpatterns = [
-    re_path(r'ws/alerts/(?P<installation_name>\w+)$', consumers.WsConsumer.as_asgi()),
+    re_path(r'ws/alerts/(?P<installation_name>\w+)$', consumers.WsConsumerAlerts.as_asgi()),
+    re_path(r'ws/valves/(?P<installation_name>\w+)$', consumers.WsConsumerValves.as_asgi()),
 ]
