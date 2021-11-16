@@ -19,6 +19,7 @@ from agriculturecore.drm_requests import *
 PARAM_CONTROLLER_ID = "controller_id"
 PARAM_FARM_NAME = "farm_name"
 
+ID_ERROR = "error"
 ID_ERROR_TITLE = "error_title"
 ID_ERROR_MSG = "error_msg"
 ID_ERROR_GUIDE = "error_guide"
@@ -252,10 +253,13 @@ def get_smart_farms(request):
         :class:`.JsonResponse`: A JSON response with the list of the Smart
             Farms within the DRM account.
     """
-    # Check if the AJAX request is valid.
-    error = check_ajax_request(request)
-    if error is not None:
-        return error
+    if is_authenticated(request):
+        if not request.is_ajax or request.method != "POST":
+            return JsonResponse(
+                {"error": "AJAX request must be sent using POST"},
+                status=400)
+    else:
+        return redirect('/access/login')
 
     smart_farms = get_farms(request)
     if len(smart_farms) > 0:
@@ -283,10 +287,13 @@ def get_irrigation_stations(request):
             Stations corresponding to the controller with the ID provided in
             the request.
     """
-    # Check if the AJAX request is valid.
-    error = check_ajax_request(request)
-    if error is not None:
-        return error
+    if is_authenticated(request):
+        if not request.is_ajax or request.method != "POST":
+            return JsonResponse(
+                {"error": "AJAX request must be sent using POST"},
+                status=400)
+    else:
+        return redirect('/access/login')
 
     # Get the controller ID from the POST request.
     controller_id = request.POST[PARAM_CONTROLLER_ID]
@@ -301,7 +308,7 @@ def get_irrigation_stations(request):
                                  ID_ERROR_MSG: NO_STATIONS_MSG,
                                  ID_ERROR_GUIDE: SETUP_MODULES_GUIDE})
     except DeviceCloudHttpException as e:
-        return get_exception_response(e)
+        return JsonResponse({ID_ERROR: str(e)})
 
 
 def get_farm_status(request):
@@ -315,10 +322,13 @@ def get_farm_status(request):
     Returns:
         :class:`.JsonResponse`: A JSON response with the status of the farm.
     """
-    # Check if the AJAX request is valid.
-    error = check_ajax_request(request)
-    if error is not None:
-        return error
+    if is_authenticated(request):
+        if not request.is_ajax or request.method != "POST":
+            return JsonResponse(
+                {"error": "AJAX request must be sent using POST"},
+                status=400)
+    else:
+        return redirect('/access/login')
 
     try:
         # Get the controller ID from the POST request.
@@ -352,7 +362,7 @@ def get_farm_status(request):
 
         return JsonResponse(farm_status, status=200)
     except Exception as e:
-        return get_exception_response(e)
+        return JsonResponse({ID_ERROR: str(e)})
 
 
 def set_valve(request):
@@ -366,10 +376,13 @@ def set_valve(request):
     Returns:
         :class:`.JsonResponse`: A JSON response with the set status.
     """
-    # Check if the AJAX request is valid.
-    error = check_ajax_request(request)
-    if error is not None:
-        return error
+    if is_authenticated(request):
+        if not request.is_ajax or request.method != "POST":
+            return JsonResponse(
+                {"error": "AJAX request must be sent using POST"},
+                status=400)
+    else:
+        return redirect('/access/login')
 
     # Get the controller ID and irrigation station from the POST request.
     data = json.loads(request.body.decode(request.encoding))
@@ -380,7 +393,7 @@ def set_valve(request):
     new_value = set_valve_value(request, controller_id, station_id, value)
     if new_value is not None:
         return JsonResponse({"value": new_value}, status=200)
-    return JsonResponse({ID_ERROR: "Could not set the valve."}, status=400)
+    return JsonResponse({"error": "Could not set the valve."}, status=400)
 
 
 def set_tank_valve(request):
@@ -394,10 +407,13 @@ def set_tank_valve(request):
     Returns:
         :class:`.JsonResponse`: A JSON response with the set status.
     """
-    # Check if the AJAX request is valid.
-    error = check_ajax_request(request)
-    if error is not None:
-        return error
+    if is_authenticated(request):
+        if not request.is_ajax or request.method != "POST":
+            return JsonResponse(
+                {"error": "AJAX request must be sent using POST"},
+                status=400)
+    else:
+        return redirect('/access/login')
 
     # Get the controller ID and status of the valve from the POST request.
     data = json.loads(request.body.decode(request.encoding))
@@ -407,7 +423,7 @@ def set_tank_valve(request):
     new_value = set_tank_valve_value(request, controller_id, value)
     if new_value is not None:
         return JsonResponse({"value": new_value}, status=200)
-    return JsonResponse({ID_ERROR: "Could not set the valve."}, status=400)
+    return JsonResponse({"error": "Could not set the valve."}, status=400)
 
 
 def refill_tank(request):
@@ -421,10 +437,13 @@ def refill_tank(request):
     Returns:
         :class:`.JsonResponse`: A JSON response with the set status.
     """
-    # Check if the AJAX request is valid.
-    error = check_ajax_request(request)
-    if error is not None:
-        return error
+    if is_authenticated(request):
+        if not request.is_ajax or request.method != "POST":
+            return JsonResponse(
+                {"error": "AJAX request must be sent using POST"},
+                status=400)
+    else:
+        return redirect('/access/login')
 
     # Get the controller ID and level of the tank from the POST request.
     data = json.loads(request.body.decode(request.encoding))
@@ -433,7 +452,7 @@ def refill_tank(request):
     new_value = refill_tank_request(request, controller_id)
     if new_value is not None:
         return JsonResponse({"value": new_value}, status=200)
-    return JsonResponse({ID_ERROR: "Could not set the valve."}, status=400)
+    return JsonResponse({"error": "Could not set the valve."}, status=400)
 
 
 def get_request_data(request):
@@ -457,7 +476,7 @@ def get_request_data(request):
 
 def get_wind(request):
     """
-    Returns the wind data of the main controller.
+    Returns the wind speed data of the main controller.
 
     Args:
         request (:class:`.WSGIRequest`): the AJAX request.
@@ -465,7 +484,36 @@ def get_wind(request):
     Returns:
         A JSON with the list of data points or the error.
     """
+
     return get_data_points(request, ID_WIND)
+
+
+def get_wind_dir(request):
+    """
+    Returns the wind direction data of the main controller.
+
+    Args:
+        request (:class:`.WSGIRequest`): the AJAX request.
+
+    Returns:
+        A JSON with the list of data points or the error.
+    """
+
+    return get_data_points(request, ID_WIND_DIR)
+
+
+def get_luminosity(request):
+    """
+    Returns the luminosity data of the main controller.
+
+    Args:
+        request (:class:`.WSGIRequest`): the AJAX request.
+
+    Returns:
+        A JSON with the list of data points or the error.
+    """
+
+    return get_data_points(request, ID_LUMINOSITY)
 
 
 def get_rain(request):
@@ -544,10 +592,13 @@ def check_farm_connection_status(request):
     Returns:
         A JSON with the status of the farm or the error.
     """
-    # Check if the AJAX request is valid.
-    error = check_ajax_request(request)
-    if error is not None:
-        return error
+    if is_authenticated(request):
+        if not request.is_ajax or request.method != "POST":
+            return JsonResponse(
+                {"error": "AJAX request must be sent using POST"},
+                status=400)
+    else:
+        return redirect('/access/login')
 
     # Get the controller ID and irrigation station from the POST request.
     data = json.loads(request.body.decode(request.encoding))

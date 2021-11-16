@@ -53,12 +53,15 @@ REQ_DO_COMMAND = "<rci_request version='1.1'>" \
 DO_CMD_XBEE_DISCOVER = "<discover option='current' />"
 DO_CMD_XBEE_SETTING = "<radio_command addr='{}' id='{}' format='{}' timeout='1000' />"
 
-ID_WIND = "wind"
+ID_WIND = "wind_speed"
+ID_WIND_DIR = "wind_direction"
 ID_RADIATION = "radiation"
 ID_RAIN = "rain"
 ID_LEVEL = "level"
 ID_VALVE = "valve"
 ID_TEMPERATURE = "temperature"
+ID_PRESSURE = "pressure"
+ID_LUMINOSITY = "luminosity"
 ID_BATTERY = "battery"
 ID_MOISTURE = "moisture"
 
@@ -66,8 +69,6 @@ ID_CONTROLLERS = "controllers"
 ID_STATIONS = "stations"
 ID_WEATHER = "weather"
 ID_TANK = "tank"
-
-ID_ERROR = "error"
 
 REGEX_DEV_REQUEST_RESPONSE = ".*<device_request .*>(.*)<\\/device_request>.*"
 REGEX_DO_CMD_RESPONSE = ".*<do_command target=[^>]*>(.*)<\\/do_command>.*"
@@ -146,41 +147,6 @@ def get_device_cloud_session(session):
                        base_url=user_serialized.server)
 
 
-def check_ajax_request(request):
-    """
-    Checks whether the given AJAX request is valid and the user is
-    authenticated.
-
-    Args:
-        request (:class:`.WSGIRequest`): The HTTP request.
-
-    Returns:
-        `None` if the request is valid, or a `JsonResponse` with the error
-            if it is not.
-    """
-    if is_authenticated(request):
-        if not request.is_ajax or request.method != "POST":
-            return JsonResponse({ID_ERROR: "AJAX request must be sent using POST"}, status=400)
-        return None
-    else:
-        return JsonResponse({ID_ERROR: "Not authenticated"}, status=401)
-
-
-def get_exception_response(e):
-    """
-    Returns the JSON response with the error contained in the given exception.
-
-    Args:
-        e (:class:`.Exception`): The exception.
-
-    Returns:
-        A JSON response with the details of the exception.
-    """
-    return JsonResponse({ID_ERROR: ("Error in the DRM request: {}.".format(e.response.text)
-                                    if isinstance(e, DeviceCloudHttpException) else str(e))},
-                        status=400)
-
-
 def send_device_request(request, target):
     """
     Sends a Device Request to DRM to the device with the given ID.
@@ -192,12 +158,13 @@ def send_device_request(request, target):
     Returns:
         A JSON with the response or the error.
     """
-    # Check if the AJAX request is valid.
-    error = check_ajax_request(request)
-    if error is not None:
-        return error
+    if not request.is_ajax or request.method != "POST":
+        return JsonResponse({"error": "AJAX request must be sent using POST"},
+                            status=400)
 
     dc = get_device_cloud(request)
+    if dc is None:
+        return JsonResponse({"error": "Invalid credentials."}, status=400)
 
     device_id = request.POST[views.PARAM_CONTROLLER_ID]
     data = request.POST[PARAM_DATA] if PARAM_DATA in request.POST else None
@@ -208,7 +175,9 @@ def send_device_request(request, target):
             return JsonResponse({"data": resp}, status=200)
         return JsonResponse({"valid": True}, status=200)
     except DeviceCloudHttpException as e:
-        return get_exception_response(e)
+        return JsonResponse(
+            {"error": "Error in the DRM request: {}.".format(e.response.text)},
+            status=e.response.status_code)
 
 
 def send_request(dc, device_id, target, data=None):
@@ -564,12 +533,13 @@ def get_data_points(request, stream_name):
     Returns:
         A JSON with the data points or the error.
     """
-    # Check if the AJAX request is valid.
-    error = check_ajax_request(request)
-    if error is not None:
-        return error
+    if not request.is_ajax or request.method != "POST":
+        return JsonResponse({"error": "AJAX request must be sent using POST"},
+                            status=400)
 
     dc = get_device_cloud(request)
+    if dc is None:
+        return JsonResponse({"error": "Invalid credentials."}, status=400)
 
     device_id = request.POST[views.PARAM_CONTROLLER_ID]
     interval = int(
@@ -629,6 +599,10 @@ def get_general_farm_status(request, device_id, stations):
         # Weather station.
         if stream_id == STREAM_FORMAT_CONTROLLER.format(device_id, ID_WIND):
             status[ID_WEATHER][ID_WIND] = data
+        elif stream_id == STREAM_FORMAT_CONTROLLER.format(device_id, ID_WIND_DIR):
+            status[ID_WEATHER][ID_WIND_DIR] = data
+        elif stream_id == STREAM_FORMAT_CONTROLLER.format(device_id, ID_LUMINOSITY):
+            status[ID_WEATHER][ID_LUMINOSITY] = data
         elif stream_id == STREAM_FORMAT_CONTROLLER.format(device_id, ID_RAIN):
             status[ID_WEATHER][ID_RAIN] = data
         elif stream_id == STREAM_FORMAT_CONTROLLER.format(device_id, ID_RADIATION):

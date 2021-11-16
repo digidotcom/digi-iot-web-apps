@@ -20,7 +20,8 @@
     <script defer src="https://cdn.sobekrepository.org/includes/gmaps-markerwithlabel/1.9.1/gmaps-markerwithlabel-1.9.1.js"></script>
     <script src="https://www.gstatic.com/charts/loader.js"></script>
     <script>
-        google.charts.load("current", {"packages":["line"]});
+        <!--42 is for version 42 cause there is a bug that causes the charts popups to flicker and version 42 did not have this issue.-->
+        google.charts.load("42", {"packages":["line", "corechart"]});
     </script>
 </head>
 <body>

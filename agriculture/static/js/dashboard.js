@@ -79,15 +79,16 @@ const INFO_WINDOW_CONTENT_CONTROLLER = "" +
     "            <span class='digi-icon-color fas fa-sun fa-2x'></span>" +
     "        </div>" +
     "        <div class='marker-info-value'>" +
-    "            <span id='infow-radiation'>@@RADIATION@@</span> W/m²" +
+    "            <span id='infow-luminosity'>@@LUMINOSITY@@</span> lux" +
     "        </div>" +
     "    </div>" +
     "</div>";
 const CLASS_STATUS_LOADING = "marker-info-value-status-loading";
 const CLASS_BUTTON_STATUS_OFF = "marker-info-button-off";
 
-const ID_WIND = "wind";
+const ID_WIND = "wind_speed";
 const ID_RADIATION = "radiation";
+const ID_LUMINOSITY = "luminosity";
 const ID_RAIN = "rain";
 const ID_LEVEL = "level";
 const ID_VALVE = "valve";
@@ -133,6 +134,7 @@ var stationValves = {};
 var controllerWind = null;
 var controllerRain = null;
 var controllerRadiation = null;
+var controllerLuminosity = null;
 
 var tankValve;
 var waterLevel;
@@ -263,9 +265,7 @@ function getFarmStatus(first=true) {
                 return;
             processFarmStatusResponse(data, first);
         }
-    ).fail(function(response) {
-        processErrorResponse(response);
-    });
+    );
 }
 
 // Processes the response of the farm status request.
@@ -525,14 +525,14 @@ function updateWeatherStation(response) {
     if (controllerRainInfowElement != null)
         controllerRainInfowElement.innerText = weatherStationStatus[ID_RAIN];
 
-    // Update the radiation value.
-    controllerRadiation = weatherStationStatus[ID_RADIATION];
-    let controllerRadiationElement = document.getElementById(ID_RADIATION);
-    if (controllerRadiationElement != null)
-        controllerRadiationElement.innerText = weatherStationStatus[ID_RADIATION];
-    let controllerRadiationInfowElement = document.getElementById("infow-radiation");
-    if (controllerRadiationInfowElement != null)
-        controllerRadiationInfowElement.innerText = weatherStationStatus[ID_RADIATION];
+    // Update the luminosity value.
+    controllerLuminosity = weatherStationStatus[ID_LUMINOSITY];
+    let controllerLuminosityElement = document.getElementById(ID_LUMINOSITY);
+    if (controllerLuminosityElement != null)
+        controllerLuminosityElement.innerText = weatherStationStatus[ID_LUMINOSITY];
+    let controllerLuminosityInfowElement = document.getElementById("infow-luminosity");
+    if (controllerLuminosityInfowElement != null)
+        controllerLuminosityInfowElement.innerText = weatherStationStatus[ID_LUMINOSITY];
 }
 
 // Updates the water tank information based on the given response.
@@ -658,12 +658,11 @@ function getControllerInfoWindowContent() {
         content = content.replace("@@RAIN@@", controllerRain);
     else
         content = content.replace("@@RAIN@@", "-");
-    // Update the radiation value.
-    if (controllerRadiation != null)
-        content = content.replace("@@RADIATION@@", controllerRadiation);
+    // Update the luminosity value.
+    if (controllerLuminosity != null)
+        content = content.replace("@@LUMINOSITY@@", controllerLuminosity);
     else
-        content = content.replace("@@RADIATION@@", "-");
-
+        content = content.replace("@@LUMINOSITY@@", "-");
     return content;
 }
 
@@ -711,9 +710,7 @@ function toggleValve(stationID) {
             if (isValveON(stationID) && !isTankValveON())
                 toggleTankValve();
         }
-    ).fail(function(response) {
-        processErrorResponse(response);
-    });
+    );
 }
 
 // Updates the status of the valve with the given ID.
@@ -825,9 +822,7 @@ function refillTank() {
             waterLevel = data["value"];
             updateWaterTankLevel();
         }
-    ).fail(function(response) {
-        processErrorResponse(response);
-    });
+    );
 }
 
 // Updates the status of the tank valve toggle button.
@@ -887,9 +882,7 @@ function toggleTankValve() {
                 }
             }
         }
-    ).fail(function(response) {
-        processErrorResponse(response);
-    });
+    );
 }
 
 // Returns the number of irrigating stations.

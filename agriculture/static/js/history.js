@@ -115,6 +115,7 @@ var valveData = {};
 var windInterval;
 var rainInterval;
 var radiationInterval;
+var luminosityInterval;
 var temperatureInterval = {};
 var moistureInterval = {};
 var valveInterval = {};
@@ -132,6 +133,7 @@ function initCharts() {
     windInterval = null;
     rainInterval = null;
     radiationInterval = null;
+    luminosityInterval = null;
     temperatureInterval = {};
     moistureInterval = {};
     valveInterval = {};
@@ -160,7 +162,8 @@ function drawAllCharts(refresh=false, showProgress=true) {
 
     drawWindChart(refresh, showProgress);
     drawRainChart(refresh, showProgress);
-    drawRadiationChart(refresh, showProgress);
+    drawLuminosityChart(refresh, showProgress);
+    drawTemperatureChart(refresh, showProgress);
 
     for (macAddr in temperatureData) {
         drawTemperatureChart(macAddr, refresh, showProgress);
@@ -181,13 +184,14 @@ function drawWindChart(refresh=false, showProgress=false) {
             $("#wind-chart-loading").show();
         $.post("/ajax/get_wind", getJsonData(windInterval), function(response) {
             windData = response.data;
-            drawWindChart();
-            $("#wind-chart-loading").hide();
-        }).fail(function(response) {
-            processErrorResponse(response);
+            $.post("/ajax/get_wind_dir", getJsonData(windInterval), function(response2) {
+                windDirectionData = response2.data;
+                drawWindChart();
+                $("#wind-chart-loading").hide();
+            });
         });
     } else {
-        drawChart("wind-chart", windData, "Wind", "km/h", "#4F4F4F");
+        drawChart("wind-chart", windData, "Wind speed", "km/h", "#4F4F4F", windDirectionData, "Direction", "Direction", "#3CE222");
     }
 }
 
@@ -200,11 +204,24 @@ function drawRainChart(refresh=false, showProgress=false) {
             rainData = response.data;
             drawRainChart();
             $("#rain-chart-loading").hide();
-        }).fail(function(response) {
-            processErrorResponse(response);
         });
     } else {
         drawChart("rain-chart", rainData, "Rain", "mm", "#3399FF");
+    }
+}
+
+// Draws the luminosity chart.
+function drawLuminosityChart(refresh=false, showProgress=false) {
+    if (refresh) {
+        if (showProgress)
+            $("#luminosity-chart-loading").show();
+        $.post("/ajax/get_luminosity", getJsonData(luminosityInterval), function(response) {
+            luminosityData = response.data;
+            drawLuminosityChart();
+            $("#luminosity-chart-loading").hide();
+        });
+    } else {
+        drawChart("luminosity-chart", luminosityData, "Luminosity", "Lux", "#FFD500");
     }
 }
 
@@ -217,8 +234,6 @@ function drawRadiationChart(refresh=false, showProgress=false) {
             radiationData = response.data;
             drawRadiationChart();
             $("#radiation-chart-loading").hide();
-        }).fail(function(response) {
-            processErrorResponse(response);
         });
     } else {
         drawChart("radiation-chart", radiationData, "Radiation", "W/m2", "#FFD500");
@@ -226,19 +241,17 @@ function drawRadiationChart(refresh=false, showProgress=false) {
 }
 
 // Draws the temperature chart.
-function drawTemperatureChart(macAddr, refresh=false, showProgress=false) {
+function drawTemperatureChart(refresh=false, showProgress=false) {
     if (refresh) {
         if (showProgress)
-            $("#temperature-" + macAddr + "-chart-loading").show();
-        $.post("/ajax/get_temperature", getJsonData(temperatureInterval[macAddr], macAddr), function(response) {
-            temperatureData[macAddr] = response.data;
-            drawTemperatureChart(macAddr);
-            $("#temperature-" + macAddr + "-chart-loading").hide();
-        }).fail(function(response) {
-            processErrorResponse(response);
+            $("#temperature-chart-loading").show();
+        $.post("/ajax/get_temperature", getJsonData(temperatureInterval), function(response) {
+            temperatureData = response.data;
+            drawTemperatureChart();
+            $("#temperature-chart-loading").hide();
         });
     } else {
-        drawChart("temperature-" + macAddr + "-chart", temperatureData[macAddr], "Temperature", "ºC", "#FF0000");
+        drawChart("temperature-chart", temperatureData, "Temperature", "ºC", "#FF0000");
     }
 }
 
@@ -251,8 +264,6 @@ function drawMoistureChart(macAddr, refresh=false, showProgress=false) {
             moistureData[macAddr] = response.data;
             drawMoistureChart(macAddr);
             $("#moisture-" + macAddr + "-chart-loading").hide();
-        }).fail(function(response) {
-            processErrorResponse(response);
         });
     } else {
         drawChart("moisture-" + macAddr + "-chart", moistureData[macAddr], "Moisture", "%", "#33CC66");
@@ -268,22 +279,29 @@ function drawValveChart(macAddr, refresh=false, showProgress=false) {
             valveData[macAddr] = response.data;
             drawValveChart(macAddr);
             $("#valve-" + macAddr + "-chart-loading").hide();
-        }).fail(function(response) {
-            processErrorResponse(response);
         });
     } else {
         drawChart("valve-" + macAddr + "-chart", valveData[macAddr], "Valve", "Closed/Open", "#0000CC");
     }
 }
 
+//google.charts.load('current', {
+//     callback: drawChart,
+//     packages: ['scatterChart', 'lineChart']
+//});
+
+
 // Draws the chart with the given data.
-function drawChart(id, data, title, units, color=null) {
-    if (!isHistoryShowing())
+function drawChart(id, data, title, units, color=null, data2=null, units2=null, title2=null, color2=null) {
+    if (!isHistoryShowing() || id === undefined)
         return;
 
     var dataTable = new google.visualization.DataTable();
     dataTable.addColumn("date", "");
-    dataTable.addColumn("number", "");
+    dataTable.addColumn("number", title);
+    if (data2 != null){
+        dataTable.addColumn("number", title2);
+    }
 
     if (data.length == 0) {
         $("#" + id).empty();
@@ -291,41 +309,92 @@ function drawChart(id, data, title, units, color=null) {
         return;
     }
 
-    dataTable.addRows(data.length);
+    var maximumLength = data.length;
+    if (data2 != null && data2.length > maximumLength) {
+        maximumLength = data2.length;
+    }
+
+    dataTable.addRows(maximumLength);
 
     $.each(data, function(k, v) {
         dataTable.setCell(k, 0, new Date(v["timestamp"]));
         dataTable.setCell(k, 1, v["data"]);
     });
 
-    var options = {
-        backgroundColor: "transparent",
-        series: {
-            0: {
-                axis: "Data",
-                color: color,
-                visibleInLegend: false
-            }
-        },
-        axes: {
-            y: {
-                Data: {
-                    label: units
-                }
-            }
-        },
-        legend: {
-            position: "none"
-        },
-        vAxis: {
-            viewWindow: {
-                min: 0
-            }
-        }
-    };
+    if(data2 != null){
+        $.each(data2, function(k, v) {
+            dataTable.setCell(k, 2, v["data"]);
+        });
+    }
 
-    var chart = new google.charts.Line(document.getElementById(id));
-    chart.draw(dataTable, google.charts.Line.convertOptions(options));
+    var options = null;
+
+    if(data2 == null && id == "rain-chart"){
+        options = {
+            backgroundColor: "transparent",
+            series: {
+              0: {targetAxisIndex: 0, color: color},
+            },
+            vAxes: {
+              // Adds titles to each axis.
+              0: {title: units},
+            },
+            vAxis: {
+//                viewWindow: {
+//                    min: 0,
+//                    max: 50
+//                }
+                //ticks: [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50]
+                ticks: [{v: 0}, {v: 8}, {v: 16}, {v: 24}, {v: 32}, {v: 40}, {v: 48}, {v: 56} ]
+            },
+            legend: { position: 'bottom' }
+        };
+    }
+    else if(data2 == null && id != "rain-chart"){
+        options = {
+            backgroundColor: "transparent",
+            series: {
+              0: {targetAxisIndex: 0, color: color}
+            },
+            vAxes: {
+              // Adds titles to each axis.
+              0: {title: units}
+            },
+            vAxis: {
+                viewWindow: {
+                    min: 0
+                }
+            },
+            legend: { position: 'bottom' }
+        };
+    }
+    else if(data2 != null){
+        options = {
+            backgroundColor: "transparent",
+
+            series: {
+              0: {targetAxisIndex: 0, color: color},
+              1: {targetAxisIndex: 1, color: color2}
+            },
+            vAxes: {
+              // Adds titles to each axis.
+              0: {title: units},
+              1: {title: units2}
+            },
+
+            vAxes: [{
+                minValue: 0,
+                ticks: [{v: 0}, {v: 8}, {v: 16}, {v: 24}, {v: 32}, {v: 40}, {v: 48}, {v: 56} ]
+            }, {
+                minValue: 0,
+                ticks: [{v: 0, f: 'N'}, {v: 8, f: 'NE'}, {v: 16, f: 'E'}, {v: 24, f: 'SE'}, {v: 32, f: 'S'}, {v: 40, f: 'SW'}, {v: 48, f: 'W'}, {v: 56, f: 'NW'} ]
+            }],
+            legend: { position: 'bottom' }
+        };
+    }
+
+    var chart = new google.visualization.LineChart(document.getElementById(id));
+    chart.draw(dataTable, options);
 }
 
 // Draws the charts of the irrigation stations.
@@ -353,8 +422,6 @@ function drawStationsCharts() {
             drawMoistureChart(macAddr, true, true);
             drawValveChart(macAddr, true, true);
         }
-    }).fail(function(response) {
-        processErrorResponse(response);
     });
 }
 
