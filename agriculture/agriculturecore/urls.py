@@ -37,6 +37,7 @@ urlpatterns = [
     path('ajax/get_wind', views.get_wind, name="get_wind"),
     path('ajax/get_wind_dir', views.get_wind_dir, name="get_wind_dir"),
     path('ajax/get_luminosity', views.get_luminosity, name="get_luminosity"),
+    path('ajax/get_rain_acc', views.get_rain_acc, name="get_rain_acc"),
     path('ajax/get_rain', views.get_rain, name="get_rain"),
     path('ajax/get_radiation', views.get_radiation, name="get_radiation"),
     path('ajax/get_temperature', views.get_temperature, name="get_temperature"),

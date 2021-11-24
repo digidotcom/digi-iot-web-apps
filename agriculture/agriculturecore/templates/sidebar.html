@@ -20,7 +20,7 @@
                 <img id="simulation-logo" class="banner-icon" src="{% static 'images/simulation.png' %}">
             </button>
             <div class="dropdown-menu shadow-sm simulation-controls-container" aria-labelledby="simulationMenuButton">
-                <p>Simulation controls</p>
+                <p>Simulation control</p>
 <!--                <div class="card">-->
 <!--                    <p class="widget-title">Weather condition</p>-->
 <!--                    <p class="widget-desc">Control the weather condition of the farm. You can change it to see different temperature and moisture values.</p>-->
@@ -188,14 +188,14 @@
         });
 
         // Add 'click' callbacks to the weather and time buttons.
-        $(".weather-button").click(setWeatherCondition);
+        // $(".weather-button").click(setWeatherCondition);
         $(".time-button").click(setTimeFactor);
 
         // Check the farm connection status.
         checkFarmConnectionStatus();
 
-        // Get the weather condition and time factor from the irrigation controller.
-        getWeatherCondition();
+        // Get the time factor from the irrigation controller.
+        // getWeatherCondition();
         getTimeFactor();
 
         // Check farm connectivity in 5 secs.
@@ -243,9 +243,7 @@
                 if (data["redirect"])
                     window.location.replace(data["redirect"]);
             }
-        ).fail(function(response) {
-            processErrorResponse(response);
-        });
+        );
     }
     </script>
 {% endblock %}

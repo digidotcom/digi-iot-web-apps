@@ -516,9 +516,22 @@ def get_luminosity(request):
     return get_data_points(request, ID_LUMINOSITY)
 
 
-def get_rain(request):
+def get_rain_acc(request):
     """
     Returns the rain data of the main controller.
+
+    Args:
+        request (:class:`.WSGIRequest`): the AJAX request.
+
+    Returns:
+        A JSON with the list of data points or the error.
+    """
+    return get_data_points(request, ID_RAIN_ACC)
+
+
+def get_rain(request):
+    """
+    Returns the rain accumulated data of the main controller.
 
     Args:
         request (:class:`.WSGIRequest`): the AJAX request.

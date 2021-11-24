@@ -108,6 +108,7 @@ const STATION_CHART_HTML = "" +
 var windData;
 var rainData;
 var radiationData;
+var luminosityData;
 var temperatureData = {};
 var moistureData = {};
 var valveData = {};
@@ -163,7 +164,7 @@ function drawAllCharts(refresh=false, showProgress=true) {
     drawWindChart(refresh, showProgress);
     drawRainChart(refresh, showProgress);
     drawLuminosityChart(refresh, showProgress);
-    drawTemperatureChart(refresh, showProgress);
+    drawTemperatureChartG(refresh, showProgress);
 
     for (macAddr in temperatureData) {
         drawTemperatureChart(macAddr, refresh, showProgress);
@@ -200,13 +201,13 @@ function drawRainChart(refresh=false, showProgress=false) {
     if (refresh) {
         if (showProgress)
             $("#rain-chart-loading").show();
-        $.post("/ajax/get_rain", getJsonData(rainInterval), function(response) {
+        $.post("/ajax/get_rain_acc", getJsonData(rainInterval), function(response) {
             rainData = response.data;
             drawRainChart();
             $("#rain-chart-loading").hide();
         });
     } else {
-        drawChart("rain-chart", rainData, "Rain", "mm", "#3399FF");
+        drawChart("rain-chart", rainData, "Rain", "L/m²", "#3399FF");
     }
 }
 
@@ -236,22 +237,37 @@ function drawRadiationChart(refresh=false, showProgress=false) {
             $("#radiation-chart-loading").hide();
         });
     } else {
-        drawChart("radiation-chart", radiationData, "Radiation", "W/m2", "#FFD500");
+        drawChart("radiation-chart", radiationData, "Radiation", "W/m²", "#FFD500");
     }
 }
 
-// Draws the temperature chart.
-function drawTemperatureChart(refresh=false, showProgress=false) {
+// Draws the temperature chart of gateway.
+function drawTemperatureChartG(refresh=false, showProgress=false) {
     if (refresh) {
         if (showProgress)
             $("#temperature-chart-loading").show();
         $.post("/ajax/get_temperature", getJsonData(temperatureInterval), function(response) {
             temperatureData = response.data;
-            drawTemperatureChart();
+            drawTemperatureChartG();
             $("#temperature-chart-loading").hide();
         });
     } else {
         drawChart("temperature-chart", temperatureData, "Temperature", "ºC", "#FF0000");
+    }
+}
+
+// Draws the temperature chart of xbees.
+function drawTemperatureChart(macAddr, refresh=false, showProgress=false) {
+    if (refresh) {
+        if (showProgress)
+            $("#temperature-" + macAddr + "-chart-loading").show();
+        $.post("/ajax/get_temperature", getJsonData(temperatureInterval[macAddr], macAddr), function(response) {
+            temperatureData[macAddr] = response.data;
+            drawTemperatureChart(macAddr);
+            $("#temperature-" + macAddr + "-chart-loading").hide();
+        });
+    } else {
+        drawChart("temperature-" + macAddr + "-chart", temperatureData[macAddr], "Temperature", "ºC", "#FF0000");
     }
 }
 
@@ -284,12 +300,6 @@ function drawValveChart(macAddr, refresh=false, showProgress=false) {
         drawChart("valve-" + macAddr + "-chart", valveData[macAddr], "Valve", "Closed/Open", "#0000CC");
     }
 }
-
-//google.charts.load('current', {
-//     callback: drawChart,
-//     packages: ['scatterChart', 'lineChart']
-//});
-
 
 // Draws the chart with the given data.
 function drawChart(id, data, title, units, color=null, data2=null, units2=null, title2=null, color2=null) {
@@ -340,12 +350,7 @@ function drawChart(id, data, title, units, color=null, data2=null, units2=null, 
               0: {title: units},
             },
             vAxis: {
-//                viewWindow: {
-//                    min: 0,
-//                    max: 50
-//                }
-                //ticks: [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50]
-                ticks: [{v: 0}, {v: 8}, {v: 16}, {v: 24}, {v: 32}, {v: 40}, {v: 48}, {v: 56} ]
+                ticks: [{v: 0}, {v: 4}, {v: 8}, {v: 12}, {v: 16}, {v: 20}, {v: 24}, {v: 28} ]
             },
             legend: { position: 'bottom' }
         };
