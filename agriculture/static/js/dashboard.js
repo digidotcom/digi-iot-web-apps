@@ -89,7 +89,8 @@ const CLASS_BUTTON_STATUS_OFF = "marker-info-button-off";
 const ID_WIND = "wind_speed";
 const ID_RADIATION = "radiation";
 const ID_LUMINOSITY = "luminosity";
-const ID_RAIN = "rain";
+const ID_RAIN = "rain_diff";
+const ID_RAIN_ACC = "rain";
 const ID_LEVEL = "level";
 const ID_VALVE = "valve";
 const ID_TEMPERATURE = "temperature";
@@ -135,6 +136,7 @@ var controllerWind = null;
 var controllerRain = null;
 var controllerRadiation = null;
 var controllerLuminosity = null;
+var controllerTemperature = null;
 
 var tankValve;
 var waterLevel;
@@ -147,7 +149,6 @@ var controllerMarker;
 var currentWeatherIcon;
 var currentWeatherStatus;
 var avgTemp = 23.0;  // Define initial value for the temperature so if no stations are registered the weather forecast can be displayed.
-
 
 var bounds;
 
@@ -275,13 +276,13 @@ function processFarmStatusResponse(response, first) {
             updateCurrentWeather();
         });
         drawDevices(response);
-        updateWeatherWidget();
     }
     updateStationsStatus(response);
     updateStationCounters(response);
     updateWeatherStation(response);
     updateWaterTank(response);
     updateCurrentWeather();
+    updateWeatherWidget();
 
     // Hide the station loading.
     loadingStationsStatus = false;
@@ -533,6 +534,13 @@ function updateWeatherStation(response) {
     let controllerLuminosityInfowElement = document.getElementById("infow-luminosity");
     if (controllerLuminosityInfowElement != null)
         controllerLuminosityInfowElement.innerText = weatherStationStatus[ID_LUMINOSITY];
+
+    // Update the temperature value.
+    controllerTemperature = weatherStationStatus[ID_TEMPERATURE];
+    avgTemp = weatherStationStatus[ID_TEMPERATURE];
+    let controllerTemperatureElement = document.getElementById("current-temp");
+    if (controllerTemperatureElement != null)
+        controllerTemperatureElement.innerText = weatherStationStatus[ID_TEMPERATURE];
 }
 
 // Updates the water tank information based on the given response.
@@ -905,15 +913,22 @@ function updateWeatherWidget() {
 // Updates the current weather data (icon, temperature and status).
 function updateCurrentWeather() {
     // Calculate average temperature.
-    calculateAvgTemp();
+    //calculateAvgTemp();
 
     // Identify the current weather icon to use.
     currentWeatherIcon = SUN_GREEN;
     currentWeatherStatus = "sunny";
-    if ($("#weather-rainy-logo").hasClass("selected-icon-widget")) {
+
+    rain = document.getElementById("rain_diff").innerText;
+    rain = parseInt(rain)
+    luminosity = document.getElementById("luminosity").innerText;
+    luminosity = parseInt(luminosity)
+
+    if(rain != 0){
         currentWeatherIcon = RAIN_GREEN;
         currentWeatherStatus = "rainy";
-    } else if ($("#weather-cloudy-logo").hasClass("selected-icon-widget")) {
+    }
+    else if(rain == 0 && luminosity < 4000){
         currentWeatherIcon = CLOUD_GREEN;
         currentWeatherStatus = "cloudy";
     }
@@ -922,11 +937,6 @@ function updateCurrentWeather() {
     let currentWeather = document.getElementById("current-weather");
     if (currentWeather != null)
         currentWeather.innerHTML = currentWeatherIcon;
-
-    // Update current temperature.
-    let currentTemp = document.getElementById("current-temp");
-    if (currentTemp != null)
-        currentTemp.innerText = avgTemp;
 
     // Update current weather status.
     let currentStatus = document.getElementById("current-status");
