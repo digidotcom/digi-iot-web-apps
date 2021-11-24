@@ -56,7 +56,8 @@ DO_CMD_XBEE_SETTING = "<radio_command addr='{}' id='{}' format='{}' timeout='100
 ID_WIND = "wind_speed"
 ID_WIND_DIR = "wind_direction"
 ID_RADIATION = "radiation"
-ID_RAIN = "rain"
+ID_RAIN_ACC = "rain_acc"
+ID_RAIN = "rain_diff"
 ID_LEVEL = "level"
 ID_VALVE = "valve"
 ID_TEMPERATURE = "temperature"
@@ -603,10 +604,14 @@ def get_general_farm_status(request, device_id, stations):
             status[ID_WEATHER][ID_WIND_DIR] = data
         elif stream_id == STREAM_FORMAT_CONTROLLER.format(device_id, ID_LUMINOSITY):
             status[ID_WEATHER][ID_LUMINOSITY] = data
+        elif stream_id == STREAM_FORMAT_CONTROLLER.format(device_id, ID_RAIN_ACC):
+            status[ID_WEATHER][ID_RAIN_ACC] = data
         elif stream_id == STREAM_FORMAT_CONTROLLER.format(device_id, ID_RAIN):
             status[ID_WEATHER][ID_RAIN] = data
         elif stream_id == STREAM_FORMAT_CONTROLLER.format(device_id, ID_RADIATION):
             status[ID_WEATHER][ID_RADIATION] = data
+        elif stream_id == STREAM_FORMAT_CONTROLLER.format(device_id, ID_TEMPERATURE):
+            status[ID_WEATHER][ID_TEMPERATURE] = data
         # Water tank.
         elif stream_id == STREAM_FORMAT_CONTROLLER.format(device_id, ID_LEVEL):
             status[ID_TANK][ID_LEVEL] = data
