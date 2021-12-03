@@ -292,18 +292,18 @@ def main():
 
         # If Python version is greater than 3.7, install the corresponding
         # Twisted wheel so the channels module can be installed later on.
-        if sys.platform == "win32" and py_minor_version > 7:
-            twisted = TWISTED_64 if is_64_bits_python() else TWISTED_32
-            twisted_path = os.path.join(
-                FOLDER_WHEELS,
-                twisted.format(py_major_version, py_minor_version))
-            print("- Installing Twisted wheel (%s)... " % twisted_path, end="")
-            sys.stdout.flush()
-            if run_venv_python(venv_context, ['-m', 'pip', 'install',
-                                              twisted_path], debug) != 0:
-                print_error()
-                sys.exit(-1)
-            print_success()
+        # if sys.platform == "win32" and py_minor_version > 7:
+        #     twisted = TWISTED_64 if is_64_bits_python() else TWISTED_32
+        #     twisted_path = os.path.join(
+        #         FOLDER_WHEELS,
+        #         twisted.format(py_major_version, py_minor_version))
+        #     print("- Installing Twisted wheel (%s)... " % twisted_path, end="")
+        #     sys.stdout.flush()
+        #     if run_venv_python(venv_context, ['-m', 'pip', 'install',
+        #                                       twisted_path], debug) != 0:
+        #         print_error()
+        #         sys.exit(-1)
+        #     print_success()
 
         # Install the application requirements.
         print("- Installing application requirements: ")

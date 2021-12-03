@@ -38,6 +38,14 @@ SETUP_MODULES_GUIDE = "Please, verify the <a target='_blank' rel='noopener noref
                       "agriculture demo."
 
 
+def farms_map(request):
+    if is_authenticated(request):
+        if request.method == "GET":
+            return TemplateResponse(request, 'map.html')
+    else:
+        return redirect_login(request)
+
+
 def dashboard(request):
     if not request_has_params(request):
         return redirect("/")
@@ -70,14 +78,6 @@ def schedule(request):
         if request.method == "GET":
             return TemplateResponse(request, 'schedule.html',
                                     get_request_data(request))
-    else:
-        return redirect_login(request)
-
-
-def farms_map(request):
-    if is_authenticated(request):
-        if request.method == "GET":
-            return TemplateResponse(request, 'map.html')
     else:
         return redirect_login(request)
 

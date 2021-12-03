@@ -110,6 +110,7 @@ var rainData;
 var radiationData;
 var luminosityData;
 var temperatureData = {};
+var temperatureDataG = {};
 var moistureData = {};
 var valveData = {};
 
@@ -128,6 +129,7 @@ function initCharts() {
     rainData = null;
     radiationData = null;
     temperatureData = {};
+    temperatureDataG = {};
     moistureData = {};
     valveData = {};
 
@@ -175,7 +177,7 @@ function drawAllCharts(refresh=false, showProgress=true) {
     // Repeat the task every minute.
     setTimeout(function() {
         drawAllCharts(true, false);
-    }, 60000);
+    }, 15000);
 }
 
 // Draws the wind chart.
@@ -247,12 +249,12 @@ function drawTemperatureChartG(refresh=false, showProgress=false) {
         if (showProgress)
             $("#temperature-chart-loading").show();
         $.post("/ajax/get_temperature", getJsonData(temperatureInterval), function(response) {
-            temperatureData = response.data;
+            temperatureDataG = response.data;
             drawTemperatureChartG();
             $("#temperature-chart-loading").hide();
         });
     } else {
-        drawChart("temperature-chart", temperatureData, "Temperature", "ºC", "#FF0000");
+        drawChart("temperature-chart", temperatureDataG, "Temperature", "ºC", "#FF0000");
     }
 }
 
@@ -350,7 +352,7 @@ function drawChart(id, data, title, units, color=null, data2=null, units2=null, 
               0: {title: units},
             },
             vAxis: {
-                ticks: [{v: 0}, {v: 4}, {v: 8}, {v: 12}, {v: 16}, {v: 20}, {v: 24}, {v: 28} ]
+                ticks: [{v: 0}, {v: 8}, {v: 16}, {v: 24}, {v: 32}, {v: 40}, {v: 48}, {v: 56} , {v: 64}]
             },
             legend: { position: 'bottom' }
         };

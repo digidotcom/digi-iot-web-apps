@@ -63,7 +63,8 @@ const INFO_WINDOW_CONTENT_CONTROLLER = "" +
     "            <span class='digi-icon-color fas fa-wind fa-2x'></span>" +
     "        </div>" +
     "        <div class='marker-info-value'>" +
-    "            <span id='infow-wind'>@@WIND@@</span> km/h" +
+    "            <span id='infow-wind'>@@WIND@@</span> km/h (" +
+    "            <span id='infow-wind_dir'>@@WIND_DIR@@</span>)" +
     "        </div>" +
     "    </div>" +
     "    <div class='marker-info-element'>" +
@@ -87,10 +88,11 @@ const CLASS_STATUS_LOADING = "marker-info-value-status-loading";
 const CLASS_BUTTON_STATUS_OFF = "marker-info-button-off";
 
 const ID_WIND = "wind_speed";
+const ID_WIND_DIR = "wind_direction";
 const ID_RADIATION = "radiation";
 const ID_LUMINOSITY = "luminosity";
 const ID_RAIN = "rain_diff";
-const ID_RAIN_ACC = "rain";
+const ID_RAIN_ACC = "rain_acc";
 const ID_LEVEL = "level";
 const ID_VALVE = "valve";
 const ID_TEMPERATURE = "temperature";
@@ -103,7 +105,7 @@ const ID_STATIONS = "stations";
 const ID_WEATHER = "weather";
 const ID_TANK = "tank";
 
-const REFRESH_INTERVAL = 30000;
+const REFRESH_INTERVAL = 15000;
 
 const SUN_GREEN = "<i class='selected-icon-widget fas fa-sun'></i>";
 const CLOUD_GREEN = "<i class='selected-icon-widget fas fa-cloud'></i>";
@@ -133,6 +135,7 @@ var stationMoistures = {};
 var stationBatteries = {};
 var stationValves = {};
 var controllerWind = null;
+var controllerWindDir = null;
 var controllerRain = null;
 var controllerRadiation = null;
 var controllerLuminosity = null;
@@ -508,7 +511,7 @@ function updateWeatherStation(response) {
 
     let weatherStationStatus = response[ID_STATUS][ID_WEATHER];
 
-    // Update the wind value.
+    // Update the wind speed value.
     controllerWind = weatherStationStatus[ID_WIND];
     let controllerWindElement = document.getElementById(ID_WIND);
     if (controllerWindElement != null)
@@ -517,14 +520,41 @@ function updateWeatherStation(response) {
     if (controllerWindInfowElement != null)
         controllerWindInfowElement.innerText = weatherStationStatus[ID_WIND];
 
+    // Update the wind direction value.
+    controllerWindDir = weatherStationStatus[ID_WIND_DIR];
+    dir = "";
+    if (controllerWindDir = 0)
+        dir = "N"
+    if (controllerWindDir = 8)
+        dir = "NE"
+    if (controllerWindDir = 16)
+        dir = "E"
+    if (controllerWindDir = 24)
+        dir = "SE"
+    if (controllerWindDir = 32)
+        dir = "S"
+    if (controllerWindDir = 40)
+        dir = "SW"
+    if (controllerWindDir = 48)
+        dir = "W"
+    if (controllerWindDir = 56)
+        dir = "NW"
+
+    let controllerWindDirElement = document.getElementById(ID_WIND_DIR);
+    if (controllerWindDirElement != null)
+        controllerWindDirElement.innerText = dir;
+    let controllerWindDirInfowElement = document.getElementById("infow-wind_dir");
+    if (controllerWindDirInfowElement != null)
+        controllerWindDirInfowElement.innerText = weatherStationStatus[ID_WIND_DIR];
+
     // Update the rain value.
-    controllerRain = weatherStationStatus[ID_RAIN];
-    let controllerRainElement = document.getElementById(ID_RAIN);
+    controllerRain = weatherStationStatus[ID_RAIN_ACC];
+    let controllerRainElement = document.getElementById(ID_RAIN_ACC);
     if (controllerRainElement != null)
-        controllerRainElement.innerText = weatherStationStatus[ID_RAIN];
+        controllerRainElement.innerText = weatherStationStatus[ID_RAIN_ACC];
     let controllerRainInfowElement = document.getElementById("infow-rain");
     if (controllerRainInfowElement != null)
-        controllerRainInfowElement.innerText = weatherStationStatus[ID_RAIN];
+        controllerRainInfowElement.innerText = weatherStationStatus[ID_RAIN_ACC];
 
     // Update the luminosity value.
     controllerLuminosity = weatherStationStatus[ID_LUMINOSITY];
@@ -656,11 +686,16 @@ function getStationInfoWindowContent(stationID) {
 function getControllerInfoWindowContent() {
     // Clone the content template.
     let content = INFO_WINDOW_CONTENT_CONTROLLER;
-    // Update the wind value.
+    // Update the wind speed value.
     if (controllerWind != null)
         content = content.replace("@@WIND@@", controllerWind);
     else
         content = content.replace("@@WIND@@", "-");
+    // Update the wind direction value.
+    if (controllerWindDir != null)
+        content = content.replace("@@WIND_DIR@@", controllerWindDir);
+    else
+        content = content.replace("@@WIND_DIR@@", "-");
     // Update the rain value.
     if (controllerRain != null)
         content = content.replace("@@RAIN@@", controllerRain);
@@ -919,7 +954,7 @@ function updateCurrentWeather() {
     currentWeatherIcon = SUN_GREEN;
     currentWeatherStatus = "sunny";
 
-    rain = document.getElementById("rain_diff").innerText;
+    rain = document.getElementById("rain_acc").innerText;
     rain = parseInt(rain)
     luminosity = document.getElementById("luminosity").innerText;
     luminosity = parseInt(luminosity)
