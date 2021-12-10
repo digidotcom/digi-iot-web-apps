@@ -137,6 +137,7 @@ var stationValves = {};
 var controllerWind = null;
 var controllerWindDir = null;
 var controllerRain = null;
+var controllerRainDiff = null;
 var controllerRadiation = null;
 var controllerLuminosity = null;
 var controllerTemperature = null;
@@ -550,6 +551,7 @@ function updateWeatherStation(response) {
         controllerWindDirInfowElement.innerText = weatherStationStatus[ID_WIND_DIR];
 
     // Update the rain value.
+    controllerRainDiff = weatherStationStatus[ID_RAIN];
     controllerRain = weatherStationStatus[ID_RAIN_ACC];
     let controllerRainElement = document.getElementById(ID_RAIN_ACC);
     if (controllerRainElement != null)
@@ -956,7 +958,8 @@ function updateCurrentWeather() {
     currentWeatherIcon = SUN_GREEN;
     currentWeatherStatus = "sunny";
 
-    rain = document.getElementById("rain_acc").innerText;
+    //rain = document.getElementById("rain_acc").innerText;
+    rain = controllerRainDiff
     rain = parseInt(rain)
     luminosity = document.getElementById("luminosity").innerText;
     luminosity = parseInt(luminosity)
