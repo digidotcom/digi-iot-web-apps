@@ -39,7 +39,7 @@ SECRET_KEY = '1yp6_e(i608$l2t!lh&!+=u=ha)_4-m3l3#s$9wplrz=ur67zb'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'django-env5.us-west-2.elasticbeanstalk.com', '172.31.27.57']
+ALLOWED_HOSTS = ['127.0.0.1', 'agriculturedemodigi-env-1.us-west-2.elasticbeanstalk.com', 'django-env5.us-west-2.elasticbeanstalk.com', '172.31.27.57', '172.31.18.186']
 
 
 # Application definition
