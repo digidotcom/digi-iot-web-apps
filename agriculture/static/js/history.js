@@ -309,7 +309,7 @@ function drawChart(id, data, title, units, color=null, data2=null, units2=null, 
         return;
 
     var dataTable = new google.visualization.DataTable();
-    dataTable.addColumn("date", "");
+    dataTable.addColumn('date', '');
     dataTable.addColumn("number", title);
     if (data2 != null){
         dataTable.addColumn("number", title2);
@@ -329,8 +329,8 @@ function drawChart(id, data, title, units, color=null, data2=null, units2=null, 
     dataTable.addRows(maximumLength);
 
     $.each(data, function(k, v) {
-        dataTable.setCell(k, 0, new Date(v["timestamp"]));
-        dataTable.setCell(k, 1, v["data"]);
+       dataTable.setCell(k, 0, new Date(v["timestamp"]));
+       dataTable.setCell(k, 1, v["data"]);
     });
 
     if(data2 != null){
@@ -345,7 +345,7 @@ function drawChart(id, data, title, units, color=null, data2=null, units2=null, 
         options = {
             backgroundColor: "transparent",
             series: {
-              0: {targetAxisIndex: 0, color: color},
+              0: { targetAxisIndex: 0, color: color},
             },
             vAxes: {
               // Adds titles to each axis.
@@ -354,7 +354,8 @@ function drawChart(id, data, title, units, color=null, data2=null, units2=null, 
             vAxis: {
                 ticks: [{v: 0}, {v: 8}, {v: 16}, {v: 24}, {v: 32}, {v: 40}, {v: 48}, {v: 56} , {v: 64}]
             },
-            legend: { position: 'bottom' }
+            legend: { position: 'bottom' },
+            tooltip: { ignoreBounds: true, isHtml: true, trigger: 'both' }
         };
     }
     else if(data2 == null && id != "rain-chart"){
@@ -372,7 +373,8 @@ function drawChart(id, data, title, units, color=null, data2=null, units2=null, 
                     min: 0
                 }
             },
-            legend: { position: 'bottom' }
+            legend: { position: 'bottom' },
+            tooltip: { ignoreBounds: true, isHtml: true, trigger: 'both' }
         };
     }
     else if(data2 != null){
@@ -396,7 +398,8 @@ function drawChart(id, data, title, units, color=null, data2=null, units2=null, 
                 minValue: 0,
                 ticks: [{v: 0, f: 'N'}, {v: 8, f: 'NE'}, {v: 16, f: 'E'}, {v: 24, f: 'SE'}, {v: 32, f: 'S'}, {v: 40, f: 'SW'}, {v: 48, f: 'W'}, {v: 56, f: 'NW'} ]
             }],
-            legend: { position: 'bottom' }
+            legend: { position: 'bottom' },
+            tooltip: { ignoreBounds: true, isHtml: true, trigger: 'both' }
         };
     }
 

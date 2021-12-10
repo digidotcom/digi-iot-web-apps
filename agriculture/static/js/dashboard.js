@@ -523,22 +523,24 @@ function updateWeatherStation(response) {
     // Update the wind direction value.
     controllerWindDir = weatherStationStatus[ID_WIND_DIR];
     dir = "";
-    if (controllerWindDir = 0)
+
+    if (controllerWindDir == 0)
         dir = "N"
-    if (controllerWindDir = 8)
+    if (controllerWindDir == 8)
         dir = "NE"
-    if (controllerWindDir = 16)
+    if (controllerWindDir == 16)
         dir = "E"
-    if (controllerWindDir = 24)
+    if (controllerWindDir == 24)
         dir = "SE"
-    if (controllerWindDir = 32)
+    if (controllerWindDir == 32)
         dir = "S"
-    if (controllerWindDir = 40)
+    if (controllerWindDir == 40)
         dir = "SW"
-    if (controllerWindDir = 48)
+    if (controllerWindDir == 48)
         dir = "W"
-    if (controllerWindDir = 56)
+    if (controllerWindDir == 56)
         dir = "NW"
+
 
     let controllerWindDirElement = document.getElementById(ID_WIND_DIR);
     if (controllerWindDirElement != null)
