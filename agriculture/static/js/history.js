@@ -349,11 +349,9 @@ function drawChart(id, data, title, units, color=null, data2=null, units2=null, 
             },
             vAxes: {
               // Adds titles to each axis.
-              0: {title: units},
+              0: {title: units, ticks: [{v: 0}, {v: 8}, {v: 16}, {v: 24}, {v: 32}, {v: 40}, {v: 48}, {v: 56} , {v: 64}]}
             },
-            vAxis: {
-                ticks: [{v: 0}, {v: 8}, {v: 16}, {v: 24}, {v: 32}, {v: 40}, {v: 48}, {v: 56} , {v: 64}]
-            },
+            
             legend: { position: 'bottom' },
             tooltip: { ignoreBounds: true, isHtml: true, trigger: 'both' }
         };
@@ -366,13 +364,9 @@ function drawChart(id, data, title, units, color=null, data2=null, units2=null, 
             },
             vAxes: {
               // Adds titles to each axis.
-              0: {title: units}
+              0: {title: units,  viewWindow: {min: 0}}
             },
-            vAxis: {
-                viewWindow: {
-                    min: 0
-                }
-            },
+
             legend: { position: 'bottom' },
             tooltip: { ignoreBounds: true, isHtml: true, trigger: 'both' }
         };
@@ -387,17 +381,10 @@ function drawChart(id, data, title, units, color=null, data2=null, units2=null, 
             },
             vAxes: {
               // Adds titles to each axis.
-              0: {title: units},
-              1: {title: units2}
+              0: {title: units, minValue: 0, ticks: [{v: 0}, {v: 8}, {v: 16}, {v: 24}, {v: 32}, {v: 40}, {v: 48}, {v: 56}]},
+              1: {title: units2, minValue: 0, ticks: [{v: 0, f: 'N'}, {v: 8, f: 'NE'}, {v: 16, f: 'E'}, {v: 24, f: 'SE'}, {v: 32, f: 'S'}, {v: 40, f: 'SW'}, {v: 48, f: 'W'}, {v: 56, f: 'NW'}]}
             },
 
-            vAxes: [{
-                minValue: 0,
-                ticks: [{v: 0}, {v: 8}, {v: 16}, {v: 24}, {v: 32}, {v: 40}, {v: 48}, {v: 56} ]
-            }, {
-                minValue: 0,
-                ticks: [{v: 0, f: 'N'}, {v: 8, f: 'NE'}, {v: 16, f: 'E'}, {v: 24, f: 'SE'}, {v: 32, f: 'S'}, {v: 40, f: 'SW'}, {v: 48, f: 'W'}, {v: 56, f: 'NW'} ]
-            }],
             legend: { position: 'bottom' },
             tooltip: { ignoreBounds: true, isHtml: true, trigger: 'both' }
         };

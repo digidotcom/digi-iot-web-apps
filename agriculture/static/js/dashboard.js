@@ -64,7 +64,7 @@ const INFO_WINDOW_CONTENT_CONTROLLER = "" +
     "        </div>" +
     "        <div class='marker-info-value'>" +
     "            <span id='infow-wind'>@@WIND@@</span> km/h (" +
-    "            <span id='infow-wind_dir'>@@WIND_DIR@@</span>)" +
+    "            <span id='infow-wind_dir'>@@WIND_DIR@@</span> )" +
     "        </div>" +
     "    </div>" +
     "    <div class='marker-info-element'>" +
@@ -523,32 +523,14 @@ function updateWeatherStation(response) {
 
     // Update the wind direction value.
     controllerWindDir = weatherStationStatus[ID_WIND_DIR];
-    dir = "";
-
-    if (controllerWindDir == 0)
-        dir = "N"
-    if (controllerWindDir == 8)
-        dir = "NE"
-    if (controllerWindDir == 16)
-        dir = "E"
-    if (controllerWindDir == 24)
-        dir = "SE"
-    if (controllerWindDir == 32)
-        dir = "S"
-    if (controllerWindDir == 40)
-        dir = "SW"
-    if (controllerWindDir == 48)
-        dir = "W"
-    if (controllerWindDir == 56)
-        dir = "NW"
-
+    dir = getControllerWindDirString(controllerWindDir);
 
     let controllerWindDirElement = document.getElementById(ID_WIND_DIR);
     if (controllerWindDirElement != null)
         controllerWindDirElement.innerText = dir;
     let controllerWindDirInfowElement = document.getElementById("infow-wind_dir");
     if (controllerWindDirInfowElement != null)
-        controllerWindDirInfowElement.innerText = weatherStationStatus[ID_WIND_DIR];
+        controllerWindDirInfowElement.innerText = dir;
 
     // Update the rain value.
     controllerRainDiff = weatherStationStatus[ID_RAIN];
@@ -576,6 +558,26 @@ function updateWeatherStation(response) {
     if (controllerTemperatureElement != null)
         controllerTemperatureElement.innerText = weatherStationStatus[ID_TEMPERATURE];
 }
+
+function getControllerWindDirString (controllerWindDir){
+    if (controllerWindDir == 0)
+        return "N";
+    else if (controllerWindDir == 8)
+        return "NE";
+    else if (controllerWindDir == 16)
+        return "E";
+    else if (controllerWindDir == 24)
+        return "SE";
+    else if (controllerWindDir == 32)
+        return "S";
+    else if (controllerWindDir == 40)
+        return "SW";
+    else if (controllerWindDir == 48)
+        return "W";
+    else if (controllerWindDir == 56)
+        return "NW";
+}
+
 
 // Updates the water tank information based on the given response.
 function updateWaterTank(response) {
@@ -697,7 +699,7 @@ function getControllerInfoWindowContent() {
         content = content.replace("@@WIND@@", "-");
     // Update the wind direction value.
     if (controllerWindDir != null)
-        content = content.replace("@@WIND_DIR@@", controllerWindDir);
+        content = content.replace("@@WIND_DIR@@", getControllerWindDirString(controllerWindDir));
     else
         content = content.replace("@@WIND_DIR@@", "-");
     // Update the rain value.
