@@ -21,21 +21,6 @@
             </button>
             <div class="dropdown-menu shadow-sm simulation-controls-container" aria-labelledby="simulationMenuButton">
                 <p>Simulation control</p>
-<!--                <div class="card">-->
-<!--                    <p class="widget-title">Weather condition</p>-->
-<!--                    <p class="widget-desc">Control the weather condition of the farm. You can change it to see different temperature and moisture values.</p>-->
-<!--                    <div class="widget-button-container">-->
-<!--                        <button id="weather-sunny" class="btn widget-button weather-button" type="button" value="0">-->
-<!--                            <span id="weather-sunny-logo" class="icon-widget weather-icon fas fa-sun fa-2x" title="Change weather to sunny"></span>-->
-<!--                        </button>-->
-<!--                        <button id="weather-cloudy" class="btn widget-button weather-button" type="button" value="1">-->
-<!--                            <span id="weather-cloudy-logo" class="icon-widget weather-icon fas fa-cloud fa-2x" title="Change weather to cloudy"></span>-->
-<!--                        </button>-->
-<!--                        <button id="weather-rainy" class="btn widget-button weather-button" type="button" value="2">-->
-<!--                            <span id="weather-rainy-logo" class="icon-widget weather-icon fas fa-cloud-rain fa-2x" title="Change weather to rainy"></span>-->
-<!--                        </button>-->
-<!--                    </div>-->
-<!--                </div>-->
                 <div class="card">
                     <p class="widget-title">Time</p>
                     <p class="widget-desc">Control how the time elapses in the farm. You can change it to see the irrigation events faster.</p>
@@ -188,14 +173,12 @@
         });
 
         // Add 'click' callbacks to the weather and time buttons.
-        // $(".weather-button").click(setWeatherCondition);
         $(".time-button").click(setTimeFactor);
 
         // Check the farm connection status.
         checkFarmConnectionStatus();
 
         // Get the time factor from the irrigation controller.
-        // getWeatherCondition();
         getTimeFactor();
 
         // Check farm connectivity in 5 secs.
@@ -243,7 +226,9 @@
                 if (data["redirect"])
                     window.location.replace(data["redirect"]);
             }
-        );
+        ).fail(function(response) {
+            processErrorResponse(response);
+        });
     }
     </script>
 {% endblock %}

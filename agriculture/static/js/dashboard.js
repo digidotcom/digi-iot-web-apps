@@ -105,7 +105,7 @@ const ID_STATIONS = "stations";
 const ID_WEATHER = "weather";
 const ID_TANK = "tank";
 
-const REFRESH_INTERVAL = 15000;
+const REFRESH_INTERVAL = 10000;
 
 const SUN_GREEN = "<i class='selected-icon-widget fas fa-sun'></i>";
 const CLOUD_GREEN = "<i class='selected-icon-widget fas fa-cloud'></i>";
@@ -270,7 +270,9 @@ function getFarmStatus(first=true) {
                 return;
             processFarmStatusResponse(data, first);
         }
-    );
+    ).fail(function(response) {
+        processErrorResponse(response);
+    });
 }
 
 // Processes the response of the farm status request.
@@ -759,7 +761,9 @@ function toggleValve(stationID) {
             if (isValveON(stationID) && !isTankValveON())
                 toggleTankValve();
         }
-    );
+    ).fail(function(response) {
+        processErrorResponse(response);
+    });
 }
 
 // Updates the status of the valve with the given ID.
@@ -871,7 +875,9 @@ function refillTank() {
             waterLevel = data["value"];
             updateWaterTankLevel();
         }
-    );
+    ).fail(function(response) {
+        processErrorResponse(response);
+    });
 }
 
 // Updates the status of the tank valve toggle button.
@@ -931,7 +937,9 @@ function toggleTankValve() {
                 }
             }
         }
-    );
+    ).fail(function(response) {
+        processErrorResponse(response);
+    });
 }
 
 // Returns the number of irrigating stations.
@@ -953,14 +961,10 @@ function updateWeatherWidget() {
 
 // Updates the current weather data (icon, temperature and status).
 function updateCurrentWeather() {
-    // Calculate average temperature.
-    //calculateAvgTemp();
-
     // Identify the current weather icon to use.
     currentWeatherIcon = SUN_GREEN;
     currentWeatherStatus = "sunny";
 
-    //rain = document.getElementById("rain_acc").innerText;
     rain = controllerRainDiff
     rain = parseInt(rain)
     luminosity = document.getElementById("luminosity").innerText;

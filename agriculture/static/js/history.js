@@ -177,7 +177,7 @@ function drawAllCharts(refresh=false, showProgress=true) {
     // Repeat the task every minute.
     setTimeout(function() {
         drawAllCharts(true, false);
-    }, 15000);
+    }, 60000);
 }
 
 // Draws the wind chart.
@@ -192,6 +192,8 @@ function drawWindChart(refresh=false, showProgress=false) {
                 drawWindChart();
                 $("#wind-chart-loading").hide();
             });
+        }).fail(function(response) {
+            processErrorResponse(response);
         });
     } else {
         drawChart("wind-chart", windData, "Wind speed", "km/h", "#4F4F4F", windDirectionData, "Direction", "Direction", "#3CE222");
@@ -207,6 +209,8 @@ function drawRainChart(refresh=false, showProgress=false) {
             rainData = response.data;
             drawRainChart();
             $("#rain-chart-loading").hide();
+        }).fail(function(response) {
+            processErrorResponse(response);
         });
     } else {
         drawChart("rain-chart", rainData, "Rain", "L/m²", "#3399FF");
@@ -222,6 +226,8 @@ function drawLuminosityChart(refresh=false, showProgress=false) {
             luminosityData = response.data;
             drawLuminosityChart();
             $("#luminosity-chart-loading").hide();
+        }).fail(function(response) {
+            processErrorResponse(response);
         });
     } else {
         drawChart("luminosity-chart", luminosityData, "Luminosity", "Lux", "#FFD500");
@@ -237,6 +243,8 @@ function drawRadiationChart(refresh=false, showProgress=false) {
             radiationData = response.data;
             drawRadiationChart();
             $("#radiation-chart-loading").hide();
+        }).fail(function(response) {
+            processErrorResponse(response);
         });
     } else {
         drawChart("radiation-chart", radiationData, "Radiation", "W/m²", "#FFD500");
@@ -252,6 +260,8 @@ function drawTemperatureChartG(refresh=false, showProgress=false) {
             temperatureDataG = response.data;
             drawTemperatureChartG();
             $("#temperature-chart-loading").hide();
+        }).fail(function(response) {
+            processErrorResponse(response);
         });
     } else {
         drawChart("temperature-chart", temperatureDataG, "Temperature", "ºC", "#FF0000");
@@ -267,6 +277,8 @@ function drawTemperatureChart(macAddr, refresh=false, showProgress=false) {
             temperatureData[macAddr] = response.data;
             drawTemperatureChart(macAddr);
             $("#temperature-" + macAddr + "-chart-loading").hide();
+        }).fail(function(response) {
+            processErrorResponse(response);
         });
     } else {
         drawChart("temperature-" + macAddr + "-chart", temperatureData[macAddr], "Temperature", "ºC", "#FF0000");
@@ -282,6 +294,8 @@ function drawMoistureChart(macAddr, refresh=false, showProgress=false) {
             moistureData[macAddr] = response.data;
             drawMoistureChart(macAddr);
             $("#moisture-" + macAddr + "-chart-loading").hide();
+        }).fail(function(response) {
+            processErrorResponse(response);
         });
     } else {
         drawChart("moisture-" + macAddr + "-chart", moistureData[macAddr], "Moisture", "%", "#33CC66");
@@ -297,6 +311,8 @@ function drawValveChart(macAddr, refresh=false, showProgress=false) {
             valveData[macAddr] = response.data;
             drawValveChart(macAddr);
             $("#valve-" + macAddr + "-chart-loading").hide();
+        }).fail(function(response) {
+            processErrorResponse(response);
         });
     } else {
         drawChart("valve-" + macAddr + "-chart", valveData[macAddr], "Valve", "Closed/Open", "#0000CC");
@@ -351,7 +367,7 @@ function drawChart(id, data, title, units, color=null, data2=null, units2=null, 
               // Adds titles to each axis.
               0: {title: units, ticks: [{v: 0}, {v: 8}, {v: 16}, {v: 24}, {v: 32}, {v: 40}, {v: 48}, {v: 56} , {v: 64}]}
             },
-            
+
             legend: { position: 'bottom' },
             tooltip: { ignoreBounds: true, isHtml: true, trigger: 'both' }
         };
@@ -419,6 +435,8 @@ function drawStationsCharts() {
             drawMoistureChart(macAddr, true, true);
             drawValveChart(macAddr, true, true);
         }
+    }).fail(function(response) {
+        processErrorResponse(response);
     });
 }
 

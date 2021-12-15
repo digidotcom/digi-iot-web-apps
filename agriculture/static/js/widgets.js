@@ -14,7 +14,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-
 var currentTime;
 var currentTimeFactor;
 var timeWorker;
@@ -34,6 +33,8 @@ function setTimeFactor(e) {
     $.post("/ajax/set_factor", getJsonData(selected)).fail(function(response) {
         // If the operation fails, get the real factor.
         getTimeFactor();
+    }).fail(function(response) {
+        processErrorResponse(response);
     });
 }
 
@@ -45,6 +46,8 @@ function getTimeFactor() {
             selectTimeIcon(currentTimeFactor);
             getCurrentTime();
         }
+    }).fail(function(response) {
+        processErrorResponse(response);
     });
 }
 
@@ -59,6 +62,8 @@ function getCurrentTime() {
             };
             timeWorker.postMessage(currentTime + "@@@" + currentTimeFactor);
         }
+    }).fail(function(response) {
+        processErrorResponse(response);
     });
 }
 

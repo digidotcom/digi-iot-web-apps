@@ -32,8 +32,6 @@ from django.urls import include, path
 
 urlpatterns = [
 
-    # path("index.html", include("app.urls")),
-
     path("access/", include("login.urls")),
 
     path("", include("agriculturecore.urls")),
