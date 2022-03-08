@@ -1,0 +1,126 @@
+{% extends "sidebar.html" %}
+{% load static %}
+{% block title %}
+Digi Demo - Historic data
+{% endblock %}
+{% block inner_content %}
+            <div class="row justify-content-lg-center">
+                <div class="col-lg-12 col-xl-12">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">Historic data</h5>
+                            <div class="row">
+                                <div class="col-xl-4 chart-container">
+                                    <div class="d-flex justify-content-center align-items-center">
+                                        <span class="fas fa-thermometer-half fa-2x mr-3"></span>
+                                        <span>Temperature</span>
+                                    </div>
+                                    <div class="chart-wrapper">
+                                        <div id="temperature-chart" class="big-chart"></div>
+                                        <div id="temperature-chart-loading" class="chart-loading">
+                                            <img class="loading-chart-image" src="{% static 'images/loading.gif' %}" alt="Loading..." />
+                                        </div>
+                                    </div>
+                                    <div class="btn-group btn-group-toggle d-flex justify-content-center" data-toggle="buttons">
+                                        <label class="btn btn-secondary btn-sm active">
+                                            <input type="radio" name="temperature-interval" value="1" checked> Hour
+                                        </label>
+                                        <label class="btn btn-secondary btn-sm">
+                                            <input type="radio" name="temperature-interval" value="24"> Day
+                                        </label>
+                                        <label class="btn btn-secondary btn-sm">
+                                            <input type="radio" name="temperature-interval" value="168"> Week
+                                        </label>
+                                        <label class="btn btn-secondary btn-sm">
+                                            <input type="radio" name="temperature-interval" value="720"> Month
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-xl-4 chart-container">
+                                    <div class="d-flex justify-content-center align-items-center">
+                                        <span class="fas fa-microchip fa-2x mr-3"></span>
+                                        <span>CPU usage</span>
+                                    </div>
+                                    <div class="chart-wrapper">
+                                        <div id="cpu-chart" class="big-chart"></div>
+                                        <div id="cpu-chart-loading" class="chart-loading">
+                                            <img class="loading-chart-image" src="{% static 'images/loading.gif' %}" alt="Loading..." />
+                                        </div>
+                                    </div>
+                                    <div class="btn-group btn-group-toggle d-flex justify-content-center" data-toggle="buttons">
+                                        <label class="btn btn-secondary btn-sm active">
+                                            <input type="radio" name="cpu-interval" value="1" checked> Hour
+                                        </label>
+                                        <label class="btn btn-secondary btn-sm">
+                                            <input type="radio" name="cpu-interval" value="24"> Day
+                                        </label>
+                                        <label class="btn btn-secondary btn-sm">
+                                            <input type="radio" name="cpu-interval" value="168"> Week
+                                        </label>
+                                        <label class="btn btn-secondary btn-sm">
+                                            <input type="radio" name="cpu-interval" value="720"> Month
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-xl-4 chart-container">
+                                    <div class="d-flex justify-content-center align-items-center">
+                                        <span class="fas fa-database fa-2x mr-3"></span>
+                                        <span>Memory</span>
+                                    </div>
+                                    <div class="chart-wrapper">
+                                        <div id="memory-chart" class="big-chart"></div>
+                                        <div id="memory-chart-loading" class="chart-loading">
+                                            <img class="loading-chart-image" src="{% static 'images/loading.gif' %}" alt="Loading..." />
+                                        </div>
+                                    </div>
+                                    <div class="btn-group btn-group-toggle d-flex justify-content-center" data-toggle="buttons">
+                                        <label class="btn btn-secondary btn-sm active">
+                                            <input type="radio" name="memory-interval" value="1" checked> Hour
+                                        </label>
+                                        <label class="btn btn-secondary btn-sm">
+                                            <input type="radio" name="memory-interval" value="24"> Day
+                                        </label>
+                                        <label class="btn btn-secondary btn-sm">
+                                            <input type="radio" name="memory-interval" value="168"> Week
+                                        </label>
+                                        <label class="btn btn-secondary btn-sm">
+                                            <input type="radio" name="memory-interval" value="720"> Month
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+{% endblock %}
+{% block javascript_inner %}
+    <script>
+    $(document).ready(function() {
+        initCharts();
+    });
+
+    // Registers the callbacks for the controller charts interval buttons.
+    $(function() {
+        $("input[type=radio][name=temperature-interval]").change(function() {
+            temperatureInterval = this.value;
+            drawTemperatureChart(true, true);
+        });
+
+        $("input[type=radio][name=cpu-interval]").change(function() {
+            cpuInterval = this.value;
+            drawCPUChart(true, true);
+        });
+
+        $("input[type=radio][name=memory-interval]").change(function() {
+            memoryInterval = this.value;
+            drawMemoryChart(true, true);
+        });
+    });
+
+    // Re-draws all the charts when the window is resized.
+    $(window).resize(function() {
+        drawAllCharts();
+    });
+    </script>
+{% endblock %}

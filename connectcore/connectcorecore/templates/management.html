@@ -1,0 +1,157 @@
+{% extends "sidebar.html" %}
+{% load static %}
+{% block title %}
+Digi Demo - Management
+{% endblock %}
+{% block inner_content %}
+<!--            <input type="file" id="firmware_file" style="display:none" onchange="firmwareFileChanged()" accept=".swu,.json,.txt"/>-->
+            <input type="file" id="firmware_file" style="display:none" onchange="firmwareFileChanged()"/>
+            <div class="row justify-content-lg-center">
+                <div class="col-lg-12 col-xl-12">
+                    <div id="loading_popup" class="popup popup-loading shadow">
+                        <img class="popup-item" src="{% static 'images/loading.gif' %}" alt="Loading..." />
+                        <div id="loading_popup_message" class="popup-text">Loading information...</div>
+                    </div>
+                    <div id="info_popup" class="popup popup-info shadow d-none">
+                        <div id="info_popup_title" class="popup-title">Error</div>
+                        <div id="info_popup_message" class="popup-text">-</div>
+                    </div>
+                    <div id="confirm_dialog" class="confirm-dialog d-none">
+                        <div class="device-card-header">
+                            <span class="fas fa-question-circle fa-lg mr-2"></span>
+                            <span id="confirm_dialog_title"></span>
+                            <div class="fas fa-window-close fa-lg device-card-header-button" onclick="showPopup(ID_LOADING_WRAPPER, ID_CONFIRM_DIALOG, false)"></div>
+                        </div>
+                        <div id="confirm_dialog_message" class="confirm-dialog-message"></div>
+                        <div class="confirm-dialog-buttons-container">
+                            <div id="confirm_dialog_no_button" class="device-card-button confirm-dialog-button">No</div>
+                            <div id="confirm_dialog_yes_button" class="device-card-button confirm-dialog-button">Yes</div>
+                        </div>
+                    </div>
+                    <div id="loading_wrapper" class="loading-wrapper element-grayed">
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <h5 class="card-title">System monitor</h5>
+                                <div>Configure the system monitor service parameters.</div>
+                                <div class="system-monitor-param-container">
+                                    <span class="system-monitor-param-label">Time between samples:</span>
+                                    <input id="sample_rate" class="system-monitor-input" type="text"/>
+                                    <button class="fas fa-question-circle system-monitor-help" title="Time to wait between samples read (in seconds). Must be a positive number greater than 0." data-toggle="tooltip" data-placement="right"></button>
+                                </div>
+                                <div id="sample_rate_error" class="system-monitor-error"></div>
+                                <div class="system-monitor-param-container">
+                                    <span class="system-monitor-param-label">Samples to buffer:</span>
+                                    <input id="num_samples_upload" class="system-monitor-input" type="text"/>
+                                    <button class="fas fa-question-circle system-monitor-help" title="Number of samples of each parameter to gather before uploading them to Digi Remote Manager. Must be a positive number greater than 0." data-toggle="tooltip" data-placement="right"></button>
+                                </div>
+                                <div id="samples_buffer_error" class="system-monitor-error"></div>
+                                <div id="save_button" class="device-card-button system-monitor-save system-monitor-save-disabled" onclick="saveSystemMonitor()">Save</div>
+                            </div>
+                        </div>
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <h5 class="card-title">Reboot device</h5>
+                                <div>Click <b>REBOOT</b> to restart your device.</div>
+                                <div id="reboot_button" class="device-card-button reboot-button" onclick="askReboot()">REBOOT</div>
+                            </div>
+                        </div>
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <h5 class="card-title">Firmware update</h5>
+                                <table style="margin: 15px;">
+                                    <tr>
+                                        <td style="width: 180px; vertical-align: top;">
+                                            <span class="device-card-content-text">Current DEY version:</span>
+                                        </td>
+                                        <td>
+                                            <span id="dey_version" class="device-card-content-value">-</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="vertical-align: top;">
+                                            <span class="device-card-content-text">Current kernel version:</span>
+                                        </td>
+                                        <td>
+                                            <span id="kernel_version" class="device-card-content-value">-</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="vertical-align: top;">
+                                            <span class="device-card-content-text">Current U-Boot version:</span>
+                                        </td>
+                                        <td>
+                                            <span id="uboot_version" class="device-card-content-value">-</span>
+                                        </td>
+                                    </tr>
+                                </table>
+                                <div class="firmware-tabs">
+                                    <div id="firmware_tab_upload_header" class="firmware-tab-header firmware-tab-header-active" onclick="showFirmwareTab(ID_FIRMWARE_TAB_UPLOAD)">
+                                        <span class="fas fa-upload fa-lg"></span>
+                                        <span class="firmware-tab-text">Upload file</span>
+                                    </div>
+                                    <div id="firmware_tab_fileset_header" class="firmware-tab-header" onclick="showFirmwareTab(ID_FIRMWARE_TAB_FILESET)">
+                                        <span class="fas fa-database fa-lg"></span>
+                                        <span class="firmware-tab-text">Download from storage</span>
+                                    </div>
+                                </div>
+                                <div class="firmware-tab-container">
+                                    <div id="firmware_tab_upload" class="firmware-tab firmware-tab-upload">
+                                        <div>Upload and install a firmware file from your computer.</div>
+                                        <div class="firmware-file-container">
+                                            <div id="select_firmware_button" class="device-card-button browse-firmware-button" onclick="openFirmwareBrowser()">Choose file...</div>
+                                            <div id="firmware_file_label" class="firmware-file-label">No file chosen</div>
+                                        </div>
+                                    </div>
+                                    <div id="firmware_tab_fileset" class="firmware-tab firmware-tab-fileset">
+                                        <div>Download and install firmware from Digi Remote Manager storage.</div>
+                                        <div class="fileset-items-header">
+                                            <div class="fileset-entry-icon"></div>
+                                            <div class="fileset-entry-name">Name</div>
+                                            <div class="fileset-entry-path">Path</div>
+                                            <div class="fileset-entry-size">Size</div>
+                                            <div class="fileset-entry-last-modified">Last modified</div>
+                                        </div>
+                                        <div id="fileset_items_container" class="fileset-items-container"></div>
+                                        <div id="refresh_fileset_button" class="device-card-button refresh-fileset-button" onclick="refreshFilesetFiles()">Refresh</div>
+                                    </div>
+                                </div>
+                                <div id="update_firmware_progress" class="update-firmware-progress">
+                                    <div id="update_firmware_progress_title" class="update-firmware-progress-title">Firmware update in progress...</div>
+                                    <div class="progress update-firmware-progress-bar">
+                                        <div id="update_firmware_progress_bar" class="progress-bar progress-bar-striped update-firmware-progress-bar update-firmware-progress-bar-info update-firmware-progress-bar-hover" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width:40%">40%</div>
+                                    </div>
+                                    <span id="update_firmware_progress_message" class="update-firmware-progress-status">Waiting for firmware update...</span>
+                                </div>
+                                <div>
+                                    <div id="update_firmware_button" class="device-card-button update-firmware-button management-button-disabled" onclick="askUpdateFirmware()">Update Firmware</div>
+                                    <div id="cancel_update_firmware_button" class="device-card-button cancel-firmware-update-button management-button-disabled" onclick="askCancelFirmwareUpdate()">Cancel update</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+{% endblock %}
+{% block javascript_inner %}
+    <script>
+    $(document).ready(function() {
+        // Reset variables.
+        readingManagementInfo = false;
+        managementInfoRead = false;
+        deviceRebooting = false;
+        updatingFirmware = false;
+        firmwareUpdateTimer = null;
+        selectedFilesetEntry = null;
+        filesLoaded = false;
+        // Initialize page.
+        initializeManagementPage();
+        // Register system monitor input changed.
+        $("#sample_rate").on("input", function(event) {
+            validateSystemMonitor(event.target.value);
+        });
+        $("#num_samples_upload").on("input", function(event) {
+            validateSystemMonitor();
+        });
+    });
+    </script>
+{% endblock %}

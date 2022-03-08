@@ -1,0 +1,241 @@
+{% extends "base_logged_in_sidebar.html" %}
+{% load static %}
+{% block nav_widgets %}
+        <div id="data_usage_panel" class="data-usage-panel" style="display: none;">
+            <div class="data-usage-panel-wrapper">
+                <div id="data_usage_loading" class="data-usage-loading">
+                    <div class="data-usage-loading-background"></div>
+                    <img class="data-usage-loading-icon" src="{% static 'images/loading.gif' %}" alt="Loading..." />
+                    <div class="data-usage-loading-text">Loading data...</div>
+                </div>
+                <div id="data_usage_content" class="data-usage-content">
+                    <div class="data-usage-section">
+                        <div class="data-usage-header">
+                            <div class="data-usage-title">Total account data usage</div>
+                            <div class="fas fa-sync device-card-header-button" onclick="refreshUsageData()"></div>
+                        </div>
+                        <div id="data_usage_total" class="data-usage-total-value">-</div>
+                        <div class="data-usage-graphic-container">
+                            <button id="data_usage_graphic_devices" class="fas data-usage-graphic data-usage-graphic-devices" data-toggle="tooltip" data-placement="bottom" title="Total data usage by devices"></button>
+                            <button id="data_usage_graphic_web" class="fas data-usage-graphic data-usage-graphic-web" data-toggle="tooltip" data-placement="bottom" title="Total data usage by web APIs"></button>
+                        </div>
+                        <div class="data-usage-values-container">
+                            <table>
+                                <tr>
+                                    <td>
+                                        <div class="data-usage-legend data-usage-graphic-devices"></div>
+                                    </td>
+                                    <td>
+                                        <div class="data-usage-legend-text">Devices data usage</div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="data-usage-legend data-usage-graphic-web"></div>
+                                    </td>
+                                    <td>
+                                        <div class="data-usage-legend-text">Web APIs data usage</div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="data-usage-section">
+                        <div class="data-usage-title">Devices usage</div>
+                        <div class="data-usage-values-container">
+                            <table>
+                                <tr>
+                                    <td>
+                                        <div class="data-usage-value-label-bold">Total devices usage:</div>
+                                    </td>
+                                    <td>
+                                        <div id="data_usage_devices" class="data-usage-value-bold">-</div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="data-usage-value-label">Current device usage:</div>
+                                    </td>
+                                    <td>
+                                        <div id="data_usage_current_device" class="data-usage-value">-</div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="data-usage-section">
+                        <div class="data-usage-title">Web APIs usage</div>
+                        <div class="data-usage-values-container">
+                            <table>
+                                <tr>
+                                    <td>
+                                        <div class="data-usage-value-label-bold">Total web APIs usage:</div>
+                                    </td>
+                                    <td>
+                                        <div id="data_usage_web" class="data-usage-value-bold">-</div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="data-usage-value-label">Web services usage:</div>
+                                    </td>
+                                    <td>
+                                        <div id="data_usage_web_services" class="data-usage-value">-</div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="data-usage-value-label">Monitors usage:</div>
+                                    </td>
+                                    <td>
+                                        <div id="data_usage_monitors" class="data-usage-value">-</div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div>
+            <img src="{% static 'images/board.png' %}" class="device-title-img" title="Device">
+        </div>
+        <div id="device-name"></div>
+        <div>
+            <img src="{% static 'images/status_offline.png' %}" id="device-connection-status" class="device-title-img" title="Offline">
+        </div>
+        <div class="vertical-separator"></div>
+        <div>
+            <button id="devices-list-button" class="btn widget-button" type="button" value="0" onclick="window.open('/','_self');">
+                <img src="{% static 'images/devices_list_gray.png' %}" id="devices-list-icon" class="devices-list-icon" data-toggle="tooltip" data-placement="bottom" title="Open devices list">
+            </button>
+            <button id="data_usage_button" class="btn widget-button" type="button" value="0" onclick="toggleDataUsagePanel();">
+                <img src="{% static 'images/data_usage.png' %}" id="data_usage_icon" class="devices-list-icon" data-toggle="tooltip" data-placement="bottom" title="Show data usage">
+            </button>
+        </div>
+        <div class="vertical-separator"></div>
+{% endblock %}
+{% block sidebar_content %}
+            <ul id="sections" data-pjax class="list-group">
+                <li>
+                    <a data-pjax href="/dashboard/" class="list-group-item list-group-item-action d-flex align-items-center">
+                        <div class="d-flex w-100 justify-content-start align-items-center">
+                            <span class="digi-menu-icon fas fa-tachometer-alt fa-fw fa-lg mr-3"></span>
+                            <span class="menu-collapsed">Dashboard</span>
+                        </div>
+                    </a>
+                </li>
+                <li>
+                    <a data-pjax href="/history/" class="list-group-item list-group-item-action d-flex align-items-center">
+                        <div class="d-flex w-100 justify-content-start align-items-center">
+                            <span class="digi-menu-icon fas fa-chart-area fa-fw fa-lg mr-3"></span>
+                            <span class="menu-collapsed">Historic data</span>
+                        </div>
+                    </a>
+                </li>
+                <li>
+                    <a data-pjax href="/management/" class="list-group-item list-group-item-action d-flex align-items-center">
+                        <div class="d-flex w-100 justify-content-start align-items-center">
+                            <span class="digi-menu-icon fas fa-cog fa-fw fa-lg mr-3"></span>
+                            <span class="menu-collapsed">Management</span>
+                        </div>
+                    </a>
+                </li>
+            </ul>
+{% endblock %}
+
+{% block page_content %}
+        <div id="loading">
+            <img id="loading-image" src="/static/images/loading.gif" alt="Loading..." />
+        </div>
+        <div id="pjax-container">
+            {% block inner_content %}{% endblock %}
+            {% block javascript_inner %}{% endblock %}
+        </div>
+{% endblock %}
+
+{% block javascript %}
+    <!-- Local JS files and functions -->
+    <script type="text/javascript" src="{% static 'js/sidebar.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/ccimx8mm-dvk.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/ccimx8m-nano.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/ccimx8x-sbc-pro.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/dashboard.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/management.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/history.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/xterm.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/xterm-addon-fit.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/console.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/file-system.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/data-usage.js' %}"></script>
+    <script>
+    $(document).ready(function() {
+        // Don't show the loading spinner at the beginning. Initial page
+        // load is full, so not relying on AJAX.
+        $("#loading").hide();
+
+        verifyParameters();
+
+        // Set up PJAX.
+        if ($.support.pjax) {
+            $.pjax.defaults.timeout = 20000;
+            $.pjax.defaults.fragment = "#pjax-container";
+            $(document).pjax("a[data-pjax]", "#pjax-container");
+
+            $(document).on("pjax:beforeSend", function() {
+                // Do not load new content if there are unsaved changes.
+                if ($("#save-schedule").length && !$("#save-schedule").attr("disabled") && !confirm("There are unsaved changes. Do you want to exit?"))
+                    return false;
+            });
+
+            $(document).on("pjax:send", function(e) {
+                setSelectedSection(e.currentTarget.activeElement);
+                $("#pjax-container").hide();
+                $("#loading").show();
+            });
+
+            $(document).on("pjax:complete", function() {
+                $("#loading").hide();
+                $("#pjax-container").show();
+                verifyParameters();
+            });
+        }
+
+        // Append the URL parameters to the section links.
+        var params = new URLSearchParams(window.location.search).toString();
+        if (params) {
+            $("#sections li").each(function(i, n) {
+                n.children[0].href += "?" + params;
+            });
+        }
+
+        // Set the selected section.
+        setSelectedSection();
+
+        // Set the name of the selected device.
+        $("#device-name").html("{{ device_name }}".toUpperCase());
+
+        // Change the color of the devices icon when hovering.
+        $("#devices-list-button").on({
+            "mouseover" : function() {
+                $("#devices-list-icon").attr("src", "{% static 'images/devices_list_green.png' %}");
+            },
+            "mouseout" : function() {
+                $("#devices-list-icon").attr("src", "{% static 'images/devices_list_gray.png' %}");
+            }
+        });
+        // Change the color of the data usage icon when hovering.
+        $("#data_usage_button").on({
+            "mouseover" : function() {
+                $("#data_usage_icon").attr("src", "{% static 'images/data_usage_green.png' %}");
+            },
+            "mouseout" : function() {
+                $("#data_usage_icon").attr("src", "{% static 'images/data_usage.png' %}");
+            }
+        });
+
+        // Check the device connection status.
+        checkDeviceConnectionStatus();
+    });
+    </script>
+{% endblock %}

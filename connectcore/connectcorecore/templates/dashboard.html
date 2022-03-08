@@ -1,0 +1,698 @@
+{% extends "sidebar.html" %}
+{% load static %}
+{% block title %}
+Digi Demo - Dashboard
+{% endblock %}
+{% block inner_content %}
+            <input type="file" id="file_to_upload" style="display:none"/>
+            <div class="row justify-content-lg-center">
+                <div class="col-lg-12 col-xl-12">
+                    <div class="column main-row">
+                        <div class="card dashboard-device-card">
+                            <div class="card-body">
+                                <div id="dashboard_device" class="dashboard-device">
+                                    <div id="loading_popup" class="popup popup-loading shadow">
+                                        <img class="popup-item" src="{% static 'images/loading.gif' %}" alt="Loading..." />
+                                        <div id="loading_popup_message" class="popup-text">Loading device...</div>
+                                    </div>
+                                    <div id="info_popup" class="popup popup-info shadow d-none">
+                                        <div id="info_popup_title" class="popup-title">Error</div>
+                                        <div id="info_popup_message" class="popup-text">-</div>
+                                    </div>
+                                    <div id="confirm_dialog" class="confirm-dialog d-none">
+                                        <div class="device-card-header">
+                                            <span class="fas fa-question-circle fa-lg mr-2"></span>
+                                            <span id="confirm_dialog_title"></span>
+                                            <div class="fas fa-window-close fa-lg device-card-header-button" onclick="showPopup(ID_LOADING_WRAPPER, ID_CONFIRM_DIALOG, false)"></div>
+                                        </div>
+                                        <div id="confirm_dialog_message" class="confirm-dialog-message"></div>
+                                        <div class="confirm-dialog-buttons-container">
+                                            <div id="confirm_dialog_no_button" class="device-card-button confirm-dialog-button">No</div>
+                                            <div id="confirm_dialog_yes_button" class="device-card-button confirm-dialog-button">Yes</div>
+                                        </div>
+                                    </div>
+                                    <div id="loading_wrapper" class="loading-wrapper element-grayed">
+                                        <div id="device_board" class="device-board">
+                                            <div class="dashboard-top-panel shadow-sm">
+                                                <div id="device_toolbar" class="device-toolbar">
+                                                    <div id="platform_name" class="platform-name"></div>
+                                                    <div id="device-button-show-info" class="device-button" onclick="setInfoPanelsVisible(true)">
+                                                        <img id="device-button-show-info-img" src="{% static 'images/show_info.png' %}" width="32px" data-toggle="tooltip" data-placement="bottom" title="Show all information panels">
+                                                    </div>
+                                                    <div id="device-button-hide-info" class="device-button" onclick="setInfoPanelsVisible(false)">
+                                                        <img id="device-button-hide-info-img" src="{% static 'images/hide_info.png' %}" width="32px" data-toggle="tooltip" data-placement="bottom" title="Hide all information panels">
+                                                    </div>
+                                                    <div class="samples-info-container">
+                                                        <table>
+                                                            <tr>
+                                                                <td>
+                                                                    <span class="device-card-content-text">Time between samples:</span>
+                                                                </td>
+                                                                <td>
+                                                                    <span id="sample_rate" class="device-card-content-value">-</span>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>
+                                                                    <span class="device-card-content-text">Samples to buffer:</span>
+                                                                </td>
+                                                                <td>
+                                                                    <span id="num_samples_upload" class="device-card-content-value">-</span>
+                                                                </td>
+                                                            </tr>
+                                                        </table>
+                                                        <div class="samples-info-overlay" title="Change device sampling settings" data-toggle="tooltip" data-placement="bottom" onclick="changeSampleRate()"></div>
+                                                    </div>
+                                                </div>
+                                                <div id="board_image_container" class="device-board-container">
+                                                    <center><img id="board_image" class="device-board-image" width="" src=""/></center>
+                                                </div>
+                                            </div>
+                                            <div id="device_info" class="device-info">
+                                                <div id="device_info_panel_header" class="device-card-header" style="cursor: pointer;" onclick="toggleDeviceInfoVisibility()">
+                                                    <span class="fas fa-info-circle fa-lg mr-2"></span>
+                                                    <span>Device information</span>
+                                                    <div id="device_info_toggle_button" class="fas fa-caret-down fa-lg device-card-header-button"></div>
+                                                </div>
+                                                <div id="device_info_panel_container" class="device-card-content shadow-sm" style="display: none;">
+                                                    <table>
+                                                        <tr>
+                                                            <td style="width: 130px; vertical-align: top;">
+                                                                <span class="device-card-content-text">Device ID:</span>
+                                                            </td>
+                                                            <td>
+                                                                <span id="device_id" class="device-card-content-value">-</span>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td style="vertical-align: top;">
+                                                                <span class="device-card-content-text">Serial number:</span>
+                                                            </td>
+                                                            <td>
+                                                                <span id="serial_number" class="device-card-content-value">-</span>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td style="vertical-align: top;">
+                                                                <span class="device-card-content-text">DEY version:</span>
+                                                            </td>
+                                                            <td>
+                                                                <span id="dey_version" class="device-card-content-value">-</span>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td style="vertical-align: top;">
+                                                                <span class="device-card-content-text">Kernel version:</span>
+                                                            </td>
+                                                            <td>
+                                                                <span id="kernel_version" class="device-card-content-value">-</span>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td style="vertical-align: top;">
+                                                                <span class="device-card-content-text">U-Boot version:</span>
+                                                            </td>
+                                                            <td>
+                                                                <span id="uboot_version" class="device-card-content-value">-</span>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td style="vertical-align: top;">
+                                                                <span class="device-card-content-text">Module variant:</span>
+                                                            </td>
+                                                            <td>
+                                                                <span id="module_variant" class="device-card-content-value">-</span>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td style="vertical-align: top;">
+                                                                <span class="device-card-content-text">Board variant:</span>
+                                                            </td>
+                                                            <td>
+                                                                <span id="board_variant" class="device-card-content-value">-</span>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td style="vertical-align: top;">
+                                                                <span class="device-card-content-text">Board ID:</span>
+                                                            </td>
+                                                            <td>
+                                                                <span id="board_id" class="device-card-content-value">-</span>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td style="vertical-align: top;">
+                                                                <span class="device-card-content-text">MCA FW version:</span>
+                                                            </td>
+                                                            <td>
+                                                                <span id="mca_fw_version" class="device-card-content-value">-</span>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td style="vertical-align: top;">
+                                                                <span class="device-card-content-text">MCA HW version:</span>
+                                                            </td>
+                                                            <td>
+                                                                <span id="mca_hw_version" class="device-card-content-value">-</span>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                            <div id="device-error" class="device-error"></div>
+                                            <div id="help_panel_area" class="help-panel-area fas fa-question fa-2x d-flex align-items-center justify-content-center" onclick="toggleHelpPopup()"></div>
+                                            <div id="help_panel" class="help-panel">
+                                                <span id="help_panel_arrow" class="help-arrow"></span>
+                                                <div class="help-panel-content">
+                                                    <p><b>Welcome to the device dashboard.</b></p>
+                                                    <span>From this page you can explore and interact with the different device components. Hover and click the green-highlighted panels to discover the board interfaces and specific enabled functionality.</span>
+                                                    <div class="help-panel-button" onclick="setHelpPopupVisible(false)">Got it!</div>
+                                                </div>
+                                            </div>
+                                            <div id="console_panel_area" class="panel-area panel-tooltip" onclick="openConsole()">
+                                                <span class="panel-tooltip-text">Open console</span>
+                                                <span id="console_panel_icon" class="fas fa-terminal panel-area-icon"></span>
+                                            </div>
+                                            <div id="console_panel" class="console-panel">
+                                                <div class="console-background"></div>
+                                                <div id="console_container" class="console-container">
+                                                    <div id="console_header" class="device-card-header">
+                                                        <span class="fas fa-terminal fa-lg mr-2"></span>
+                                                        <span>Remote console</span>
+                                                        <div class="fas fa-window-close fa-lg device-card-header-button" onclick="closeConsole()"></div>
+                                                    </div>
+                                                    <div id="console" class="terminal"></div>
+                                                    <div id="console_hover_background" class="console-hover-background"></div>
+                                                    <div id="console_loading" class="popup shadow" style="top: 33%">
+                                                        <img class="popup-item" src="{% static 'images/loading.gif' %}" alt="Connecting..." />
+                                                        <div class="popup-text">Connecting...</div>
+                                                    </div>
+                                                    <div id="console_error_reconnect" class="popup popup-error-reconnect shadow">
+                                                        <div id="console_error_text" class="console-error-text">Error</div>
+                                                        <div class="console-error-buttons-container">
+                                                            <div id="console_reconnect_button" class="device-card-button" onclick="initCLISession()">Reconnect</div>
+                                                            <div id="console_close_button" class="device-card-button" style="margin-left: 10px;" onclick="closeConsole()">Close</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div id="cpu_panel_area" class="panel-area panel-tooltip" onclick="toggleInfoPanelVisibility('cpu')">
+                                                <span class="panel-tooltip-text">CPU stats</span>
+                                                <span id="cpu_panel_icon" class="fas fa-microchip panel-area-icon"></span>
+                                            </div>
+                                            <div id="cpu_panel" class="device-card cpu-panel shadow-sm">
+                                                <span id="cpu_panel_arrow" class="panel-arrow"></span>
+                                                <div class="device-card-header">
+                                                    <span class="fas fa-microchip fa-lg mr-2"></span>
+                                                    <span>CPU stats</span>
+                                                    <div class="fas fa-window-close fa-lg device-card-header-button" onclick="setInfoPanelVisible('cpu', false)"></div>
+                                                </div>
+                                                <div class="device-card-content">
+                                                    <div class="cpu-info">
+                                                    <table>
+                                                        <tr style="vertical-align: baseline;">
+                                                            <td>
+                                                                <span class="device-card-content-text">Usage:</span>
+                                                            </td>
+                                                            <td>
+                                                                <span id="cpu_load" class="device-card-content-value">-</span> %
+                                                            </td>
+                                                        </tr>
+                                                        <tr style="vertical-align: baseline;">
+                                                            <td>
+                                                                <span class="device-card-content-text">Uptime:</span>
+                                                            </td>
+                                                            <td>
+                                                                <span id="cpu_uptime" class="device-card-content-value">-</span>
+                                                            </td>
+                                                        </tr>
+                                                        <tr style="vertical-align: baseline;">
+                                                            <td>
+                                                                <span class="device-card-content-text">Frequency:</span>
+                                                            </td>
+                                                            <td>
+                                                                <span id="cpu_frequency" class="device-card-content-value">-</span> MHz
+                                                            </td>
+                                                        </tr>
+                                                        <tr style="vertical-align: baseline;">
+                                                            <td>
+                                                                <span class="device-card-content-text">Temperature:</span>
+                                                            </td>
+                                                            <td>
+                                                                <span id="cpu_temperature" class="device-card-content-value">-</span> ºC
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </div>
+                                                    <div class="cores">
+                                                        <div id="core-1" class="core">
+                                                            <table class="core-table">
+                                                                <tbody>
+                                                                    <tr>
+                                                                        <td rowspan="2">
+                                                                            <div class="core-name-container">
+                                                                                <span class="digi-icon-color fas fa-microchip fa-2x"></span>
+                                                                                <span>Core 1</span>
+                                                                            </div>
+                                                                        </td>
+                                                                        <td><span id="core-1-usage">-</span> %</td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td><span id="core-1-speed">-</span> MHz</td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                        <div id="core-2" class="core">
+                                                            <table class="core-table">
+                                                                <tbody>
+                                                                    <tr>
+                                                                        <td rowspan="2">
+                                                                            <div class="core-name-container">
+                                                                                <span class="digi-icon-color fas fa-microchip fa-2x"></span>
+                                                                                <span>Core 2</span>
+                                                                            </div>
+                                                                        </td>
+                                                                        <td><span id="core-2-usage">-</span> %</td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td><span id="core-2-speed">-</span> MHz</td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                        <div id="core-3" class="core">
+                                                            <table class="core-table">
+                                                                <tbody>
+                                                                    <tr>
+                                                                        <td rowspan="2">
+                                                                            <div class="core-name-container">
+                                                                                <span class="digi-icon-color fas fa-microchip fa-2x"></span>
+                                                                                <span>Core 3</span>
+                                                                            </div>
+                                                                        </td>
+                                                                        <td><span id="core-3-usage">-</span> %</td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td><span id="core-3-speed">-</span> MHz</td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                        <div id="core-4" class="core">
+                                                            <table class="core-table">
+                                                                <tbody>
+                                                                    <tr>
+                                                                        <td rowspan="2">
+                                                                            <div class="core-name-container">
+                                                                                <span class="digi-icon-color fas fa-microchip fa-2x"></span>
+                                                                                <span>Core 4</span>
+                                                                            </div>
+                                                                        </td>
+                                                                        <td><span id="core-4-usage">-</span> %</td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td><span id="core-4-speed">-</span> MHz</td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div id="memory_panel_area" class="panel-area panel-tooltip" onclick="toggleInfoPanelVisibility('memory')">
+                                                <span class="panel-tooltip-text">RAM memory</span>
+                                                <span id="memory_panel_icon" class="fas fa-memory panel-area-icon"></span>
+                                            </div>
+                                            <div id="memory_panel" class="device-card memory-panel shadow-sm">
+                                                <span id="memory_panel_arrow" class="panel-arrow"></span>
+                                                <div class="device-card-header">
+                                                    <span class="fas fa-memory fa-lg mr-2"></span>
+                                                    <span>RAM memory stats</span>
+                                                    <div class="fas fa-window-close fa-lg device-card-header-button" onclick="setInfoPanelVisible('memory', false)"></div>
+                                                </div>
+                                                <div class="device-card-content">
+                                                    <table>
+                                                        <tr>
+                                                            <td>
+                                                                <span class="device-card-content-text">Total memory:</span>
+                                                            </td>
+                                                            <td>
+                                                                <span id="memory_total" class="device-card-content-value">-</span> MB
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>
+                                                                <span class="device-card-content-text">Used memory:</span>
+                                                            </td>
+                                                            <td>
+                                                                <span id="memory_used" class="device-card-content-value">-</span> MB
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>
+                                                                <span class="device-card-content-text">Free memory:</span>
+                                                            </td>
+                                                            <td>
+                                                                <span id="memory_free" class="device-card-content-value">-</span> MB
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                            <div id="filesystem_panel" class="filesystem-panel">
+                                                <div class="filesystem-background"></div>
+                                                <div id="filesystem_container" class="filesystem-container">
+                                                    <div id="filesystem_header" class="device-card-header">
+                                                        <span class="fas fa-folder-open fa-lg mr-2"></span>
+                                                        <span>Device file system</span>
+                                                        <div class="fas fa-window-close fa-lg device-card-header-button" onclick="closeFileSystem()"></div>
+                                                    </div>
+                                                    <div id="filesystem_hover_background" class="filesystem-hover-background"></div>
+                                                    <div id="filesystem_dir_name_panel" class="filesystem-dir-name-panel">
+                                                        <div class="filesystem-dir-name-background"></div>
+                                                        <div class="filesystem-dir-name-container">
+                                                            <div class="device-card-header">
+                                                                <span class="fas fa-folder-plus fa-lg mr-2"></span>
+                                                                <span>Create new directory</span>
+                                                                <div class="fas fa-window-close fa-lg device-card-header-button" onclick="closeDirectoryNamePanel()"></div>
+                                                            </div>
+                                                            <div class="filesystem-dir-name-label">Enter the new directory name</div>
+                                                            <input id="filesystem_directory_name" class="filesystem-dir-name-input" type="text"/>
+                                                            <div id="filesystem_directory_name_error" class="filesystem-dir-name-error"></div>
+                                                            <div id="filesystem_directory_name_button" class="device-card-button filesystem-dir-name-button filesystem-dir-name-button-disabled" onclick="onCreateDirectory()">Create directory</div>
+                                                        </div>
+                                                    </div>
+                                                    <div id="filesystem_toolbar" class="filesystem-toolbar">
+                                                        <div class="filesystem-current-directory-container">
+                                                            <div class="filesystem-current-directory-label">Current dir:</div>
+                                                            <div id="current_directory" class="filesystem-current-directory"></div>
+                                                        </div>
+                                                        <div class="filesystem-toolbar-buttons-container">
+                                                            <div id="filesystem_create_directory_button" class="filesystem-button fas fa-folder-plus fa-2x" onclick="openDirectoryNamePanel()" title="Create directory"></div>
+                                                            <div id="filesystem_upload_file_button" class="filesystem-button fas fa-upload fa-2x" onclick="openFileBrowser()" title="Upload file"></div>
+                                                            <div id="filesystem_download_file_button" class="filesystem-button fas fa-file-download fa-2x" onclick="downloadSelectedFile()" title="Download file"></div>
+                                                            <div id="filesystem_remove_file_button" class="filesystem-button fas fa-trash fa-2x" onclick="askRemoveFile()" title="Remove file"></div>
+                                                        </div>
+                                                    </div>
+                                                    <div id="filesystem_items_header" class="filesystem-items-header">
+                                                        <div class="filesystem-entry-icon"></div>
+                                                        <div class="filesystem-entry-name">Name</div>
+                                                        <div class="filesystem-entry-size">Size</div>
+                                                        <div class="filesystem-entry-last-modified">Last modified</div>
+                                                    </div>
+                                                    <div id="filesystem_items_container" class="filesystem-items-container"></div>
+                                                    <div id="filesystem_loading" class="popup shadow" style="top: 33%">
+                                                        <img class="popup-item" src="{% static 'images/loading.gif' %}" alt="Loading..." />
+                                                        <div class="popup-text">Loading...</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div id="wifi_bt_panel_area" class="panel-area panel-tooltip" onclick="toggleInfoPanelVisibility('wifi-bt')">
+                                                <span class="panel-tooltip-text">WiFi/BT stats</span>
+                                                <span id="wifi_bt_panel_icon" class="fas fa-wifi panel-area-icon"></span>
+                                            </div>
+                                            <div id="wifi_bt_panel" class="device-card wifi-panel shadow-sm">
+                                                <span id="wifi_bt_panel_arrow" class="panel-arrow"></span>
+                                                <div class="device-card-header">
+                                                    <span class="fas fa-wifi fa-lg mr-2"></span>
+                                                    <span>Wi-Fi/BT stats</span>
+                                                    <div class="fas fa-window-close fa-lg device-card-header-button" onclick="setInfoPanelVisible('wifi-bt', false)"></div>
+                                                </div>
+                                                <div class="device-card-content">
+                                                    <table>
+                                                        <tr>
+                                                            <td>
+                                                                <span class="device-card-content-text">Status:</span>
+                                                            </td>
+                                                            <td>
+                                                                <span id="wifi_state" class="device-card-content-value">-</span>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>
+                                                                <span class="device-card-content-text">MAC address:</span>
+                                                            </td>
+                                                            <td>
+                                                                <span id="wifi_mac" class="device-card-content-value">-</span>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>
+                                                                <span class="device-card-content-text">IP address:</span>
+                                                            </td>
+                                                            <td>
+                                                                <span id="wifi_ip" class="device-card-content-value">-</span>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>
+                                                                <span class="device-card-content-text">Sent data:</span>
+                                                            </td>
+                                                            <td>
+                                                                <span id="wifi_sent_data" class="device-card-content-value">-</span>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>
+                                                                <span class="device-card-content-text">Received data:</span>
+                                                            </td>
+                                                            <td>
+                                                                <span id="wifi_received_data" class="device-card-content-value">-</span>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </div>
+                                                <div class="device-card-header">
+                                                    <span class="fab fa-bluetooth-b fa-lg mr-2"></span>
+                                                    <span>Bluetooth</span>
+                                                </div>
+                                                <div class="device-card-content">
+                                                    <table>
+                                                        <tr>
+                                                            <td>
+                                                                <span class="device-card-content-text">Status:</span>
+                                                            </td>
+                                                            <td>
+                                                                <span id="bluetooth_state" class="device-card-content-value">-</span>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>
+                                                                <span class="device-card-content-text">MAC address:</span>
+                                                            </td>
+                                                            <td>
+                                                                <span id="bluetooth_mac" class="device-card-content-value">-</span>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>
+                                                                <span class="device-card-content-text">Sent data:</span>
+                                                            </td>
+                                                            <td>
+                                                                <span id="bluetooth_sent_data" class="device-card-content-value">-</span>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>
+                                                                <span class="device-card-content-text">Received data:</span>
+                                                            </td>
+                                                            <td>
+                                                                <span id="bluetooth_received_data" class="device-card-content-value">-</span>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                            <div id="ethernet_panel_area" class="panel-area panel-tooltip" onclick="toggleInfoPanelVisibility('ethernet')">
+                                                <span class="panel-tooltip-text">Ethernet stats</span>
+                                                <span id="ethernet_panel_icon" class="fas fa-ethernet panel-area-icon"></span>
+                                            </div>
+                                            <div id="ethernet_panel" class="device-card ethernet-panel shadow-sm">
+                                                <span id="ethernet_panel_arrow" class="panel-arrow"></span>
+                                                <div class="device-card-header">
+                                                    <span class="fas fa-ethernet fa-lg mr-2"></span>
+                                                    <span>Ethernet stats</span>
+                                                    <div class="fas fa-window-close fa-lg device-card-header-button" onclick="setInfoPanelVisible('ethernet', false)"></div>
+                                                </div>
+                                                <div class="device-card-content">
+                                                    <table>
+                                                        <tr>
+                                                            <td>
+                                                                <span class="device-card-content-text">Status:</span>
+                                                            </td>
+                                                            <td>
+                                                                <span id="ethernet_state" class="device-card-content-value">-</span>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>
+                                                                <span class="device-card-content-text">MAC address:</span>
+                                                            </td>
+                                                            <td>
+                                                                <span id="ethernet_mac" class="device-card-content-value">-</span>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>
+                                                                <span class="device-card-content-text">IP address:</span>
+                                                            </td>
+                                                            <td>
+                                                                <span id="ethernet_ip" class="device-card-content-value">-</span>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>
+                                                                <span class="device-card-content-text">Sent data:</span>
+                                                            </td>
+                                                            <td>
+                                                                <span id="ethernet_sent_data" class="device-card-content-value">-</span>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>
+                                                                <span class="device-card-content-text">Received data:</span>
+                                                            </td>
+                                                            <td>
+                                                                <span id="ethernet_received_data" class="device-card-content-value">-</span>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                            <div id="video_panel_area" class="panel-area panel-tooltip" onclick="toggleInfoPanelVisibility('video')">
+                                                <span class="panel-tooltip-text">Video info</span>
+                                                <span id="video_panel_icon" class="fas fa-desktop panel-area-icon"></span>
+                                            </div>
+                                            <div id="video_panel" class="device-card video-panel shadow-sm">
+                                                <span id="video_panel_arrow" class="panel-arrow"></span>
+                                                <div class="device-card-header">
+                                                    <span class="fas fa-desktop fa-lg mr-2"></span>
+                                                    <span>Video info</span>
+                                                    <div class="fas fa-window-close fa-lg device-card-header-button" onclick="setInfoPanelVisible('video', false)"></div>
+                                                </div>
+                                                <div class="device-card-content">
+                                                    <table>
+                                                        <tr>
+                                                            <td>
+                                                                <span class="device-card-content-text">Resolution:</span>
+                                                            </td>
+                                                            <td>
+                                                                <span id="video_resolution" class="device-card-content-value">-</span>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                    <div id="video_brightness_container">
+                                                        <span class="device-card-content-text">Brightness:</span>
+                                                        <span class="device-card-content-value"> 0%</span>
+                                                        <input id="video_brightness"/>
+                                                        <span class="device-card-content-value"> 100%</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div id="audio_panel_area" class="panel-area panel-tooltip" onclick="toggleInfoPanelVisibility('audio')">
+                                                <span class="panel-tooltip-text">Audio control</span>
+                                                <span id="audio_panel_icon" class="fas fa-volume-up panel-area-icon"></span>
+                                            </div>
+                                            <div id="audio_panel" class="device-card audio-panel shadow-sm">
+                                                <span id="audio_panel_arrow" class="panel-arrow"></span>
+                                                <div class="device-card-header">
+                                                    <span class="fas fa-volume-up fa-lg mr-2"></span>
+                                                    <span>Audio control</span>
+                                                    <div class="fas fa-window-close fa-lg device-card-header-button" onclick="setInfoPanelVisible('audio', false)"></div>
+                                                </div>
+                                                <div class="device-card-content">
+                                                    <div>
+                                                        <span class="device-card-content-text">Volume:</span>
+                                                        <span class="device-card-content-value"> 0%</span>
+                                                        <input id="audio_volume"/>
+                                                        <span class="device-card-content-value"> 100%</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div id="led_panel_area" class="led-panel-area-off"></div>
+                                            <div id="led_panel" class="led-panel shadow-sm panel-tooltip" onclick="toggleUserLED()">
+                                                <span class="panel-tooltip-text">Toggle LED</span>
+                                                <span id="led_panel_arrow" class="panel-arrow"></span>
+                                                <img id ="led_image" class="led-image" src="{% static 'images/led_bubble.png' %}"/>
+                                            </div>
+                                            <div id="flash_memory_panel_area" class="panel-area panel-tooltip" onclick="toggleInfoPanelVisibility('flash_memory')">
+                                                <span class="panel-tooltip-text">Flash memory</span>
+                                                <span id="flash_memory_panel_icon" class="fas fa-database panel-area-icon"></span>
+                                            </div>
+                                            <div id="flash_memory_panel" class="device-card flash-memory-panel shadow-sm">
+                                                <span id="flash_memory_panel_arrow" class="panel-arrow"></span>
+                                                <div class="device-card-header">
+                                                    <span class="fas fa-database fa-lg mr-2"></span>
+                                                    <span>Flash memory stats</span>
+                                                    <div class="fas fa-window-close fa-lg device-card-header-button" onclick="setInfoPanelVisible('flash_memory', false)"></div>
+                                                </div>
+                                                <div class="device-card-content">
+                                                    <table>
+                                                        <tr>
+                                                            <td>
+                                                                <span class="device-card-content-text">Total flash memory:</span>
+                                                            </td>
+                                                            <td>
+                                                                <span id="flash_size" class="device-card-content-value">-</span> GB
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                    <div class="device-card-button filesystem-explore-button" onclick="openFileSystem()">Explore file system...</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+{% endblock %}
+{% block javascript_inner %}
+    <script>
+    $(document).ready(function() {
+        // Initialize the device.
+        initDevice();
+        // Initialize sliders.
+        initSliders();
+        // Register resize event.
+        window.onresize = adjustImageSize;
+        // Change the color of the device toolbar icons when hovering.
+        $("#device-button-hide-info").on({
+            "mouseover" : function() {
+                $("#device-button-hide-info-img").attr("src", "{% static 'images/hide_info_green.png' %}");
+            },
+            "mouseout" : function() {
+                $("#device-button-hide-info-img").attr("src", "{% static 'images/hide_info.png' %}");
+            }
+        });
+        $("#device-button-show-info").on({
+            "mouseover" : function() {
+                $("#device-button-show-info-img").attr("src", "{% static 'images/show_info_green.png' %}");
+            },
+            "mouseout" : function() {
+                $("#device-button-show-info-img").attr("src", "{% static 'images/show_info.png' %}");
+            }
+        });
+        // Register file upload change event.
+        $("#file_to_upload").on("change", function(event) {
+            uploadFile(event.target.files[0]);
+        });
+        // Register directory name input changed.
+        $("#filesystem_directory_name").on("input", function(event) {
+            validateDirectoryName(event.target.value);
+        });
+        // Change image of the LED panel when hovering.
+        $("#led_panel").on({
+            "mouseover" : function() {
+                $("#led_image").attr("src", "{% static 'images/led_bubble_hover.png' %}");
+            },
+            "mouseout" : function() {
+                $("#led_image").attr("src", "{% static 'images/led_bubble.png' %}");
+            }
+        });
+    });
+    </script>
+{% endblock %}

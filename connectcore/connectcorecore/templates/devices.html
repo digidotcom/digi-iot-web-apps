@@ -1,0 +1,66 @@
+{% extends "base_logged_in.html" %}
+{% load static %}
+{% block title %}
+Digi Demo - Devices
+{% endblock %}
+{% block page_content %}
+<div class="row justify-content-lg-center">
+    <div class="col-lg-12 col-xl-12">
+        <div class="column main-row" style="min-height: 250px;">
+            <div class="card devices-list-card">
+                <div class="card-body">
+                    <h6 class="card-title">Select the ConnectCore device to manage</h6>
+                    <div class="devices-list-container">
+                        <div id="loading_wrapper" class="loading-wrapper element-grayed">
+                            <div id="devices-list" class="devices-list"></div>
+                            <div class="register-device-container">
+                                <span class="register-device-description">Don't find your device in the list? Click <b>Register device</b> button to register it in your account.</span>
+                                <button type="button" id="add-button" class="register-device-button" onclick="openAddDeviceDialog()">Register device</button>
+                            </div>
+                            <div class="devices-buttons-container">
+                                <button type="button" id="refresh-button" class="btn btn-primary" disabled="true" onclick="listDevices()">Refresh</button>
+                                <button type="button" id="continue-button" class="btn btn-primary" disabled="true" style="margin-left: 10px;">Continue</button>
+                            </div>
+                        </div>
+                        <div id="loading_popup" class="popup popup-loading shadow">
+                            <img class="popup-item" src="{% static 'images/loading.gif' %}" alt="Loading..." />
+                            <div id="loading_popup_message" class="popup-text">Loading devices...</div>
+                        </div>
+                        <div id="info_popup" class="popup popup-info shadow d-none">
+                            <div id="info_popup_title" class="popup-title">Error</div>
+                            <div id="info_popup_message" class="popup-text">-</div>
+                        </div>
+                        <div id="add_device_dialog" class="add-device-dialog">
+                            <div class="add-device-background"></div>
+                            <div class="add-device-container">
+                                <div class="device-card-header">
+                                    <span class="fas fa-plus-square fa-lg mr-2"></span>
+                                    <span>Register new device</span>
+                                    <div class="fas fa-window-close fa-lg device-card-header-button" onclick="closeAddDeviceDialog()"></div>
+                                </div>
+                                <div class="add-device-label">Enter the Device ID or MAC address of the device:</div>
+                                <input id="add_device_input" class="add-device-input" type="text"/>
+                                <div id="add_device_error" class="add-device-error"></div>
+                                <div id="add_device_button" class="device-card-button add-device-button add-device-button-disabled" onclick="onRegisterDevice()">Register device</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block javascript %}
+    <!-- Local JS files and functions -->
+    <script>
+    // Ready method.
+    $(document).ready(function() {
+        listDevices();
+    });
+    // Register device ID input changed.
+    $("#add_device_input").on("input", function(event) {
+        validateDeviceID(event.target.value);
+    });
+    </script>
+{% endblock %}
