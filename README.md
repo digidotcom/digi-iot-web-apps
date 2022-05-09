@@ -1,7 +1,7 @@
-# XBee IoT Web Applications
+# Digi IoT Web Applications
 
 This repository contains the source code of the web applications of the Digi
-XBee IoT solution demos, which demonstrate the end-to-end connection technology
+IoT solution demos, which demonstrate the end-to-end connection technology
 using Digi products and services.
 
 The web applications are built with the Django framework and can be run locally.
@@ -22,13 +22,13 @@ to run:
 ## How to Contribute
 
 The contributing guidelines are in the 
-[CONTRIBUTING.md](https://github.com/digidotcom/xbee-iot-web-apps/blob/master/CONTRIBUTING.md) 
+[CONTRIBUTING.md](https://github.com/digidotcom/digi-iot-web-apps/blob/master/CONTRIBUTING.md)
 document.
 
 
 ## License
 
-Copyright 2020-2021, Digi International Inc.
+Copyright 2020-2022, Digi International Inc.
 
 This Source Code Form is subject to the terms of the Mozilla Public
 License, v. 2.0. If a copy of the MPL was not distributed with this
