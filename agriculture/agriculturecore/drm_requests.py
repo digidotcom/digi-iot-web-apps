@@ -585,9 +585,22 @@ def get_data_points(request, stream_name):
     strm = dc.streams.get_stream(stream_id)
     datapoints = []
 
+    # Establish rollup values for requests exceeding 1 hour.
+    rollup_interval = None
+    rollup_method = None
+    if interval != 1:
+        rollup_method = "average"
+        if interval == 24:  # Day -> 48 samples
+            rollup_interval = "half"
+        elif interval == 168:  # Week -> 168 samples
+            rollup_interval = "hour"
+        elif interval == 720:  # Month -> 31 samples
+            rollup_interval = "day"
     for dp in strm.read(
             start_time=(datetime.now(timezone.utc) - timedelta(hours=interval)),
-            newest_first=False):
+            newest_first=False,
+            rollup_interval=rollup_interval,
+            rollup_method=rollup_method):
         datapoints.append({"timestamp": dp.get_timestamp().timestamp() * 1000,
                            "data": dp.get_data()})
 
