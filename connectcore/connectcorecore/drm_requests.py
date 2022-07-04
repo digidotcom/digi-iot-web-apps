@@ -105,8 +105,6 @@ ID_DEY_VERSION = "dey_version"
 ID_ERROR = "error"
 ID_ERROR_MSG = "error_msg"
 ID_ERROR_MESSAGE = "error_message"
-ID_ETHERNET_IP = "ethernet_ip"
-ID_ETHERNET_MAC = "ethernet_mac"
 ID_FILE = "file"
 ID_FILES = "files"
 ID_FLASH_SIZE = "flash_size"
@@ -156,8 +154,9 @@ ID_VIDEO_RESOLUTION = "video_resolution"
 ID_WIFI_IP = "wifi_ip"
 ID_WIFI_MAC = "wifi_mac"
 
-IFACE_ETHERNET = "eth0"
 IFACE_WIFI = "wlan0"
+
+NUM_ETHERNET_INTERFACES = 2
 
 OPERATION_CLI = "cli"
 OPERATION_DATA_SERVICE = "data_service"
@@ -256,7 +255,8 @@ STATUS_FAILED = "failed"
 
 STREAMS_LIST = ["wlan0/state", "wlan0/rx_bytes", "wlan0/tx_bytes", "hci0/state", "hci0/rx_bytes", "hci0/tx_bytes",
                 "eth0/state", "eth0/rx_bytes", "eth0/tx_bytes", "lo/state", "lo/rx_bytes", "lo/tx_bytes", "uptime",
-                "frequency", "cpu_temperature", "cpu_load", "used_memory", "free_memory"]
+                "frequency", "cpu_temperature", "cpu_load", "used_memory", "free_memory", "eth1/state",
+                "eth1/rx_bytes", "eth1/tx_bytes"]
 
 TARGET_DEVICE_INFO = "device_info"
 TARGET_SET_AUDIO_VOLUME = "set_audio_volume"
@@ -789,12 +789,13 @@ def get_device_information(request, device_id):
         else:
             info[ID_WIFI_MAC] = DEFAULT_MAC
             info[ID_WIFI_IP] = DEFAULT_IP
-        if IFACE_ETHERNET in information:
-            info[ID_ETHERNET_MAC] = information[IFACE_ETHERNET][ID_MAC]
-            info[ID_ETHERNET_IP] = information[IFACE_ETHERNET][ID_IP]
-        else:
-            info[ID_ETHERNET_MAC] = DEFAULT_MAC
-            info[ID_ETHERNET_IP] = DEFAULT_IP
+        for index in range(0, NUM_ETHERNET_INTERFACES):
+            if "eth%s" % index in information:
+                info["ethernet%s_mac" % index] = information["eth%s" % index][ID_MAC]
+                info["ethernet%s_ip" % index] = information["eth%s" % index][ID_IP]
+            else:
+                info["ethernet%s_mac" % index] = DEFAULT_MAC
+                info["ethernet%s_ip" % index] = DEFAULT_IP
     except DeviceCloudHttpException as e:
         info[ID_ERROR] = e.response.text
         return info
