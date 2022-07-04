@@ -103,3 +103,6 @@ GitHub.sublime-settings
 !.vscode/launch.json 
 !.vscode/extensions.json 
 .history
+
+# Pycharm/IntelliJ IDEA #
+.idea/*
