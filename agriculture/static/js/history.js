@@ -108,13 +108,16 @@ const STATION_CHART_HTML = "" +
 var windData;
 var rainData;
 var radiationData;
+var luminosityData;
 var temperatureData = {};
+var temperatureDataG = {};
 var moistureData = {};
 var valveData = {};
 
 var windInterval;
 var rainInterval;
 var radiationInterval;
+var luminosityInterval;
 var temperatureInterval = {};
 var moistureInterval = {};
 var valveInterval = {};
@@ -126,12 +129,14 @@ function initCharts() {
     rainData = null;
     radiationData = null;
     temperatureData = {};
+    temperatureDataG = {};
     moistureData = {};
     valveData = {};
 
     windInterval = null;
     rainInterval = null;
     radiationInterval = null;
+    luminosityInterval = null;
     temperatureInterval = {};
     moistureInterval = {};
     valveInterval = {};
@@ -160,7 +165,8 @@ function drawAllCharts(refresh=false, showProgress=true) {
 
     drawWindChart(refresh, showProgress);
     drawRainChart(refresh, showProgress);
-    drawRadiationChart(refresh, showProgress);
+    drawLuminosityChart(refresh, showProgress);
+    drawTemperatureChartG(refresh, showProgress);
 
     for (macAddr in temperatureData) {
         drawTemperatureChart(macAddr, refresh, showProgress);
@@ -181,13 +187,16 @@ function drawWindChart(refresh=false, showProgress=false) {
             $("#wind-chart-loading").show();
         $.post("/ajax/get_wind", getJsonData(windInterval), function(response) {
             windData = response.data;
-            drawWindChart();
-            $("#wind-chart-loading").hide();
+            $.post("/ajax/get_wind_dir", getJsonData(windInterval), function(response2) {
+                windDirectionData = response2.data;
+                drawWindChart();
+                $("#wind-chart-loading").hide();
+            });
         }).fail(function(response) {
             processErrorResponse(response);
         });
     } else {
-        drawChart("wind-chart", windData, "Wind", "km/h", "#4F4F4F");
+        drawChart("wind-chart", windData, "Wind speed", "km/h", "#4F4F4F", windDirectionData, "Direction", "Direction", "#3CE222");
     }
 }
 
@@ -196,7 +205,7 @@ function drawRainChart(refresh=false, showProgress=false) {
     if (refresh) {
         if (showProgress)
             $("#rain-chart-loading").show();
-        $.post("/ajax/get_rain", getJsonData(rainInterval), function(response) {
+        $.post("/ajax/get_rain_acc", getJsonData(rainInterval), function(response) {
             rainData = response.data;
             drawRainChart();
             $("#rain-chart-loading").hide();
@@ -204,7 +213,24 @@ function drawRainChart(refresh=false, showProgress=false) {
             processErrorResponse(response);
         });
     } else {
-        drawChart("rain-chart", rainData, "Rain", "mm", "#3399FF");
+        drawChart("rain-chart", rainData, "Rain", "L/m²", "#3399FF");
+    }
+}
+
+// Draws the luminosity chart.
+function drawLuminosityChart(refresh=false, showProgress=false) {
+    if (refresh) {
+        if (showProgress)
+            $("#luminosity-chart-loading").show();
+        $.post("/ajax/get_luminosity", getJsonData(luminosityInterval), function(response) {
+            luminosityData = response.data;
+            drawLuminosityChart();
+            $("#luminosity-chart-loading").hide();
+        }).fail(function(response) {
+            processErrorResponse(response);
+        });
+    } else {
+        drawChart("luminosity-chart", luminosityData, "Luminosity", "Lux", "#FFD500");
     }
 }
 
@@ -221,11 +247,28 @@ function drawRadiationChart(refresh=false, showProgress=false) {
             processErrorResponse(response);
         });
     } else {
-        drawChart("radiation-chart", radiationData, "Radiation", "W/m2", "#FFD500");
+        drawChart("radiation-chart", radiationData, "Radiation", "W/m²", "#FFD500");
     }
 }
 
-// Draws the temperature chart.
+// Draws the temperature chart of gateway.
+function drawTemperatureChartG(refresh=false, showProgress=false) {
+    if (refresh) {
+        if (showProgress)
+            $("#temperature-chart-loading").show();
+        $.post("/ajax/get_temperature", getJsonData(temperatureInterval), function(response) {
+            temperatureDataG = response.data;
+            drawTemperatureChartG();
+            $("#temperature-chart-loading").hide();
+        }).fail(function(response) {
+            processErrorResponse(response);
+        });
+    } else {
+        drawChart("temperature-chart", temperatureDataG, "Temperature", "ºC", "#FF0000");
+    }
+}
+
+// Draws the temperature chart of xbees.
 function drawTemperatureChart(macAddr, refresh=false, showProgress=false) {
     if (refresh) {
         if (showProgress)
@@ -277,13 +320,16 @@ function drawValveChart(macAddr, refresh=false, showProgress=false) {
 }
 
 // Draws the chart with the given data.
-function drawChart(id, data, title, units, color=null) {
-    if (!isHistoryShowing())
+function drawChart(id, data, title, units, color=null, data2=null, units2=null, title2=null, color2=null) {
+    if (!isHistoryShowing() || id === undefined)
         return;
 
     var dataTable = new google.visualization.DataTable();
-    dataTable.addColumn("date", "");
-    dataTable.addColumn("number", "");
+    dataTable.addColumn('date', '');
+    dataTable.addColumn("number", title);
+    if (data2 != null){
+        dataTable.addColumn("number", title2);
+    }
 
     if (data.length == 0) {
         $("#" + id).empty();
@@ -291,41 +337,77 @@ function drawChart(id, data, title, units, color=null) {
         return;
     }
 
-    dataTable.addRows(data.length);
+    var maximumLength = data.length;
+    if (data2 != null && data2.length > maximumLength) {
+        maximumLength = data2.length;
+    }
+
+    dataTable.addRows(maximumLength);
 
     $.each(data, function(k, v) {
-        dataTable.setCell(k, 0, new Date(v["timestamp"]));
-        dataTable.setCell(k, 1, v["data"]);
+       dataTable.setCell(k, 0, new Date(v["timestamp"]));
+       dataTable.setCell(k, 1, v["data"]);
     });
 
-    var options = {
-        backgroundColor: "transparent",
-        series: {
-            0: {
-                axis: "Data",
-                color: color,
-                visibleInLegend: false
-            }
-        },
-        axes: {
-            y: {
-                Data: {
-                    label: units
-                }
-            }
-        },
-        legend: {
-            position: "none"
-        },
-        vAxis: {
-            viewWindow: {
-                min: 0
-            }
-        }
-    };
+    if(data2 != null){
+        $.each(data2, function(k, v) {
+            dataTable.setCell(k, 2, v["data"]);
+        });
+    }
 
-    var chart = new google.charts.Line(document.getElementById(id));
-    chart.draw(dataTable, google.charts.Line.convertOptions(options));
+    var options = null;
+
+    if(data2 == null && id == "rain-chart"){
+        options = {
+            backgroundColor: "transparent",
+            series: {
+              0: { targetAxisIndex: 0, color: color},
+            },
+            vAxes: {
+              // Adds titles to each axis.
+              0: {title: units, ticks: [{v: 0}, {v: 8}, {v: 16}, {v: 24}, {v: 32}, {v: 40}, {v: 48}, {v: 56} , {v: 64}]}
+            },
+
+            legend: { position: 'bottom' },
+            tooltip: { ignoreBounds: true, isHtml: true, trigger: 'both' }
+        };
+    }
+    else if(data2 == null && id != "rain-chart"){
+        options = {
+            backgroundColor: "transparent",
+            series: {
+              0: {targetAxisIndex: 0, color: color}
+            },
+            vAxes: {
+              // Adds titles to each axis.
+              0: {title: units,  viewWindow: {min: 0}}
+            },
+
+            legend: { position: 'bottom' },
+            tooltip: { ignoreBounds: true, isHtml: true, trigger: 'both' }
+        };
+    }
+    else if(data2 != null){
+        options = {
+            backgroundColor: "transparent",
+
+            series: {
+              0: {targetAxisIndex: 0, color: color},
+              1: {targetAxisIndex: 1, color: color2}
+            },
+            vAxes: {
+              // Adds titles to each axis.
+              0: {title: units, minValue: 0, ticks: [{v: 0}, {v: 8}, {v: 16}, {v: 24}, {v: 32}, {v: 40}, {v: 48}, {v: 56}]},
+              1: {title: units2, minValue: 0, ticks: [{v: 0, f: 'N'}, {v: 8, f: 'NE'}, {v: 16, f: 'E'}, {v: 24, f: 'SE'}, {v: 32, f: 'S'}, {v: 40, f: 'SW'}, {v: 48, f: 'W'}, {v: 56, f: 'NW'}]}
+            },
+
+            legend: { position: 'bottom' },
+            tooltip: { ignoreBounds: true, isHtml: true, trigger: 'both' }
+        };
+    }
+
+    var chart = new google.visualization.LineChart(document.getElementById(id));
+    chart.draw(dataTable, options);
 }
 
 // Draws the charts of the irrigation stations.

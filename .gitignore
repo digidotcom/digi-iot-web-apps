@@ -10,6 +10,7 @@ media
 *.bak 
 
 # If you are using PyCharm # 
+.idea/*
 */.idea/*
 *.iws /out/ 
 
@@ -103,3 +104,4 @@ GitHub.sublime-settings
 !.vscode/launch.json 
 !.vscode/extensions.json 
 .history
+

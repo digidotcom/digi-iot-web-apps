@@ -53,21 +53,24 @@ REQ_DO_COMMAND = "<rci_request version='1.1'>" \
 DO_CMD_XBEE_DISCOVER = "<discover option='current' />"
 DO_CMD_XBEE_SETTING = "<radio_command addr='{}' id='{}' format='{}' timeout='1000' />"
 
-ID_WIND = "wind"
+ID_WIND = "wind_speed"
+ID_WIND_DIR = "wind_direction"
 ID_RADIATION = "radiation"
-ID_RAIN = "rain"
+ID_RAIN_ACC = "rain_acc"
+ID_RAIN = "rain_diff"
 ID_LEVEL = "level"
 ID_VALVE = "valve"
 ID_TEMPERATURE = "temperature"
+ID_PRESSURE = "pressure"
+ID_LUMINOSITY = "luminosity"
 ID_BATTERY = "battery"
 ID_MOISTURE = "moisture"
 
 ID_CONTROLLERS = "controllers"
+ID_ERROR = "error"
 ID_STATIONS = "stations"
 ID_WEATHER = "weather"
 ID_TANK = "tank"
-
-ID_ERROR = "error"
 
 REGEX_DEV_REQUEST_RESPONSE = ".*<device_request .*>(.*)<\\/device_request>.*"
 REGEX_DO_CMD_RESPONSE = ".*<do_command target=[^>]*>(.*)<\\/do_command>.*"
@@ -150,10 +153,8 @@ def check_ajax_request(request):
     """
     Checks whether the given AJAX request is valid and the user is
     authenticated.
-
     Args:
         request (:class:`.WSGIRequest`): The HTTP request.
-
     Returns:
         `None` if the request is valid, or a `JsonResponse` with the error
             if it is not.
@@ -642,10 +643,18 @@ def get_general_farm_status(request, device_id, stations):
         # Weather station.
         if stream_id == STREAM_FORMAT_CONTROLLER.format(device_id, ID_WIND):
             status[ID_WEATHER][ID_WIND] = data
+        elif stream_id == STREAM_FORMAT_CONTROLLER.format(device_id, ID_WIND_DIR):
+            status[ID_WEATHER][ID_WIND_DIR] = data
+        elif stream_id == STREAM_FORMAT_CONTROLLER.format(device_id, ID_LUMINOSITY):
+            status[ID_WEATHER][ID_LUMINOSITY] = data
+        elif stream_id == STREAM_FORMAT_CONTROLLER.format(device_id, ID_RAIN_ACC):
+            status[ID_WEATHER][ID_RAIN_ACC] = data
         elif stream_id == STREAM_FORMAT_CONTROLLER.format(device_id, ID_RAIN):
             status[ID_WEATHER][ID_RAIN] = data
         elif stream_id == STREAM_FORMAT_CONTROLLER.format(device_id, ID_RADIATION):
             status[ID_WEATHER][ID_RADIATION] = data
+        elif stream_id == STREAM_FORMAT_CONTROLLER.format(device_id, ID_TEMPERATURE):
+            status[ID_WEATHER][ID_TEMPERATURE] = data
         # Water tank.
         elif stream_id == STREAM_FORMAT_CONTROLLER.format(device_id, ID_LEVEL):
             status[ID_TANK][ID_LEVEL] = data

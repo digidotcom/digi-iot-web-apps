@@ -18,32 +18,6 @@ var currentTime;
 var currentTimeFactor;
 var timeWorker;
 
-// Sets the new weather condition.
-function setWeatherCondition(e) {
-    e.preventDefault();
-
-    var selected = $(this).attr("value");
-    selectWeatherIcon(selected);
-
-    $.post("/ajax/set_condition", getJsonData(selected)).fail(function(response) {
-        // If the operation fails, get the real condition.
-        getWeatherCondition();
-    }).fail(function(response) {
-        processErrorResponse(response);
-    });
-}
-
-// Gets the current weather condition.
-function getWeatherCondition() {
-    var data = getJsonData();
-
-    $.post("/ajax/get_condition", getJsonData(), function(response) {
-        var resp = response["data"];
-        selectWeatherIcon(resp);
-    }).fail(function(response) {
-        processErrorResponse(response);
-    });
-}
 
 // Sets the new time factor.
 function setTimeFactor(e) {
@@ -91,22 +65,6 @@ function getCurrentTime() {
     }).fail(function(response) {
         processErrorResponse(response);
     });
-}
-
-// Marks the weather icon with the given value as selected.
-function selectWeatherIcon(value) {
-    unselectWeatherIcons();
-    if (value == document.getElementById("weather-sunny").value)
-        $("#weather-sunny-logo").addClass("selected-icon-widget");
-    else if (value == document.getElementById("weather-cloudy").value)
-        $("#weather-cloudy-logo").addClass("selected-icon-widget");
-    else if (value == document.getElementById("weather-rainy").value)
-        $("#weather-rainy-logo").addClass("selected-icon-widget");
-}
-
-// Unselects all the weather icons.
-function unselectWeatherIcons() {
-    $(".weather-icon").removeClass("selected-icon-widget");
 }
 
 // Marks the time icon with the given value as selected.

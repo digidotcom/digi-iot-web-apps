@@ -14,6 +14,7 @@
 
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
+
 from agriculturecore.drm_requests import *
 
 PARAM_CONTROLLER_ID = "controller_id"
@@ -35,6 +36,14 @@ NO_CONTROLLERS_MSG = "No irrigation controllers have been added to your farm. "
 SETUP_MODULES_GUIDE = "Please, verify the <a target='_blank' rel='noopener noreferrer' href='https://www.digi.com/resources/documentation/digidocs/90002422/#tasks/t_config_devices.htm'>documentation</a> " \
                       "on how to set up your modules to run the Smart " \
                       "agriculture demo."
+
+
+def farms_map(request):
+    if is_authenticated(request):
+        if request.method == "GET":
+            return TemplateResponse(request, 'map.html')
+    else:
+        return redirect_login(request)
 
 
 def dashboard(request):
@@ -69,14 +78,6 @@ def schedule(request):
         if request.method == "GET":
             return TemplateResponse(request, 'schedule.html',
                                     get_request_data(request))
-    else:
-        return redirect_login(request)
-
-
-def farms_map(request):
-    if is_authenticated(request):
-        if request.method == "GET":
-            return TemplateResponse(request, 'map.html')
     else:
         return redirect_login(request)
 
@@ -253,9 +254,7 @@ def get_smart_farms(request):
             Farms within the DRM account.
     """
     # Check if the AJAX request is valid.
-    error = check_ajax_request(request)
-    if error is not None:
-        return error
+    check_error(request)
 
     smart_farms = get_farms(request)
     if len(smart_farms) > 0:
@@ -284,9 +283,7 @@ def get_irrigation_stations(request):
             the request.
     """
     # Check if the AJAX request is valid.
-    error = check_ajax_request(request)
-    if error is not None:
-        return error
+    check_error(request)
 
     # Get the controller ID from the POST request.
     controller_id = request.POST[PARAM_CONTROLLER_ID]
@@ -316,9 +313,7 @@ def get_farm_status(request):
         :class:`.JsonResponse`: A JSON response with the status of the farm.
     """
     # Check if the AJAX request is valid.
-    error = check_ajax_request(request)
-    if error is not None:
-        return error
+    check_error(request)
 
     try:
         # Get the controller ID from the POST request.
@@ -367,9 +362,7 @@ def set_valve(request):
         :class:`.JsonResponse`: A JSON response with the set status.
     """
     # Check if the AJAX request is valid.
-    error = check_ajax_request(request)
-    if error is not None:
-        return error
+    check_error(request)
 
     # Get the controller ID and irrigation station from the POST request.
     data = json.loads(request.body.decode(request.encoding))
@@ -395,9 +388,7 @@ def set_tank_valve(request):
         :class:`.JsonResponse`: A JSON response with the set status.
     """
     # Check if the AJAX request is valid.
-    error = check_ajax_request(request)
-    if error is not None:
-        return error
+    check_error(request)
 
     # Get the controller ID and status of the valve from the POST request.
     data = json.loads(request.body.decode(request.encoding))
@@ -422,9 +413,7 @@ def refill_tank(request):
         :class:`.JsonResponse`: A JSON response with the set status.
     """
     # Check if the AJAX request is valid.
-    error = check_ajax_request(request)
-    if error is not None:
-        return error
+    check_error(request)
 
     # Get the controller ID and level of the tank from the POST request.
     data = json.loads(request.body.decode(request.encoding))
@@ -457,7 +446,7 @@ def get_request_data(request):
 
 def get_wind(request):
     """
-    Returns the wind data of the main controller.
+    Returns the wind speed data of the main controller.
 
     Args:
         request (:class:`.WSGIRequest`): the AJAX request.
@@ -465,12 +454,54 @@ def get_wind(request):
     Returns:
         A JSON with the list of data points or the error.
     """
+
     return get_data_points(request, ID_WIND)
+
+
+def get_wind_dir(request):
+    """
+    Returns the wind direction data of the main controller.
+
+    Args:
+        request (:class:`.WSGIRequest`): the AJAX request.
+
+    Returns:
+        A JSON with the list of data points or the error.
+    """
+
+    return get_data_points(request, ID_WIND_DIR)
+
+
+def get_luminosity(request):
+    """
+    Returns the luminosity data of the main controller.
+
+    Args:
+        request (:class:`.WSGIRequest`): the AJAX request.
+
+    Returns:
+        A JSON with the list of data points or the error.
+    """
+
+    return get_data_points(request, ID_LUMINOSITY)
+
+
+def get_rain_acc(request):
+    """
+    Returns the rain data of the main controller.
+
+    Args:
+        request (:class:`.WSGIRequest`): the AJAX request.
+
+    Returns:
+        A JSON with the list of data points or the error.
+    """
+    return get_data_points(request, ID_RAIN_ACC)
 
 
 def get_rain(request):
     """
-    Returns the rain data of the main controller.
+    Returns the rain accumulated data of the main controller.
 
     Args:
         request (:class:`.WSGIRequest`): the AJAX request.
@@ -545,9 +576,7 @@ def check_farm_connection_status(request):
         A JSON with the status of the farm or the error.
     """
     # Check if the AJAX request is valid.
-    error = check_ajax_request(request)
-    if error is not None:
-        return error
+    check_error(request)
 
     # Get the controller ID and irrigation station from the POST request.
     data = json.loads(request.body.decode(request.encoding))
@@ -587,3 +616,9 @@ def request_has_params(request):
         `True` if the request has the required parameters, `False` otherwise.
     """
     return request_has_id(request) and request_has_name(request)
+
+
+def check_error(request):
+    error = check_ajax_request(request)
+    if error is not None:
+        return error

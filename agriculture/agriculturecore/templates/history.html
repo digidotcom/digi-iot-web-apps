@@ -10,10 +10,10 @@ Digi Demo - Historic data
                         <div class="card-body">
                             <h5 class="card-title">Historic data: Irrigation controller</h5>
                             <div class="row">
-                                <div class="col-xl-4 chart-container">
+                                <div class="col-xl-6 chart-container">
                                     <div class="d-flex justify-content-center align-items-center">
                                         <span class="fas fa-wind fa-2x mr-3"></span>
-                                        <span>Wind speed</span>
+                                        <span>Wind</span>
                                     </div>
                                     <div class="chart-wrapper">
                                         <div id="wind-chart" class="big-chart"></div>
@@ -36,7 +36,7 @@ Digi Demo - Historic data
                                         </label>
                                     </div>
                                 </div>
-                                <div class="col-xl-4 chart-container">
+                                <div class="col-xl-6 chart-container">
                                     <div class="d-flex justify-content-center align-items-center">
                                         <span class="fas fa-cloud-rain fa-2x mr-3"></span>
                                         <span>Rain</span>
@@ -62,32 +62,58 @@ Digi Demo - Historic data
                                         </label>
                                     </div>
                                 </div>
-                                <div class="col-xl-4 chart-container">
+                                <div class="col-xl-6 chart-container">
                                     <div class="d-flex justify-content-center align-items-center">
                                         <span class="fas fa-sun fa-2x mr-3"></span>
-                                        <span>Solar radiation</span>
+                                        <span>Luminosity</span>
                                     </div>
                                     <div class="chart-wrapper">
-                                        <div id="radiation-chart" class="big-chart"></div>
-                                        <div id="radiation-chart-loading" class="chart-loading">
+                                        <div id="luminosity-chart" class="big-chart"></div>
+                                        <div id="luminosity-chart-loading" class="chart-loading">
                                             <img class="loading-chart-image" src="{% static 'images/loading.gif' %}" alt="Loading..." />
                                         </div>
                                     </div>
                                     <div class="btn-group btn-group-toggle d-flex justify-content-center" data-toggle="buttons">
                                         <label class="btn btn-secondary btn-sm active">
-                                            <input type="radio" name="radiation-interval" value="1" checked> Hour
+                                            <input type="radio" name="luminosity-interval" value="1" checked> Hour
                                         </label>
                                         <label class="btn btn-secondary btn-sm">
-                                            <input type="radio" name="radiation-interval" value="24"> Day
+                                            <input type="radio" name="luminosity-interval" value="24"> Day
                                         </label>
                                         <label class="btn btn-secondary btn-sm">
-                                            <input type="radio" name="radiation-interval" value="168"> Week
+                                            <input type="radio" name="luminosity-interval" value="168"> Week
                                         </label>
                                         <label class="btn btn-secondary btn-sm">
-                                            <input type="radio" name="radiation-interval" value="720"> Month
+                                            <input type="radio" name="luminosity-interval" value="720"> Month
                                         </label>
                                     </div>
                                 </div>
+                                <div class='col-xl-6 chart-container'>
+                                   <div class='d-flex justify-content-center align-items-center'>
+                                       <span class='fas fa-thermometer-half fa-2x mr-3'></span>
+                                       <span>Temperature</span>
+                                   </div>
+                                   <div class='chart-wrapper'>
+                                       <div id='temperature-chart' class='big-chart'></div>
+                                       <div id='temperature-chart-loading' class='chart-loading'>
+                                           <img class='loading-chart-image' src='../static/images/loading.gif' alt='Loading...' />
+                                       </div>
+                                   </div>
+                                   <div class='btn-group btn-group-toggle d-flex justify-content-center' data-toggle='buttons'>
+                                       <label class='btn btn-secondary btn-sm active'>
+                                           <input type='radio' name='temperature-interval' value='1' checked> Hour
+                                       </label>
+                                       <label class='btn btn-secondary btn-sm'>
+                                           <input type='radio' name='temperature-interval' value='24'> Day
+                                       </label>
+                                       <label class='btn btn-secondary btn-sm'>
+                                           <input type='radio' name='temperature-interval' value='168'> Week
+                                       </label>
+                                       <label class='btn btn-secondary btn-sm'>
+                                           <input type='radio' name='temperature-interval' value='720'> Month
+                                       </label>
+                                   </div>
+                               </div>
                             </div>
                         </div>
                     </div>
@@ -113,9 +139,14 @@ Digi Demo - Historic data
             drawRainChart(true, true);
         });
 
-        $("input[type=radio][name=radiation-interval]").change(function() {
-            radiationInterval = this.value;
-            drawRadiationChart(true, true);
+        $("input[type=radio][name=luminosity-interval]").change(function() {
+            luminosityInterval = this.value;
+            drawLuminosityChart(true, true);
+        });
+
+        $("input[type=radio][name=temperature-interval]").change(function() {
+            temperatureInterval = this.value;
+            drawTemperatureChartG(true, true);
         });
     });
 
@@ -124,4 +155,5 @@ Digi Demo - Historic data
         drawAllCharts();
     });
     </script>
+    <style>div.google-visualization-tooltip { width:150px;}</style>
 {% endblock %}
