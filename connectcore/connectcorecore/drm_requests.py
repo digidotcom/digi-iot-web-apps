@@ -171,8 +171,8 @@ PROVISION_TYPE_MAC = "mac"
 
 REGEX_DEV_REQUEST_RESPONSE = ".*<device_request .*>(.*)<\\/device_request>.*"
 REGEX_DO_CMD_RESPONSE = ".*<do_command target=[^>]*>(.*)<\\/do_command>.*"
-REGEX_INFO_HARDWARE = "SN=([0-9a-zA-Z-_:]+) MACHINE=([0-9a-zA-Z-_:]+) VARIANT=([0-9a-zA-Z]+) " \
-                      "SBC_VARIANT=([0-9a-zA-Z]+) BOARD_ID=([0-9a-zA-Z]+)"
+REGEX_INFO_HARDWARE = "SN=([0-9a-zA-Z-_:\\/]+) MACHINE=([0-9a-zA-Z-_:\\/]+) VARIANT=([0-9a-zA-Z\\/]+) " \
+                      "SBC_VARIANT=([0-9a-zA-Z\\/]+) BOARD_ID=([0-9a-zA-Z\\/]+)"
 REGEX_INFO_KINETIS = "HW_VERSION=([0-9a-zA-Z-_:\\/]+) FW_VERSION=([0-9a-zA-Z-_:\\/]+)"
 REGEX_MONITOR_ERROR = ".*<error>(.*)<\\/error>.*"
 
