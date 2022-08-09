@@ -21,8 +21,8 @@ const ERROR_DEVICE_NOT_CONNECTED_TITLE = "Device offline";
 const ERROR_DEVICE_NOT_CONNECTED_MESSAGE = "The selected device is offline";
 
 // Variables.
-var deviceConnectionStatus;
-var prevDeviceConnectionStatus;
+var deviceConnectionStatus = false;
+var deviceSocket = null;
 
 // Hide submenus
 $("#body-row .collapse").collapse("hide");
@@ -141,13 +141,20 @@ function checkDeviceConnectionStatus() {
 // Processes the device connection status answer.
 function processDeviceConnectionStatusAnswer(response) {
     // Sanity checks.
-    if (response[ID_STATUS] == null || response[ID_STATUS] == "undefined") {
-        // Do not continue.
-        return;
-    }
-    // Save the new connection status.
-    deviceConnectionStatus = response[ID_STATUS];
-    // Get icon and title based on connection status.
+    if (response[ID_STATUS] == null || response[ID_STATUS] == "undefined")
+        deviceConnectionStatus = false;
+    else
+        deviceConnectionStatus = response[ID_STATUS];
+
+    // Fire connection status changed event.
+    connection_status_changed();
+    // Subscribe for connection events.
+    subscribeDeviceMonitor();
+}
+
+// Handles what happens when a connection change is detected.
+function connection_status_changed() {
+    // Initialize variables.
     var statusImage = "";
     var statusTitle = "";
     if (deviceConnectionStatus == true) {
@@ -163,29 +170,25 @@ function processDeviceConnectionStatusAnswer(response) {
         deviceStatusElement.src = PATH_IMAGES + statusImage;
         deviceStatusElement.title = statusTitle;
     }
-    // Check if connection changed to update the displayed section.
-    if (prevDeviceConnectionStatus != deviceConnectionStatus) {
-        if (isDashboardShowing()) {
-            if (deviceConnectionStatus)
-                initDevice();
-            else
-                displayDeviceDisconnectedError();
-        } else if (isManagementShowing()) {
-            if (deviceConnectionStatus)
-                initializeManagementPage();
-            else if (!isDeviceRebooting())
-                displayDeviceDisconnectedError();
-        } else if (isHistoryShowing()) {
-            if (deviceConnectionStatus)
-                initCharts();
-            else
-                displayDeviceDisconnectedError();
+    // Update page contents.
+    if (isDashboardShowing()) {
+        if (deviceConnectionStatus)
+            initDevice();
+        else
+            displayDeviceDisconnectedError();
+    } else if (isManagementShowing()) {
+        if (deviceConnectionStatus)
+            initializeManagementPage();
+        else if (!isDeviceRebooting()) {
+            managementInfoRead = false;
+            displayDeviceDisconnectedError();
         }
+    } else if (isHistoryShowing()) {
+        if (deviceConnectionStatus)
+            initCharts();
+        else
+            displayDeviceDisconnectedError();
     }
-    // Store connection status.
-    prevDeviceConnectionStatus = deviceConnectionStatus;
-    // Schedule a new connection status update in 30 seconds.
-    setTimeout(checkDeviceConnectionStatus, 30000);
 }
 
 // Displays the device disconnected error.
@@ -196,4 +199,27 @@ function displayDeviceDisconnectedError() {
     showLoadingPopup(false);
     // Show info dialog.
     showInfoPopup(true, ERROR_DEVICE_NOT_CONNECTED_TITLE, ERROR_DEVICE_NOT_CONNECTED_MESSAGE);
+}
+
+// Subscribes to device connection changes.
+function subscribeDeviceMonitor() {
+    // Sanity checks.
+    if (deviceSocket != null)
+        return;
+    // Create the web socket.
+    var socketPrefix = window.location.protocol == "https:" ? "wss" : "ws";
+    deviceSocket = new WebSocket(socketPrefix + "://" + window.location.host + "/ws/device/" + getDeviceID());
+    // Define the callback to be notified when data is received in the web socket.
+    deviceSocket.onmessage = function(e) {
+        // Retrieve new status.
+        var event = JSON.parse(e.data);
+        if (event[ID_STATUS] != null && event[ID_STATUS] != "undefined") {
+            if (event[ID_STATUS] == "connected")
+                deviceConnectionStatus = true;
+            else
+                deviceConnectionStatus = false;
+            // Fire connection status changed event.
+            connection_status_changed();
+        }
+    };
 }

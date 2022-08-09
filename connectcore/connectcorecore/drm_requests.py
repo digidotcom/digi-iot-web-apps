@@ -226,6 +226,15 @@ SCHEMA_MONITOR_CLI = '[' \
                      '}' \
                      '{{/each}}' \
                      ']'
+SCHEMA_MONITOR_DEVICE = '[' \
+                        '{{#each this}}' \
+                        '{{#if @index}}, {{/if}}' \
+                        '{ ' \
+                        '"device_id": "{{device.id}}",' \
+                        '"status": "{{device.connection_status}}"' \
+                        '}' \
+                        '{{/each}}' \
+                        ']'
 SCHEMA_MONITOR_DP = '[' \
                     '{{#each this}}' \
                     '{{#if @index}}, {{/if}}' \
@@ -1952,7 +1961,99 @@ def remove_datapoints_monitor(session, monitor_id):
         print(e)
 
 
-def remove_inactive_monitors(dc, topic_hint, device_id):
+def register_device_monitor(session, device_id, consumer):
+    """
+    Creates a Device Cloud monitor to be notified when devices of the
+    account connect or disconnect.
+
+    Args:
+        session (:class:`.SessionStore`): The Django session.
+        device_id (String): ID of the device.
+        consumer (:class:`.WsConsumer`): The web socket consumer.
+
+    Returns:
+        The ID of the created monitor.
+    """
+    # Initialize variables.
+    answer = {}
+    topic = "devices/{}".format(device_id)
+    dc = get_device_cloud_session(session)
+    if dc is None:
+        return -1
+
+    global monitor_managers
+
+    # Get or create the monitor manager for the given session.
+    session_key = session.session_key
+    if session_key in monitor_managers:
+        monitor_manager = monitor_managers.get(session_key)
+    else:
+        monitor_manager = MonitorManager(dc.get_connection())
+        monitor_managers[session_key] = monitor_manager
+
+    # Clean inactive monitors.
+    remove_inactive_monitors(dc, "devices", device_id)
+
+    # Create the monitor to receive device events for the given device id.
+    try:
+        monitor = monitor_manager.create_tcp_monitor_with_schema([topic],
+                                                                 SCHEMA_MONITOR_DEVICE,
+                                                                 batch_size=1,
+                                                                 batch_duration=0)
+
+        # Define the monitor callback.
+        def monitor_callback(json_data):
+            for event in json_data:
+                # Push new event to the web socket.
+                consumer.send(text_data=json.dumps(event))
+            return True
+
+        # Add the monitor callback.
+        monitor.add_callback(monitor_callback)
+        # Save the monitor ID.
+        answer[ID_MONITOR_ID] = monitor.get_id()
+    except Exception as e:
+        re_search = re.search(REGEX_MONITOR_ERROR, str(e), re.IGNORECASE)
+        if re_search:
+            answer[ID_ERROR] = re_search.group(1)
+        else:
+            answer[ID_ERROR] = str(e)
+
+    return answer
+
+
+def remove_device_monitor(session, monitor_id):
+    """
+    Disconnects and deletes the Device Cloud monitor with the given ID that was
+    listening for device connections.
+
+    Args:
+        session (:class:`.SessionStore`): The Django session.
+        monitor_id (int): The ID of the monitor to delete.
+    """
+    dc = get_device_cloud_session(session)
+    if dc is None:
+        return
+
+    global monitor_managers
+
+    # Get or create the monitor manager for the given session.
+    session_key = session.session_key
+    if session_key not in monitor_managers:
+        return
+    monitor_manager = monitor_managers.pop(session_key)
+
+    # Stop the monitor.
+    monitor_manager.stop_listeners()
+
+    # Delete the monitor.
+    try:
+        dc.get_connection().delete(WS_MONITOR_API.format(monitor_id))
+    except DeviceCloudHttpException as e:
+        print(e)
+
+
+def remove_inactive_monitors(dc, topic_hint, device_id=None):
     """
     Removes inactive Remote Manager monitors containing the given topic hint and device ID.
 
@@ -1964,9 +2065,13 @@ def remove_inactive_monitors(dc, topic_hint, device_id):
     # Clean inactive monitors.
     monitors = dc.monitor.get_monitors(MON_TRANSPORT_TYPE_ATTR == "tcp" and MON_STATUS_ATTR == "INACTIVE")
     for monitor in monitors:
-        if topic_hint in monitor.get_metadata()["monTopic"] and device_id in monitor.get_metadata()["monTopic"]:
-            print("Deleted inactive monitor %s" % monitor.get_metadata()["monId"])
-            monitor.delete()
+        if topic_hint in monitor.get_metadata()["monTopic"]:
+            del_monitor = True
+            if device_id and device_id not in monitor.get_metadata()["monTopic"]:
+                del_monitor = False
+            if del_monitor:
+                print("Deleted inactive monitor %s" % monitor.get_metadata()["monId"])
+                monitor.delete()
 
 
 class MonitorManager(MonitorAPI):

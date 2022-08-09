@@ -143,8 +143,6 @@ Digi Demo - Management
         firmwareUpdateTimer = null;
         selectedFilesetEntry = null;
         filesLoaded = false;
-        // Initialize page.
-        initializeManagementPage();
         // Register system monitor input changed.
         $("#sample_rate").on("input", function(event) {
             validateSystemMonitor(event.target.value);

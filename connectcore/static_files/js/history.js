@@ -51,6 +51,10 @@ function initCharts() {
     temperatureInterval = null;
     cpuInterval = null;
     memoryInterval = null;
+    // Hide the loading popup.
+    showLoadingPopup(false);
+    // Hide the info popup.
+    showInfoPopup(false);
     // Draw all the charts.
     drawAllCharts(true, true);
 }

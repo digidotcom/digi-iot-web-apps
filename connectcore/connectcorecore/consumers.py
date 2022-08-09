@@ -19,6 +19,7 @@ from connectcorecore import drm_requests
 
 ERROR_REGISTER_CLI_MONITOR = "ERROR: could not register CLI monitor - %s"
 ERROR_REGISTER_DATAPOINT_MONITOR = "ERROR: could not register data point monitor - %s"
+ERROR_REGISTER_DEVICE_MONITOR = "ERROR: could not register device monitor - %s"
 ERROR_START_CLI_SESSION = "ERROR: could not start CLI session - %s"
 
 GROUP_UPLOAD_PROGRESS = "upload_progress.{}"
@@ -136,3 +137,37 @@ class FileUploadProgressConsumer(WebsocketConsumer):
 
     def progress_received(self, event):
         self.send(text_data=TEMPLATE_PROGRESS % event["data"])
+
+
+class DeviceConsumer(WebsocketConsumer):
+    """
+    Class to manage web socket connection for device connections.
+    """
+    def __init__(self):
+        WebsocketConsumer.__init__(self)
+        self._monitor_id = -1
+
+    def connect(self):
+        # Initialize variables.
+        session = self.scope["session"]
+        device_id = self.scope["url_route"]["kwargs"]["device_id"]
+        # Sanity checks.
+        if session is None or device_id is None:
+            return
+
+        # Accept the connection.
+        self.accept()
+        # Subscribe device monitor.
+        answer = drm_requests.register_device_monitor(session, device_id, self)
+        # Check errors.
+        if ID_ERROR in answer:
+            self._monitor_id = -1
+            self.send(text_data=TEMPLATE_ERROR % ERROR_REGISTER_DEVICE_MONITOR % answer[ID_ERROR])
+            return
+        self._monitor_id = answer[ID_MONITOR_ID]
+
+    def disconnect(self, close_code):
+        if self._monitor_id != -1:
+            # Unsubscribe monitor.
+            drm_requests.remove_device_monitor(self.scope["session"], self._monitor_id)
+            self._monitor_id = -1

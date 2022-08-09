@@ -23,4 +23,6 @@ websocket_urlpatterns = [
     re_path(r'wss/datapoints/(?P<device_id>[\w-]+)$', consumers.DataPointConsumer.as_asgi()),
     re_path(r'ws/file_upload_progress/(?P<file_name>[\w\.-]+)$', consumers.FileUploadProgressConsumer.as_asgi()),
     re_path(r'wss/file_upload_progress/(?P<file_name>[\w\.-]+)$', consumers.FileUploadProgressConsumer.as_asgi()),
+    re_path(r'ws/device/(?P<device_id>[\w-]+)$', consumers.DeviceConsumer.as_asgi()),
+    re_path(r'wss/device/(?P<device_id>[\w-]+)$', consumers.DeviceConsumer.as_asgi()),
 ]
