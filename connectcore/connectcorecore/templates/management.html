@@ -33,19 +33,19 @@ Digi Demo - Management
                             <div class="card-body">
                                 <h5 class="card-title">System monitor</h5>
                                 <div>Configure the system monitor service parameters.</div>
-                                <div class="system-monitor-param-container">
-                                    <span class="system-monitor-param-label">Time between samples:</span>
-                                    <input id="sample_rate" class="system-monitor-input" type="text"/>
+                                <div class="param-container">
+                                    <span class="param-label">Time between samples:</span>
+                                    <input id="sample_rate" class="input-control" type="text"/>
                                     <button class="fas fa-question-circle system-monitor-help" title="Time to wait between samples read (in seconds). Must be a positive number greater than 0." data-toggle="tooltip" data-placement="right"></button>
                                 </div>
-                                <div id="sample_rate_error" class="system-monitor-error"></div>
-                                <div class="system-monitor-param-container">
-                                    <span class="system-monitor-param-label">Samples to buffer:</span>
-                                    <input id="num_samples_upload" class="system-monitor-input" type="text"/>
+                                <div id="sample_rate_error" class="error-label"></div>
+                                <div class="param-container">
+                                    <span class="param-label">Samples to buffer:</span>
+                                    <input id="num_samples_upload" class="input-control" type="text"/>
                                     <button class="fas fa-question-circle system-monitor-help" title="Number of samples of each parameter to gather before uploading them to Digi Remote Manager. Must be a positive number greater than 0." data-toggle="tooltip" data-placement="right"></button>
                                 </div>
-                                <div id="samples_buffer_error" class="system-monitor-error"></div>
-                                <div id="save_button" class="device-card-button system-monitor-save system-monitor-save-disabled" onclick="saveSystemMonitor()">Save</div>
+                                <div id="samples_buffer_error" class="error-label"></div>
+                                <div id="save_button" class="device-card-button config-button config-button-disabled" onclick="saveSystemMonitor()">Save</div>
                             </div>
                         </div>
                         <div class="card shadow-sm">

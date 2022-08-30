@@ -45,10 +45,7 @@ const CLASS_MANAGEMENT_BUTTON_DISABLED = "management-button-disabled";
 const CLASS_PROGRESS_BAR_ERROR = "update-firmware-progress-bar-error";
 const CLASS_PROGRESS_BAR_INFO = "update-firmware-progress-bar-info";
 const CLASS_PROGRESS_BAR_SUCCESS = "update-firmware-progress-bar-success";
-const CLASS_SAVE_BUTTON_DISABLED = "system-monitor-save-disabled";
-const CLASS_SYSTEM_MONITOR_INPUT_ERROR = "system-monitor-input-error";
 
-const ERROR_FIELD_EMPTY = "Field cannot be empty";
 const ERROR_FIELD_NUMBER = "Value must be a positive number";
 const ERROR_FIELD_POSITIVE = "Value must be greater than 0";
 
@@ -256,11 +253,11 @@ function validateSystemMonitor() {
     var samplesBufferValid = validateSystemMonitorField(ID_NUM_SAMPLES_UPLOAD, ID_NUM_SAMPLES_UPLOAD_ERROR);
     // Check errors.
     if (!sampleRateValid || !samplesBufferValid) {
-        if (!saveButton.classList.contains(CLASS_SAVE_BUTTON_DISABLED))
-            saveButton.classList.add(CLASS_SAVE_BUTTON_DISABLED);
+        if (!saveButton.classList.contains(CLASS_CONFIG_BUTTON_DISABLED))
+            saveButton.classList.add(CLASS_CONFIG_BUTTON_DISABLED);
     } else {
-        if (saveButton.classList.contains(CLASS_SAVE_BUTTON_DISABLED))
-            saveButton.classList.remove(CLASS_SAVE_BUTTON_DISABLED);
+        if (saveButton.classList.contains(CLASS_CONFIG_BUTTON_DISABLED))
+            saveButton.classList.remove(CLASS_CONFIG_BUTTON_DISABLED);
     }
 }
 
@@ -288,13 +285,13 @@ function validateSystemMonitorField(fieldID, errorID) {
     }
     // Update controls.
     if (isValid) {
-        if (field.classList.contains(CLASS_FILE_SYSTEM_DIR_NAME_INPUT_ERROR))
-            field.classList.remove(CLASS_FILE_SYSTEM_DIR_NAME_INPUT_ERROR);
+        if (field.classList.contains(CLASS_INPUT_ERROR))
+            field.classList.remove(CLASS_INPUT_ERROR);
         fieldError.innerHTML = "&nbsp;";
         fieldError.style.display = "none";
     } else {
-        if (!field.classList.contains(CLASS_FILE_SYSTEM_DIR_NAME_INPUT_ERROR))
-            field.classList.add(CLASS_FILE_SYSTEM_DIR_NAME_INPUT_ERROR);
+        if (!field.classList.contains(CLASS_INPUT_ERROR))
+            field.classList.add(CLASS_INPUT_ERROR);
         fieldError.innerHTML = error;
         fieldError.style.display = "block";
     }
