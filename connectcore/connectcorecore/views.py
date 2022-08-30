@@ -29,6 +29,7 @@ ERROR_CLI_SEND_DATA = "Could send data to CLI."
 ERROR_CLI_TERMINATE = "Could not terminate the CLI session."
 ERROR_CREATE_DIRECTORY = "Could not create the directory."
 ERROR_DOWNLOAD_FILE = "Could not download file"
+ERROR_GET_CONFIG = "Could not read configuration"
 ERROR_GET_DATA_USAGE = "Could not retrieve data usage information"
 ERROR_GET_SAMPLE_RATE = "Could not get system monitor settings"
 ERROR_HISTORY_TEMPERATURE = "Could not get the temperature history"
@@ -41,11 +42,14 @@ ERROR_REMOVE_FILE = "Could not remove file"
 ERROR_UPDATE_FIRMWARE = "Could not update firmware."
 ERROR_UPLOAD_FILE = "Could not upload file"
 ERROR_UPLOAD_FIRMWARE = "Could not upload firmware file."
+ERROR_SET_CONFIG = "Could not save configuration"
 ERROR_SET_SAMPLE_RATE = "Could not set system monitor settings"
 ERROR_TARGET_NOT_REGISTERED = "Target not registered. Make sure the application is running in the device."
 
+ID_CONFIGURATION = "configuration"
 ID_DEVICE_NAME = "device_name"
 ID_DIRECTORY = "directory"
+ID_ELEMENTS = "elements"
 ID_ERROR_GUIDE = "error_guide"
 ID_ERROR_MSG = "error_msg"
 ID_ERROR_TITLE = "error_title"
@@ -78,6 +82,18 @@ def dashboard(request):
     if is_authenticated(request):
         if request.method == "GET":
             return TemplateResponse(request, 'dashboard.html',
+                                    get_request_data(request))
+    else:
+        return redirect_login(request)
+
+
+def network(request):
+    if not request_has_params(request):
+        return redirect("/")
+
+    if is_authenticated(request):
+        if request.method == "GET":
+            return TemplateResponse(request, 'network.html',
                                     get_request_data(request))
     else:
         return redirect_login(request)
@@ -992,6 +1008,68 @@ def list_fileset_files(request):
                 return JsonResponse({ID_ERROR: answer[ID_ERROR]}, status=400)
             return JsonResponse(answer, status=200)
         return JsonResponse({ID_ERROR: ERROR_LIST_FILESET}, status=400)
+    except Exception as e:
+        return get_exception_response(e)
+
+
+def get_config(request):
+    """
+    Retrieves the device configuration for the device specified in the request.
+
+    Args:
+        request (:class:`.WSGIRequest`): the AJAX request.
+
+    Returns:
+         :class:`.JsonResponse`: a JSON with the result.
+    """
+    # Check if the AJAX request is valid.
+    error = check_ajax_request(request)
+    if error is not None:
+        return error
+
+    # Get the parameters from the POST request.
+    data = json.loads(request.body.decode(request.encoding))
+    device_id = data[ID_DEVICE_ID]
+    elements = data[ID_ELEMENTS]
+
+    try:
+        answer = get_configuration(request, device_id, elements)
+        if answer is not None:
+            if ID_ERROR in answer:
+                return JsonResponse({ID_ERROR: answer[ID_ERROR]}, status=400)
+            return JsonResponse(answer, status=200)
+        return JsonResponse({ID_ERROR: ERROR_GET_CONFIG}, status=400)
+    except Exception as e:
+        return get_exception_response(e)
+
+
+def set_config(request):
+    """
+    Changes the device configuration with the data specified in the request.
+
+    Args:
+        request (:class:`.WSGIRequest`): the AJAX request.
+
+    Returns:
+         :class:`.JsonResponse`: a JSON with the result.
+    """
+    # Check if the AJAX request is valid.
+    error = check_ajax_request(request)
+    if error is not None:
+        return error
+
+    # Get the parameters from the POST request.
+    data = json.loads(request.body.decode(request.encoding))
+    device_id = data[ID_DEVICE_ID]
+    configuration = data[ID_CONFIGURATION]
+
+    try:
+        answer = set_configuration(request, device_id, configuration)
+        if answer is not None:
+            if ID_ERROR in answer:
+                return JsonResponse({ID_ERROR: answer[ID_ERROR]}, status=400)
+            return JsonResponse(answer, status=200)
+        return JsonResponse({ID_ERROR: ERROR_SET_CONFIG}, status=400)
     except Exception as e:
         return get_exception_response(e)
 

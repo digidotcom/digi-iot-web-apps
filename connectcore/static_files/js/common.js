@@ -47,6 +47,7 @@ const ID_DATA_USAGE_MONITORS = "data_usage_monitors";
 const ID_DATA_USAGE_TOTAL = "data_usage_total";
 const ID_DATA_USAGE_WEB = "data_usage_web";
 const ID_DATA_USAGE_WEB_SERVICES = "data_usage_web_services";
+const ID_DESC = "desc";
 const ID_DEVICE_ID = "device_id";
 const ID_DEVICE_NAME = "device_name";
 const ID_DEVICE_TYPE = "device_type";
@@ -138,9 +139,12 @@ const VALUE_SUCCESSFUL = "successful";
 const VALUE_TOP = "top";
 const VALUE_UNKNOWN = "unknown";
 
+const CLASS_ARROW_DOWN = "fa-caret-down";
+const CLASS_ARROW_UP = "fa-caret-up";
 const CLASS_D_NONE = "d-none";
 const CLASS_DISABLED_DIV = "disabled-div";
 const CLASS_ELEMENT_GRAYED = "element-grayed";
+const CLASS_INPUT_DISABLED = "input-control-disabled";
 const CLASS_INPUT_ERROR = "input-control-error";
 const CLASS_CONFIG_BUTTON_DISABLED = "config-button-disabled";
 const CLASS_SELECTED = "selected";
@@ -450,6 +454,11 @@ function roundToGigaBytes(kiloBytes) {
 // Returns whether the dashboard page is showing or not.
 function isDashboardShowing() {
     return window.location.pathname.indexOf("dashboard") > -1;
+}
+
+// Returns whether the network page is showing or not.
+function isNetworkShowing() {
+    return window.location.pathname.indexOf("network") > -1;
 }
 
 // Returns whether the management page is showing or not.

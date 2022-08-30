@@ -61,6 +61,7 @@ ERROR_CREATE_FILE = "Error creating file: %s"
 ERROR_DEVICE_NOT_ANSWER = "Device did not answer. Make sure the application is running in the device."
 ERROR_DOWNLOAD_FILE = "Error '%s' downloading file: %s"
 ERROR_DRM_REQUEST = "Error in the DRM request: {}."
+ERROR_GET_CONFIG = "Error reading configuration: %s"
 ERROR_GET_DATA_USAGE = "Error reading account data usage: %s"
 ERROR_LIST_DIRECTORY = "Error '%s' listing directory: %s"
 ERROR_LIST_FILESET = "Error listing fileset files: %s"
@@ -70,6 +71,7 @@ ERROR_NO_SESSION_ID = "No CLI session ID received"
 ERROR_NOT_AUTHENTICATED = "Not authenticated"
 ERROR_PARSING = "Error parsing Digi Remote Manager answer"
 ERROR_REMOVE_FILE = "Error '%s' removing file: %s"
+ERROR_SET_CONFIG = "Error saving configuration: %s"
 ERROR_TIMEOUT = "Timeout waiting for device response"
 ERROR_UNKNOWN = "unknown"
 ERROR_UNRECOGNIZED_ANSWER = "unrecognized answer"
@@ -269,8 +271,10 @@ STREAMS_LIST = ["wlan0/state", "wlan0/rx_bytes", "wlan0/tx_bytes", "hci0/state",
                 "used_memory", "free_memory"]
 
 TARGET_DEVICE_INFO = "device_info"
+TARGET_GET_CONFIG = "get_config"
 TARGET_PLAY_MUSIC = "play_music"
 TARGET_SET_AUDIO_VOLUME = "set_audio_volume"
+TARGET_SET_CONFIG = "set_config"
 TARGET_SET_LED = "user_led"
 TARGET_SET_VIDEO_BRIGHTNESS = "set_video_brightness"
 
@@ -1710,6 +1714,70 @@ def list_fileset(request, file_set):
         else:
             answer[ID_ERROR] = ERROR_LIST_FILESET % e.response.status_code
 
+    return answer
+
+
+def get_configuration(request, device_id, elements):
+    """
+    Retrieves the device configuration for the given element.
+
+    Args:
+        request (:class:`.WSGIRequest`): The request used to generate the
+            Device Cloud instance.
+        device_id (String): The device ID for which to retrieve the configuration.
+        elements (List): The elements to retrieve their configuration.
+
+    Returns:
+        Dictionary: Dictionary containing the answer.
+    """
+    dc = get_device_cloud(request)
+    request_data = json.dumps({"element": elements})
+    answer = {}
+
+    try:
+        response = send_request(dc, device_id, TARGET_GET_CONFIG,
+                                data=request_data)
+        if "not registered" in response or "Invalid format" in response:
+            answer[ID_ERROR] = response
+        else:
+            answer[ID_DATA] = response
+    except DeviceCloudHttpException as e:
+        if e.response.text is not None and e.response.text != "":
+            answer[ID_ERROR] = ERROR_GET_CONFIG % json.loads(e.response.text)[ID_ERROR_MESSAGE]
+        else:
+            answer[ID_ERROR] = ERROR_GET_CONFIG % e.response.status_code
+    return answer
+
+
+def set_configuration(request, device_id, configuration):
+    """
+    Changes the device configuration with the provided one.
+
+    Args:
+        request (:class:`.WSGIRequest`): The request used to generate the
+            Device Cloud instance.
+        device_id (String): The device ID for which to change the configuration.
+        configuration (Dictionary): The new configuration.
+
+    Returns:
+        Dictionary: Dictionary containing the answer.
+    """
+    dc = get_device_cloud(request)
+    request_data = "%s" % json.dumps(configuration)
+    answer = {}
+
+    try:
+        response = send_request(dc, device_id, TARGET_SET_CONFIG,
+                                data=request_data)
+        if "not registered" in response or "Invalid format" in response:
+            answer[ID_ERROR] = response
+        else:
+            answer[ID_DATA] = response
+    except DeviceCloudHttpException as e:
+        if e.response.text is not None and e.response.text != "":
+            answer[ID_ERROR] = ERROR_SET_CONFIG % json.loads(e.response.text)[ID_ERROR_MESSAGE]
+        else:
+            answer[ID_ERROR] = ERROR_SET_CONFIG % e.response.status_code
     return answer
 
 

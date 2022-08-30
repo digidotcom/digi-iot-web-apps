@@ -181,7 +181,12 @@ function connection_status_changed() {
             initDevice();
         else
             displayDeviceDisconnectedError();
-    } else if (isManagementShowing()) {
+    } else if (isNetworkShowing()) {
+        if (deviceConnectionStatus)
+            initializeNetworkPage();
+        else
+            displayDeviceDisconnectedError();
+    }else if (isManagementShowing()) {
         if (deviceConnectionStatus)
             initializeManagementPage();
         else if (!isDeviceRebooting()) {
