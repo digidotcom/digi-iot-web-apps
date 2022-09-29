@@ -144,10 +144,12 @@ const CLASS_ELEMENT_GRAYED = "element-grayed";
 const CLASS_SELECTED = "selected";
 
 const ERROR_ABORTED = "Operation aborted";
+const ERROR_BAD_REQUEST = "Bad request";
+const ERROR_FORBIDDEN = "Could not perform the selected action. Make sure you have the correct access rights.";
 const ERROR_URL_NOT_FOUND = "Requested URL not found";
 const ERROR_SERVER_ERROR = "Internal server error";
 const ERROR_TITLE = "Error";
-const ERROR_UNKNOWN_ERROR = "Unknown error";
+const ERROR_UNKNOWN_ERROR = "Unknown error. Make sure that server is running.";
 
 const IMAGE_OFFLINE = "status_offline.png";
 const IMAGE_ONLINE = "status_online.png";
@@ -204,8 +206,10 @@ function processAjaxErrorResponse(response) {
         errorMessage = response.responseJSON[ID_ERROR];
         // Show the error message (if any).
         if (errorMessage == null)
-            errorMessage = ERROR_UNKNOWN_ERROR;
-    } else if (response.status == 404)
+            errorMessage = ERROR_BAD_REQUEST;
+    } else if (response.status == 403)
+        errorMessage = ERROR_FORBIDDEN;
+    else if (response.status == 404)
         errorMessage = ERROR_URL_NOT_FOUND;
     else if (response.status == 500)
         errorMessage = ERROR_SERVER_ERROR;

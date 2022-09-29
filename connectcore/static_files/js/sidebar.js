@@ -103,6 +103,11 @@ function setSelectedSection(element=null) {
             }
         });
     }
+    if (isDashboardShowing()) {
+        window.setTimeout(function () {
+           adjustImageSize();
+        }, 300);
+    }
 }
 
 // Verifies the given device parameters.
