@@ -128,6 +128,7 @@ ID_NAME = "name"
 ID_N_DP_UPLOAD = "n_dp_upload"
 ID_NUM_SAMPLES_UPLOAD = "num_samples_upload"
 ID_PATH = "path"
+ID_PLAY = "play"
 ID_PROGRESS = "progress"
 ID_RESOLUTION = "resolution"
 ID_SAMPLE_RATE = "sample_rate"
@@ -268,6 +269,7 @@ STREAMS_LIST = ["wlan0/state", "wlan0/rx_bytes", "wlan0/tx_bytes", "hci0/state",
                 "eth1/rx_bytes", "eth1/tx_bytes"]
 
 TARGET_DEVICE_INFO = "device_info"
+TARGET_PLAY_MUSIC = "play_music"
 TARGET_SET_AUDIO_VOLUME = "set_audio_volume"
 TARGET_SET_LED = "user_led"
 TARGET_SET_VIDEO_BRIGHTNESS = "set_video_brightness"
@@ -540,6 +542,30 @@ def provision_device(request, provision_value, provision_type):
         answer[ID_ERROR] = e.response.text
 
     return answer
+
+
+def set_play_music_state(request, device_id, play, music_file):
+    """
+    Sets the play music state for the given device.
+
+    Args:
+        request (:class:`.WSGIRequest`): The request used to generate the
+            Device Cloud instance.
+        device_id (String): the device ID of the ConnectCore DRM device.
+        play (String): the new value of the play music.
+        music_file (String): the music file to play.
+
+    Returns:
+        String: 'OK' on success, 'ERROR' otherwise.
+    """
+    dc = get_device_cloud(request)
+    request_data = "%s" % json.dumps({"play": play, "music_file": music_file})
+
+    try:
+        return send_request(dc, device_id, TARGET_PLAY_MUSIC,
+                            data=request_data)
+    except DeviceCloudHttpException as e:
+        return e.response.text
 
 
 def set_cc_device_audio_volume(request, device_id, value):

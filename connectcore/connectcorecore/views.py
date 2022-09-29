@@ -53,6 +53,7 @@ ID_FILE_NAME = "file_name"
 ID_FILE_SET = "file_set"
 ID_IS_FILE = "is_file"
 ID_LED_NAME = "led_name"
+ID_MUSIC_FILE = "music_file"
 ID_REDIRECT = "redirect"
 ID_PROVISION_TYPE = "provision_type"
 ID_PROVISION_VALUE = "provision_value"
@@ -281,6 +282,41 @@ def get_device_status(request):
         status = get_general_device_status(request, device_id)
 
         return JsonResponse(status, status=200)
+    except Exception as e:
+        return get_exception_response(e)
+
+
+def play_music(request):
+    """
+    Sets the play music state.
+
+    Args:
+         request (:class:`.WSGIRequest`): The request used to check if the
+            user is authenticated and to generate the Device Cloud instance.
+
+    Returns:
+        :class:`.JsonResponse`: A JSON response with the operation result.
+    """
+    # Check if the AJAX request is valid.
+    music_file = None
+    error = check_ajax_request(request)
+    if error is not None:
+        return error
+
+    # Get the device ID and volume from the POST request.
+    data = json.loads(request.body.decode(request.encoding))
+    device_id = data[ID_DEVICE_ID]
+    play = data[ID_PLAY]
+    if ID_MUSIC_FILE in data:
+        music_file = data[ID_MUSIC_FILE]
+
+    try:
+        answer = set_play_music_state(request, device_id, play, music_file)
+        if ANSWER_SUCCESS in answer:
+            return JsonResponse({ID_PLAY: play}, status=200)
+        if ANSWER_TARGET_NOT_REGISTERED in answer:
+            return JsonResponse({ID_ERROR: ERROR_TARGET_NOT_REGISTERED}, status=400)
+        return JsonResponse({ID_ERROR: answer}, status=400)
     except Exception as e:
         return get_exception_response(e)
 

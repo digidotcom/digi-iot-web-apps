@@ -26,6 +26,7 @@ urlpatterns = [
     path('ajax/get_device_status', views.get_device_status, name="get_device_status"),
     path('ajax/get_devices', views.get_devices, name='get_devices'),
     path('ajax/get_device_info', views.get_device_info, name="get_device_info"),
+    path('ajax/play_music', views.play_music, name='play_music'),
     path('ajax/set_audio_volume', views.set_audio_volume, name='set_audio_volume'),
     path('ajax/set_video_brightness', views.set_video_brightness, name='set_video_brightness'),
     path('ajax/set_led_value', views.set_led_value, name='set_led_value'),
