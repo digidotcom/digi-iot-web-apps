@@ -264,9 +264,9 @@ STATUS_CANCELED = "canceled"
 STATUS_FAILED = "failed"
 
 STREAMS_LIST = ["wlan0/state", "wlan0/rx_bytes", "wlan0/tx_bytes", "hci0/state", "hci0/rx_bytes", "hci0/tx_bytes",
-                "eth0/state", "eth0/rx_bytes", "eth0/tx_bytes", "lo/state", "lo/rx_bytes", "lo/tx_bytes", "uptime",
-                "frequency", "cpu_temperature", "cpu_load", "used_memory", "free_memory", "eth1/state",
-                "eth1/rx_bytes", "eth1/tx_bytes"]
+                "eth0/state", "eth0/rx_bytes", "eth0/tx_bytes", "eth1/state", "eth1/rx_bytes", "eth1/tx_bytes",
+                "lo/state", "lo/rx_bytes", "lo/tx_bytes", "uptime", "frequency", "cpu_temperature", "cpu_load",
+                "used_memory", "free_memory"]
 
 TARGET_DEVICE_INFO = "device_info"
 TARGET_PLAY_MUSIC = "play_music"
