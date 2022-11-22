@@ -1,0 +1,207 @@
+/* GENERAL */
+:root {
+  --digi-green: #84C361;
+  --digi-green-transparent: rgba(132, 195, 97, 0.5);
+  --digi-green-dark: #6E9C54;
+  --digi-gray: #717174;
+  --digi-light-gray: #E8E8E8;
+  --digi-gray-transparent: rgba(113, 113, 116, 0.3);
+  --white-transparent: rgba(255, 255, 255, 0.5);
+  --nav-img-size: 34px;
+
+  --font-family-open-sans: "Open Sans", Arial, "sans serif";
+}
+
+@font-face {
+  font-family: 'Open Sans';
+  src: local('Open Sans'),
+       url('../fonts/OpenSans-Regular.ttf') format('truetype');
+}
+
+html, body {
+  overflow: hidden;
+}
+
+body {
+  font-family: var(--font-family-open-sans);
+}
+
+.disabled-div {
+  pointer-events: none;
+  opacity: 0.4;
+}
+
+.btn-primary {
+  background-color: var(--digi-green);
+  border: none;
+  color: white;
+  padding: 12px 80px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  text-transform: uppercase;
+  font-size: 14px;
+  -webkit-box-shadow: 0 10px 30px 0 rgba(132, 195, 97, 0.4);
+  box-shadow: 0 10px 30px 0 rgba(132, 195, 97, 0.4);
+  -webkit-border-radius: 5px 5px 5px 5px;
+  border-radius: 5px 5px 5px 5px;
+  -webkit-transition: all 0.3s ease-in-out;
+  -moz-transition: all 0.3s ease-in-out;
+  -ms-transition: all 0.3s ease-in-out;
+  -o-transition: all 0.3s ease-in-out;
+  transition: all 0.3s ease-in-out;
+  visibility: inherit;
+}
+
+.btn-primary:hover, .btn-primary:active {
+  background-color: var(--digi-green) !important;
+  box-shadow: 0 0 0 .2rem var(--digi-green-transparent) !important;
+  color: white !important;
+}
+
+.btn-primary:focus {
+  box-shadow: 0 0 0 .2rem var(--digi-green-transparent) !important;
+}
+
+.btn-primary:disabled {
+  background-color: var(--digi-light-gray) !important;
+}
+
+.element-grayed {
+  opacity: 20%;
+  background-color: white;
+  pointer-events: none;
+}
+
+/* NAVIGATION BAR */
+.banner-icon, .devices-list-icon {
+  height: var(--nav-img-size);
+}
+
+.devices-list-icon:hover {
+  opacity: 0.8;
+  color: var(--digi-green);
+}
+
+#banner-text {
+  font-size: 20px;
+  line-height: 14px;
+  height: 14px;
+  margin: 0px;
+  color: var(--digi-gray);
+}
+
+.navbar-brand {
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+
+#topBar {
+  z-index: 1000;
+}
+
+.dropdown-toggle, .widget-button {
+  background-color: transparent;
+  border: 0px solid transparent;
+  padding: 0px;
+}
+
+.dropdown-toggle:focus, .widget-button:focus {
+  outline: 0;
+  -webkit-box-shadow: none;
+  -moz-box-shadow: none;
+  box-shadow: none;
+}
+
+.dropdown-toggle::after {
+  vertical-align: 0px;
+}
+
+.dropdown-menu {
+  right: 0;
+  left: auto;
+  margin: 12px 0px;
+  border: 0px solid transparent;
+  border-radius: 0px;
+  padding: 2px 0px;
+}
+
+.digi-gray .dropdown-toggle::after {
+  color: var(--digi-gray)
+}
+
+.digi-green .dropdown-toggle::after {
+  color: var(--digi-green)
+}
+
+.dropdown-item {
+  color: var(--digi-gray);
+}
+
+.dropdown-item:hover {
+  background-color: var(--digi-gray-transparent);
+  color: var(--digi-gray);
+}
+
+@media (min-width: 992px) {
+  .navbar-expand-lg > .nav-container {
+    -ms-flex-wrap: nowrap;
+    flex-wrap: nowrap;
+  }
+}
+.navbar > .nav-container {
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+  -ms-flex-align: center;
+  align-items: center;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+  width: 100%;
+  padding-right: 30px;
+  padding-left: 30px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.nav-right-container {
+  display: flex;
+}
+
+.vertical-separator {
+  border-left: 2px solid var(--digi-gray);
+  height: var(--nav-img-size);
+  margin-left: 20px;
+  margin-right: 20px;
+}
+
+#device-name {
+  height: var(--nav-img-size);
+  font-size: 20px;
+  color: var(--digi-gray);
+  font-weight: bold;
+  padding-top: 4px;
+  margin: 0px 10px;
+}
+
+.device-title-img {
+  padding-top: 6px;
+  width: 24px;
+}
+/* END NAVIGATION BAR */
+
+/* CENTRAL CONTAINER */
+#body-row {
+  margin-left:0;
+  margin-right:0;
+  height: calc( 100vh - var(--nav-img-size) - 20px ); /* height of the top toolbar or banner plus 20 px of padding */
+  display: flex;
+}
+
+.container-fluid {
+  padding: 15px 60px;
+  overflow: auto;
+  font-size: 15px;
+}
+/* END CENTRAL CONTAINER */
