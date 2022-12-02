@@ -12,25 +12,11 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-"""
-ASGI config for XBee Sensor Lab project.
+from django.urls import re_path
 
-It exposes the ASGI callable as a module-level variable named ``application``.
+from . import consumers
 
-For more information on this file, see
-https://docs.djangoproject.com/en/3.2/howto/deployment/asgi/
-"""
-
-import os
-import sensorlabcore.routing
-
-from channels.auth import AuthMiddlewareStack
-from channels.routing import ProtocolTypeRouter, URLRouter
-from django.core.asgi import get_asgi_application
-
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'sensorlabcommon.settings')
-
-application = ProtocolTypeRouter({
-    "http": get_asgi_application(),
-    "websocket": AuthMiddlewareStack(URLRouter(sensorlabcore.routing.websocket_urlpatterns))
-})
+websocket_urlpatterns = [
+    re_path(r'ws/datapoints/', consumers.DataPointConsumer.as_asgi()),
+    re_path(r'wss/datapoints/', consumers.DataPointConsumer.as_asgi()),
+]

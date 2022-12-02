@@ -56,6 +56,7 @@ INSTALLED_APPS = [
 
     'login',
     'sensorlabcore',
+    'channels',
 ]
 
 MIDDLEWARE = [
@@ -153,3 +154,28 @@ else:
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Channels
+ASGI_APPLICATION = 'sensorlabcommon.asgi.application'
+
+CHANNEL_LAYERS = {
+    "default": {
+        ### Method 1: Via redis lab
+        # 'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        # 'CONFIG': {
+        #     "hosts": [
+        #       'redis://h:<password>;@<redis Endpoint>:<port>'
+        #     ],
+        # },
+
+        ### Method 2: Via local Redis
+        # 'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        # 'CONFIG': {
+        #      "hosts": [('127.0.0.1', 6379)],
+        # },
+
+        ### Method 3: Via In-memory channel layer
+        ## WARNING!!! This is not recommended for production
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    },
+}

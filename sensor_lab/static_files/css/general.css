@@ -74,13 +74,8 @@ body {
 }
 
 /* NAVIGATION BAR */
-.banner-icon, .devices-list-icon {
+.banner-icon {
   height: var(--nav-img-size);
-}
-
-.devices-list-icon:hover {
-  opacity: 0.8;
-  color: var(--digi-green);
 }
 
 #banner-text {
@@ -94,6 +89,10 @@ body {
 .navbar-brand {
   padding-top: 2px;
   padding-bottom: 2px;
+}
+
+.navbar-button {
+  margin-left: 12px;
 }
 
 #topBar {
@@ -200,8 +199,378 @@ body {
 }
 
 .container-fluid {
-  padding: 15px 60px;
+  padding: 0px;
   overflow: auto;
-  font-size: 15px;
+  font-size: 16px;
+}
+
+.row {
+  position: absolute;
+  --bs-gutter-x: 0px;
+  width: 100%;
+  max-width: 1450px;
+  padding: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0px;
 }
 /* END CENTRAL CONTAINER */
+
+/* LOADING */
+.loading-wrapper {
+  position: relative;
+  height: 100%;
+  z-index: 1;
+  background:
+}
+/* END LOADING */
+
+/* POPUP */
+.popup {
+  z-index: 999;
+  position: absolute;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  padding: 20px 10px;
+  border-radius: 15px;
+  top: 50%;
+  left: 50%;
+  text-align: center;
+  max-width: 800px;
+}
+
+.popup i {
+  font-size: 1.3vw;
+}
+
+.popup .popup-item {
+  width: 70%;
+}
+
+.popup .popup-title, .popup .popup-text {
+  color: var(--digi-gray);
+}
+
+.popup .popup-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 15px;
+}
+
+.popup-error-reconnect {
+  top: 35%;
+  z-index: 999;
+  padding: 20px 30px;
+}
+/* END POPUP */
+
+/* ADD SENSOR DIALOG */
+.add-sensor-dialog {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: 999;
+  top: 0px;
+  visibility: hidden;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.add-sensor-header {
+  background-color: var(--digi-gray);
+  color: white;
+  padding: 5px 10px;
+  align-items: center;
+  font-size: 16px;
+}
+
+.add-sensor-header-button {
+  margin-top: 4px;
+  float: right;
+  cursor: pointer;
+}
+
+.add-sensor-header-button:hover {
+  color: var(--digi-green);
+}
+
+.add-sensor-container {
+  background-color: white;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 70%;
+  min-height: 200px;
+  max-width: 500px;
+  -webkit-box-shadow: 0 10px 30px 0 rgb(0 0 0 / 40%);
+  box-shadow: 0 10px 30px 0 rgb(0 0 0 / 40%);
+}
+
+.add-sensor-label {
+  position: relative;
+  padding-bottom: 10px;
+  padding-top: 10px;
+  padding-right: 10px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  left: 7.5%;
+  width: 85%;
+}
+
+.add-sensor-input {
+  position: relative;
+  padding: 2px 5px !important;
+  text-align: left !important;
+  left: 7.5%;
+  font-size: 16px !important;
+  margin-bottom: 15px;
+  -webkit-transition: none !important;
+  -moz-transition: none !important;
+  -ms-transition: none !important;
+  -o-transition: none !important;
+  transition: none !important;
+}
+
+.add-sensor-error {
+  color: red;
+  font-size: 12px;
+  font-style: italic;
+  margin-bottom: 5px;
+  padding-right: 10px;
+  position: relative;
+  left: 7.5%;
+  width: 85%;
+}
+
+.add-sensor-button {
+  height: 35px;
+  width: 50%;
+  color: white;
+  background-color: var(--digi-gray);
+  font-weight: bold;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  bottom: 0px;
+  margin: 0 auto;
+  margin-bottom: 15px;
+  cursor: pointer;
+}
+
+.add-sensor-button:hover {
+  background-color: var(--digi-green);
+}
+
+.add-sensor-button-disabled {
+  cursor: default;
+  color: white;
+  background-color: #c3c3c3 !important;
+  pointer-events: none;
+}
+
+.add-sensor-field-error {
+  background-color: #f3b1b1 !important;
+}
+/* END ADD SENSOR DIALOG */
+
+/* XBEE SENSOR */
+.xbee-sensor-box {
+  position: relative;
+  padding: 10px;
+}
+
+.xbee-sensor {
+  position: relative;
+  padding: 5px;
+  background-color: white;
+  border-radius: 10px 10px 10px 10px;
+  -webkit-box-shadow: 0 5px 15px 0 rgb(0 0 0 / 30%);
+  box-shadow: 0 5px 15px 0 rgb(0 0 0 / 30%);
+  height: 300px;
+}
+
+.xbee-sensor-prompt {
+  border: 5px dashed var(--digi-gray);
+  background: transparent;
+  cursor: pointer;
+  stroke-dasharray = 6 14;
+}
+
+.xbee-sensor-prompt:hover {
+  opacity: 0.5;
+}
+
+.xbee-sensor-prompt-image {
+  width: 100%;
+  font-size: 80px;
+  color: var(--digi-gray);
+  text-align: center;
+  padding: 15px;
+}
+
+.xbee-sensor-prompt-text {
+  width: 100%;
+  font-size: 32px;
+  color: var(--digi-gray);
+  text-align: center;
+  padding: 15px;
+}
+
+.xbee-sensor-loading {
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  text-align: center;
+  font-size: 24px;
+  color: var(--digi-gray);
+  padding-top: 20px;
+  background: rgb(255, 255, 255, 0.9);
+  border-radius: 10px 10px 10px 10px;
+}
+
+.xbee-sensor-loading-hide {
+  display: none;
+}
+
+.xbee-sensor-header {
+  position: relative;
+  padding-bottom: 2px;
+  border-bottom: 2px solid var(--digi-green);
+  height: 10%;
+}
+
+.xbee-sensor-title {
+  color: var(--digi-gray);
+  font-size: 16px;
+  font-weight: bold;
+  text-align: center;
+  padding: 0px 15px;
+}
+
+.xbee-sensor-button {
+  color: var(--digi-gray);
+  position: absolute;
+  top: 3px;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.xbee-sensor-button:hover {
+  color: var(--digi-green);
+}
+
+.xbee-sensor-button-left {
+  margin-left: 8px;
+  float: left;
+}
+
+.xbee-sensor-button-right {
+  right: 10px;
+}
+
+.xbee-sensor-widget {
+  position: relative;
+  padding: 10px;
+  height: 90%;
+}
+
+.sensor-widget-image {
+  text-align: center;
+}
+
+.sensor-widget-image img {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.sensor-widget-value {
+  position: relative;
+  height: 100%;
+  text-align: right;
+  color: var(--digi-gray);
+}
+
+.sensor-widget-value-green {
+  color: var(--digi-green);
+}
+
+.sensor-widget-value span {
+  line-height: 100%;
+  position: absolute;
+  right: 5px;
+  bottom: 0px;
+}
+
+.sensor-widget-units {
+  position: relative;
+  height: 100%;
+  text-align: left;
+  color: var(--digi-gray);
+}
+
+.sensor-widget-units span {
+  line-height: 100%;
+  position: absolute;
+  left: 0;
+  bottom: 0px;
+}
+
+.sensor-widget-h {
+  height: 100%;
+  position: relative;
+  display: flex;
+}
+
+.sensor-widget-image-h {
+  width: 40%;
+}
+
+.sensor-widget-value-h {
+  width: 50%;
+}
+
+.sensor-widget-value-h span {
+  bottom: 10px;
+}
+
+.sensor-widget-units-h {
+  width: 10%;
+}
+
+.sensor-widget-units-h span {
+  bottom: 13px;
+}
+
+.sensor-widget-v {
+  height: 100%;
+  position: relative;
+}
+
+.sensor-widget-image-v {
+  height: 60%;
+}
+
+.sensor-widget-data-v {
+  height: 40%;
+  display: flex;
+}
+
+.sensor-widget-value-v {
+  width: 75%;
+}
+
+.sensor-widget-value-v span {
+  bottom: 0px;
+}
+
+.sensor-widget-units-v {
+  width: 25%;
+}
+
+.sensor-widget-units-v span {
+  bottom: 3px;
+}
+/* END XBEE SENSOR */

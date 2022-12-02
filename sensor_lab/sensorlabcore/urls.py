@@ -17,5 +17,8 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('', views.dashboard, name='index')
+    path('', views.dashboard, name='index'),
+    path('ajax/get_sensor_types', views.get_sensor_types, name='get_sensor_types'),
+    path('ajax/get_devices', views.get_devices, name='get_devices'),
+    path('ajax/get_data_streams', views.get_data_streams, name='get_data_streams')
 ]
