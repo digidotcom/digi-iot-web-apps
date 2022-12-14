@@ -1,0 +1,77 @@
+{% extends "base_logged_in.html" %}
+{% load static %}
+{% block title %}
+Digi XBee Sensor Lab - Dashboard
+{% endblock %}
+{% block nav_widgets %}
+        <button id="add_sensor_button" class="btn widget-button navbar-button" type="button" value="0" onclick="showAddSensorDialog(true);">
+            <img src="{% static 'images/add_gray.png' %}" id="add_icon" class="banner-icon" data-toggle="tooltip" data-placement="bottom" title="Add a new XBee sensor">
+        </button>
+        <button id="refresh_sensors_button" class="btn widget-button navbar-button" type="button" value="0" onclick="refreshSensors();">
+            <img src="{% static 'images/refresh_gray.png' %}" id="refresh_icon" class="banner-icon" data-toggle="tooltip" data-placement="bottom" title="Refresh XBee sensors">
+        </button>
+        <div class="vertical-separator"></div>
+{% endblock %}
+{% block page_content %}
+    <div id="loading_wrapper" class="loading-wrapper element-grayed">
+        <div id="dashboard" class="row justify-content-lg-left dashboard">
+            <div id="xbee_sensor_prompt" class="col-sm-6 col-md-6 col-lg-4 col-xl-3 xbee-sensor-box">
+                <div class="xbee-sensor xbee-sensor-prompt" onclick="showAddSensorDialog(true)">
+                    <div class="fas fa-plus xbee-sensor-prompt-image"></div>
+                    <div class="xbee-sensor-prompt-text">Click here to add a new XBee sensor</div>
+                </div>
+            </div>
+        </div>
+        <div id="add_sensor_dialog" class="add-sensor-dialog">
+            <div class="add-sensor-container">
+                <div class="add-sensor-header">
+                    <span>Add a new XBee sensor</span>
+                    <div class="fas fa-window-close fa-lg add-sensor-header-button" onclick="closeSensorDialog()"></div>
+                </div>
+                <div class="add-sensor-label">Sensor name:</div>
+                <input id="add_sensor_name" class="add-sensor-input" onInput="validateDialog()" type="text"/>
+                <div class="add-sensor-label">XBee device the sensor is attached to:</div>
+                <select id="add_sensor_device" class="add-sensor-input" onChange="validateDialog()"></select>
+                <div class="add-sensor-label">Sensor type:</div>
+                <select id="add_sensor_type" class="add-sensor-input" onChange="validateDialog()"></select>
+                <div id="add_sensor_error" class="add-sensor-error"></div>
+                <div id="add_sensor_button_dialog" class="add-sensor-button add-sensor-button-disabled" onclick="addSensor()">Add sensor</div>
+            </div>
+        </div>
+    </div>
+    <div id="loading_popup" class="popup popup-loading shadow">
+        <img class="popup-item" src="{% static 'images/loading.gif' %}" alt="Loading..." />
+        <div id="loading_popup_message" class="popup-text">Loading devices...</div>
+    </div>
+{% endblock %}
+{% block javascript %}
+    <!-- Local JS files and functions -->
+    <script>
+        $( document ).ready(function() {
+            showLoadingPopup(false);
+            applyFontFitToSensors();
+            $("#add_sensor_button").on({
+                "mouseover" : function() {
+                    $("#add_icon").attr("src", "{% static 'images/add_green.png' %}");
+                },
+                "mouseout" : function() {
+                    $("#add_icon").attr("src", "{% static 'images/add_gray.png' %}");
+                },
+                "click" : function() {
+                    $("#add_icon").attr("src", "{% static 'images/add_gray.png' %}");
+                }
+            });
+            $("#refresh_sensors_button").on({
+                "mouseover" : function() {
+                    $("#refresh_icon").attr("src", "{% static 'images/refresh_green.png' %}");
+                },
+                "mouseout" : function() {
+                    $("#refresh_icon").attr("src", "{% static 'images/refresh_gray.png' %}");
+                },
+                "click" : function() {
+                    $("#refresh_icon").attr("src", "{% static 'images/refresh_gray.png' %}");
+                }
+            });
+        });
+    </script>
+{% endblock %}
