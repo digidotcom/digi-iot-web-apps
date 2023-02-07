@@ -339,10 +339,8 @@ def get_device_cloud_session(session):
     if user is None:
         return None
     user_serialized = DeviceCloudUser.from_json(json.loads(user))
-    # return DeviceCloud(user_serialized.username, user_serialized.password,
-    #                    base_url=user_serialized.server)
     return DeviceCloud(user_serialized.username, user_serialized.password,
-                       base_url="https://devicecloud.digi.com")
+                       base_url=user_serialized.server)
 
 
 def check_ajax_request(request):
