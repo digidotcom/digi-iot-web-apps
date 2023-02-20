@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, Digi International Inc.
+ * Copyright 2022,2023, Digi International Inc.
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -347,7 +347,7 @@ function processTerminateCLISessionResponse(response) {
 function subscribeCLISession(sessionID) {
     // Create the web socket.
     var socketPrefix = window.location.protocol == "https:" ? "wss" : "ws";
-    cliSocket = new WebSocket(socketPrefix + "://" + window.location.host + "/ws/cli/" + device.getDeviceID() + "/" + sessionID);
+    cliSocket = new WebSocket(socketPrefix + "://" + window.location.host + getAppPath() + "ws/cli/" + device.getDeviceID() + "/" + sessionID);
     // Define the callback to be notified when data is received in the web socket.
     cliSocket.onmessage = function(e) {
         if (isDashboardShowing() && term != null && term != "undefined") {

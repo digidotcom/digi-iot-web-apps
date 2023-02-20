@@ -29,10 +29,11 @@
     <script type="text/javascript" src="{% static 'js/jquery.matchHeight-min.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/toastr.min.js' %}"></script>
 </head>
+{% load custom_tags %}
 <body>
     <nav id="topBar" class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
         <div class="nav-container">
-            <a id="banner-link" class="navbar-brand align-middle" href="{% url 'index' %}">
+            <a id="banner-link" class="navbar-brand align-middle" href="{% root_url %}">
                 <div class="d-flex align-items-baseline">
                     <img id="banner-logo" class="banner-icon" src="{% static 'images/Digi_logo_banner.png' %}">
                     <p id="banner-text">ConnectCore Demo</p>

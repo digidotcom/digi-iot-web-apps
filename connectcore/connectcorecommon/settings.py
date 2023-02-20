@@ -1,4 +1,4 @@
-# Copyright 2022, Digi International Inc.
+# Copyright 2022,2023, Digi International Inc.
 #
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -31,6 +31,9 @@ PRODUCTION_RUN = os.getenv('DJANGO_PRODUCTION_RUN', False)
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
 
+# Build URL root dir.
+SUBDIR = os.getenv('SUBDIR', None)
+ROOT_DIR = "/" if not SUBDIR else "/%s/" % SUBDIR
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
@@ -96,12 +99,14 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'django.template.context_processors.media',
             ],
+            'libraries': {
+                'custom_tags': 'templatetags.custom_tags',
+            }
         },
     },
 ]
 
 WSGI_APPLICATION = 'connectcorecommon.wsgi.application'
-
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
@@ -143,7 +148,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
 
@@ -157,18 +161,17 @@ USE_L10N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
-STATIC_URL = '/static/'
+STATIC_URL = '%sstatic/' % ROOT_DIR
 
 STATIC_ROOT = os.path.join(BASE_DIR, "static/")
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static_files"),
 ]
 
-LOGIN_URL = '/access/login/'
+LOGIN_URL = '%saccess/login/' % ROOT_DIR
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # Expire when the browser closes
 SESSION_COOKIE_AGE = 10 * 60  # Expire after 10 minutes

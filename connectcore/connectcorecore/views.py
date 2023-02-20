@@ -1,4 +1,4 @@
-# Copyright 2022, Digi International Inc.
+# Copyright 2022,2023, Digi International Inc.
 #
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -74,10 +74,13 @@ STREAM_MEMORY = "system_monitor/used_memory"
 
 TITLE_NO_DEVICES = "No ConnectCore devices found."
 
+SUBDIR = os.getenv('SUBDIR', None)
+ROOT_DIR = "/" if not SUBDIR else "/%s/" % SUBDIR
+
 
 def dashboard(request):
     if not request_has_params(request):
-        return redirect("/")
+        return redirect(ROOT_DIR)
 
     if is_authenticated(request):
         if request.method == "GET":
@@ -89,7 +92,7 @@ def dashboard(request):
 
 def network(request):
     if not request_has_params(request):
-        return redirect("/")
+        return redirect(ROOT_DIR)
 
     if is_authenticated(request):
         if request.method == "GET":
@@ -101,7 +104,7 @@ def network(request):
 
 def management(request):
     if not request_has_params(request):
-        return redirect("/")
+        return redirect(ROOT_DIR)
 
     if is_authenticated(request):
         if request.method == "GET":
@@ -113,7 +116,7 @@ def management(request):
 
 def history(request):
     if not request_has_params(request):
-        return redirect("/")
+        return redirect(ROOT_DIR)
 
     if is_authenticated(request):
         if request.method == "GET":
@@ -147,14 +150,14 @@ def verify_parameters(request):
     if is_authenticated(request):
         cc_devices = get_cc_devices(request)
         if len(cc_devices) == 0:
-            return JsonResponse({ID_REDIRECT: "/"})
+            return JsonResponse({ID_REDIRECT: ROOT_DIR})
 
         # Get the device ID and device name from the POST request.
         data = json.loads(request.body.decode(request.encoding))
         device_id = data[ID_DEVICE_ID]
 
         if device_id is None or device_id == "":
-            return JsonResponse({ID_REDIRECT: "/"})
+            return JsonResponse({ID_REDIRECT: ROOT_DIR})
 
         # Find out if the supplied parameters correspond to an actual device, if
         # not redirect to the devices page.
@@ -165,7 +168,7 @@ def verify_parameters(request):
                 break
 
         if not found:
-            return JsonResponse({ID_REDIRECT: "/"})
+            return JsonResponse({ID_REDIRECT: ROOT_DIR})
         return JsonResponse({ID_VALID: True}, status=200)
     else:
         return redirect_login(request)
@@ -181,9 +184,9 @@ def redirect_login(request):
     Returns:
         An `HttpResponseRedirect` to the login page.
     """
-    url = "/access/login"
+    url = "%saccess/login/" % ROOT_DIR
     if request.path is not None and request.GET is not None and len(request.GET) > 0:
-        url += "?dest={}".format(request.path.replace("/", ""))
+        url += "?dest={}".format(request.path)
         for arg in request.GET:
             url += "&{}={}".format(arg, request.GET[arg])
     return redirect(url)

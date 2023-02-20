@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, Digi International Inc.
+ * Copyright 2022,2023, Digi International Inc.
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -62,7 +62,7 @@ const TEMPLATE_DEVICE_LIST_ENTRY = "" +
     "    <table>" +
     "        <thead>" +
     "            <tr>" +
-    "                <td rowspan='2'><img class='device-list-entry-status' src='/static/images/@@STATUS_IMAGE@@'></td>" +
+    "                <td rowspan='2'><img class='device-list-entry-status' src=" + getPostURL('static/images/@@STATUS_IMAGE@@') + "></td>" +
     "                <td><span class='device-list-entry-name'>@@TYPE@@</span></td>" +
     "            </tr>" +
     "            <tr>" +
@@ -89,7 +89,7 @@ function listDevices() {
     showLoadingPopup(true, MESSAGE_LOADING_DEVICES);
     // Send the request.
     $.post(
-        "../ajax/get_devices",
+        getPostURL("ajax/get_devices"),
         function(data) {
             // Hide the loading panel.
             showLoadingPopup(false);
@@ -198,7 +198,7 @@ function openSelectedDevice() {
     // Show loading dialog.
     showLoadingPopup(true);
     // Navigate to device dashboard page.
-    window.open("../dashboard/?device_id=" + selectedDevice[ID_ID] + "&device_name=" + selectedDevice[ID_TYPE], "_self");
+    window.open(getPostURL("dashboard/?device_id=" + selectedDevice[ID_ID] + "&device_name=" + selectedDevice[ID_TYPE]), "_self");
 }
 
 // Opens the "Add device" dialog.
@@ -305,7 +305,7 @@ function registerDevice(provisionValue, provisionType) {
     showLoadingPopup(true, MESSAGE_REGISTERING_DEVICE);
     // Send the request.
     $.post(
-        "../ajax/register_device",
+        getPostURL("ajax/register_device"),
         JSON.stringify({
             "provision_value": provisionValue,
             "provision_type": provisionType
@@ -339,6 +339,15 @@ function processRegisterDeviceAnswer(answer) {
     } else {
         // Update the device list.
         listDevices();
+    }
+}
+
+// Retrieves the post URL to use.
+function getPostURL(postURL) {
+    if (location.pathname.includes("/devices")) {
+        return "../" + postURL;
+    } else {
+        return postURL;
     }
 }
 

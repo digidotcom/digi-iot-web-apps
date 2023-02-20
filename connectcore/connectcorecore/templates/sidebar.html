@@ -106,7 +106,7 @@
         </div>
         <div class="vertical-separator"></div>
         <div>
-            <button id="devices-list-button" class="btn widget-button" type="button" value="0" onclick="window.open('/','_self');">
+            <button id="devices-list-button" class="btn widget-button" type="button" value="0" onclick="window.open('../','_self');">
                 <img src="{% static 'images/devices_list_gray.png' %}" id="devices-list-icon" class="devices-list-icon" data-toggle="tooltip" data-placement="bottom" title="Open devices list">
             </button>
             <button id="data_usage_button" class="btn widget-button" type="button" value="0" onclick="toggleDataUsagePanel();">
@@ -118,7 +118,7 @@
 {% block sidebar_content %}
             <ul id="sections" data-pjax class="list-group">
                 <li>
-                    <a data-pjax href="/dashboard/" class="list-group-item list-group-item-action d-flex align-items-center">
+                    <a data-pjax href="../dashboard/" class="list-group-item list-group-item-action d-flex align-items-center">
                         <div class="d-flex w-100 justify-content-start align-items-center">
                             <span class="digi-menu-icon fas fa-tachometer-alt fa-fw fa-lg mr-3"></span>
                             <span class="menu-collapsed">Dashboard</span>
@@ -126,7 +126,7 @@
                     </a>
                 </li>
                 <li>
-                    <a data-pjax href="/history/" class="list-group-item list-group-item-action d-flex align-items-center">
+                    <a data-pjax href="../history/" class="list-group-item list-group-item-action d-flex align-items-center">
                         <div class="d-flex w-100 justify-content-start align-items-center">
                             <span class="digi-menu-icon fas fa-chart-area fa-fw fa-lg mr-3"></span>
                             <span class="menu-collapsed">Historic data</span>
@@ -134,7 +134,7 @@
                     </a>
                 </li>
                 <li>
-                    <a data-pjax href="/network/" class="list-group-item list-group-item-action d-flex align-items-center">
+                    <a data-pjax href="../network/" class="list-group-item list-group-item-action d-flex align-items-center">
                         <div class="d-flex w-100 justify-content-start align-items-center">
                             <span class="digi-menu-icon fas fa-network-wired fa-fw fa-lg mr-3"></span>
                             <span class="menu-collapsed">Network</span>
@@ -142,7 +142,7 @@
                     </a>
                 </li>
                 <li>
-                    <a data-pjax href="/management/" class="list-group-item list-group-item-action d-flex align-items-center">
+                    <a data-pjax href="../management/" class="list-group-item list-group-item-action d-flex align-items-center">
                         <div class="d-flex w-100 justify-content-start align-items-center">
                             <span class="digi-menu-icon fas fa-cog fa-fw fa-lg mr-3"></span>
                             <span class="menu-collapsed">Management</span>
@@ -154,7 +154,7 @@
 
 {% block page_content %}
         <div id="loading">
-            <img id="loading-image" src="/static/images/loading.gif" alt="Loading..." />
+            <img id="loading-image" src="{% static 'images/loading.gif' %}" alt="Loading..." />
         </div>
         <div id="pjax-container">
             {% block inner_content %}{% endblock %}

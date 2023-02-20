@@ -1,4 +1,4 @@
-# Copyright 2022,2023, Digi International Inc.
+# Copyright 2023, Digi International Inc.
 #
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -14,17 +14,22 @@
 
 import os
 
-from django.urls import re_path
+from django import template
 
-from . import consumers
-
+# Constants.
 # Build URL root dir.
 SUBDIR = os.getenv('SUBDIR', None)
-ROOT_DIR = "" if not SUBDIR else "%s/" % SUBDIR
+ROOT_DIR = "/" if not SUBDIR else "/%s/" % SUBDIR
 
-websocket_urlpatterns = [
-    re_path(r'%sws/cli/(?P<device_id>[\w-]+)/(?P<cli_session_id>[\w-]+)$' % ROOT_DIR, consumers.WsCLIConsumer.as_asgi()),
-    re_path(r'%sws/datapoints/(?P<device_id>[\w-]+)$' % ROOT_DIR, consumers.DataPointConsumer.as_asgi()),
-    re_path(r'%sws/file_upload_progress/(?P<file_name>[\w\.-]+)$' % ROOT_DIR, consumers.FileUploadProgressConsumer.as_asgi()),
-    re_path(r'%sws/device/(?P<device_id>[\w-]+)$' % ROOT_DIR, consumers.DeviceConsumer.as_asgi()),
-]
+# Variables.
+register = template.Library()
+
+
+@register.simple_tag
+def root_url():
+    return ROOT_DIR
+
+
+@register.simple_tag
+def logout_url():
+    return f"{ROOT_DIR}access/logout/"

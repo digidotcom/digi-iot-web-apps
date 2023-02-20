@@ -1,4 +1,4 @@
-# Copyright 2022, Digi International Inc.
+# Copyright 2022,2023, Digi International Inc.
 #
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -27,13 +27,18 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+import os
+
 from django.contrib import admin
 from django.urls import include, path
 
+SUBDIR = os.getenv('SUBDIR', None)
+ROOT_DIR = "" if not SUBDIR else "%s/" % SUBDIR
+
 urlpatterns = [
-    path("access/", include("login.urls")),
+    path("%saccess/" % ROOT_DIR, include("login.urls")),
 
-    path("", include("connectcorecore.urls")),
+    path("%s" % ROOT_DIR, include("connectcorecore.urls")),
 
-    path("admin/", admin.site.urls),
+    path("%sadmin/" % ROOT_DIR, admin.site.urls),
 ]

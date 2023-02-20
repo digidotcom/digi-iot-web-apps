@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, Digi International Inc.
+ * Copyright 2022,2023, Digi International Inc.
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -197,9 +197,22 @@ function showPopup(backElementID, frontElementID, visible) {
     }
 }
 
+// Returns the application path.
+function getAppPath() {
+    var path = "/";
+    var pathArray = location.pathname.split('/');
+    if (pathArray.length <= 3) {
+        return path;
+    }
+    for (var i = 1; i < pathArray.length - 2; i++) {  // -2 -> current path and final slash.
+        path += pathArray[i] + "/"
+    }
+    return path;
+}
+
 // Redirects to the login page.
 function redirectToLogin() {
-    var url = "/access/login?dest=" + window.location.pathname.replaceAll("/", "");
+    var url = getAppPath() + "access/login?dest=" + window.location.pathname;
     var params = new URLSearchParams(window.location.search);
     for (let param of params)
         url += "&" + param[0] + "=" + param[1];

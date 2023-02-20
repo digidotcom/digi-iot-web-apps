@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, Digi International Inc.
+ * Copyright 2022,2023, Digi International Inc.
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -558,7 +558,7 @@ function processUploadFirmwareFileResponse(response) {
 function subscribeUploadFileProgress(fileName) {
     // Create the web socket.
     var socketPrefix = window.location.protocol == "https:" ? "wss" : "ws";
-    uploadProgressSocket = new WebSocket(socketPrefix + "://" + window.location.host + "/ws/file_upload_progress/" + fileName);
+    uploadProgressSocket = new WebSocket(socketPrefix + "://" + window.location.host + getAppPath() +  "ws/file_upload_progress/" + fileName);
     // Define the callback to be notified when firmware update progress is received.
     uploadProgressSocket.onmessage = function(e) {
         // Process only in the management page.

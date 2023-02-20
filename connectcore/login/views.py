@@ -1,4 +1,4 @@
-# Copyright 2022, Digi International Inc.
+# Copyright 2022,2023, Digi International Inc.
 #
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -12,6 +12,8 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
+import os
+
 from devicecloud import DeviceCloud
 from django.shortcuts import render, redirect
 
@@ -19,6 +21,9 @@ from login.auth import DeviceCloudUser
 from login.models import CustomAuthForm
 
 PARAM_DEST = "dest"
+
+SUBDIR = os.getenv('SUBDIR', None)
+ROOT_DIR = "/" if not SUBDIR else "/%s/" % SUBDIR
 
 
 def login(request):
@@ -53,7 +58,7 @@ def logout(request):
     # End session.
     if request.session.get("user") is None:
         # Redirect to init page.
-        return redirect("/access/login")
+        return redirect("%saccess/login/" % ROOT_DIR)
 
     # Redirect to logout page.
     request.session["user"] = None
@@ -71,9 +76,10 @@ def redirect_dest(request):
     Returns:
         An `HttpResponseRedirect` to the destination page.
     """
-    url = "/"
+    url = ROOT_DIR
     if PARAM_DEST in request.GET:
-        url += "{}/?".format(request.GET[PARAM_DEST])
+        url += "{}/?".format((request.GET[PARAM_DEST].replace(ROOT_DIR, "")
+                             if ROOT_DIR is not "/" else request.GET[PARAM_DEST]).replace("/", ""))
         args = ""
         for arg in request.GET:
             if arg != PARAM_DEST:

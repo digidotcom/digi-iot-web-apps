@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, Digi International Inc.
+ * Copyright 2022,2023, Digi International Inc.
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -76,7 +76,7 @@ function drawTemperatureChart(refresh=false, showProgress=false) {
         if (showProgress)
             $("#" + ID_TEMPERATURE_CHART_LOADING).show();
         $.post(
-            "/ajax/history_temperature",
+            "../ajax/history_temperature",
             JSON.stringify({
                 "device_id": getDeviceID(),
                 "interval": temperatureInterval
@@ -110,7 +110,7 @@ function drawCPUChart(refresh=false, showProgress=false) {
         if (showProgress)
             $("#" + ID_CPU_CHART_LOADING).show();
         $.post(
-            "/ajax/history_cpu",
+            "../ajax/history_cpu",
             JSON.stringify({
                 "device_id": getDeviceID(),
                 "interval": cpuInterval
@@ -144,7 +144,7 @@ function drawMemoryChart(refresh=false, showProgress=false) {
         if (showProgress)
             $("#" + ID_MEMORY_CHART_LOADING).show();
         $.post(
-            "/ajax/history_memory",
+            "../ajax/history_memory",
             JSON.stringify({
                 "device_id": getDeviceID(),
                 "interval": memoryInterval

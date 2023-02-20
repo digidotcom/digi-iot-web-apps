@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% load custom_tags %}
 
 {% block profile %}
         <div class="nav-right-container">
@@ -9,7 +10,7 @@
                     <img id="profile-logo" class="banner-icon" src="{% static 'images/profile_gray.png' %}">
                 </button>
                 <div class="dropdown-menu shadow-sm" aria-labelledby="profileMenuButton">
-                    <a class="dropdown-item" href="{% url 'logout' %}">Log out</a>
+                    <a class="dropdown-item" href="{% logout_url %}">Log out</a>
                 </div>
             </div>
         </div>
