@@ -1126,6 +1126,8 @@ function changeSampleRate() {
 // Subscribes to any datapoint change.
 function subscribeDataPoints() {
     // Sanity checks.
+    if (!isDashboardShowing())
+        return;
     if (dataPointsSocket != null)
         return;
     // Create the web socket.
@@ -1133,13 +1135,30 @@ function subscribeDataPoints() {
     dataPointsSocket = new WebSocket(socketPrefix + "://" + window.location.host + getAppPath() + "ws/datapoints/" + device.getDeviceID());
     // Define the callback to be notified when data is received in the web socket.
     dataPointsSocket.onmessage = function(e) {
-        if (isDashboardShowing()) {
-            // Initialize variables.
-            var event = JSON.parse(e.data);
-            var stream = event[ID_STREAM];
-            var value = event[ID_VALUE];
-            // Update the datapoint value.
-            updateDataPointValue(stream, value);
+        if (!isDashboardShowing())
+            return;
+
+        // Initialize variables.
+        var event = JSON.parse(e.data);
+        // Check if the message contains an error.
+        if (event[ID_ERROR] != null) {
+            toastr.error(event[ID_ERROR]);
+            return;
+        }
+        var stream = event[ID_STREAM];
+        var value = event[ID_VALUE];
+        // Update the datapoint value.
+        updateDataPointValue(stream, value);
+    };
+    // Once socket connection is established, subscribe monitor.
+    dataPointsSocket.onopen = function(e) {
+        dataPointsSocket.send("Subscribe monitor");
+    }
+    // If socket is closed unexpectedly, reconnect.
+    dataPointsSocket.onclose = function(event) {
+        if (!event.wasClean) {
+            dataPointsSocket = null;
+            subscribeDataPoints();
         }
     };
 }

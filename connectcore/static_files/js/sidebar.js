@@ -223,6 +223,10 @@ function subscribeDeviceMonitor() {
     deviceSocket.onmessage = function(e) {
         // Retrieve new status.
         var event = JSON.parse(e.data);
+        if (event[ID_ERROR] != null) {
+            toastr.error(event[ID_ERROR]);
+            return;
+        }
         if (event[ID_STATUS] != null && event[ID_STATUS] != "undefined") {
             if (event[ID_STATUS] == "connected")
                 deviceConnectionStatus = true;
@@ -230,6 +234,17 @@ function subscribeDeviceMonitor() {
                 deviceConnectionStatus = false;
             // Fire connection status changed event.
             connection_status_changed();
+        }
+    };
+    // Once socket connection is established, subscribe monitor.
+    deviceSocket.onopen = function(e) {
+        deviceSocket.send("Subscribe monitor");
+    }
+    // If socket is closed unexpectedly, reconnect.
+    deviceSocket.onclose = function(event) {
+        if (!event.wasClean) {
+            deviceSocket = null;
+            subscribeDeviceMonitor();
         }
     };
 }

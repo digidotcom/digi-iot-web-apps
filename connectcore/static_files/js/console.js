@@ -350,43 +350,55 @@ function subscribeCLISession(sessionID) {
     cliSocket = new WebSocket(socketPrefix + "://" + window.location.host + getAppPath() + "ws/cli/" + device.getDeviceID() + "/" + sessionID);
     // Define the callback to be notified when data is received in the web socket.
     cliSocket.onmessage = function(e) {
-        if (isDashboardShowing() && term != null && term != "undefined") {
-            var event = JSON.parse(e.data);
-            var type = event[ID_TYPE];
-            switch (type) {
-                case CLI_MESSAGE_TYPE_DATA:
-                    var data = event[ID_DATA];
-                    var decodedData = atob(data);
-                    if (isConsoleShowing())
-                        term.write(decodedData);
-                    break;
-                case CLI_MESSAGE_TYPE_TERMINATE:
-                case CLI_MESSAGE_TYPE_ERROR:
-                    cliSessionID = null;
-                    if (cliSocket != null && cliSocket != "undefined")
-                        cliSocket.close();
-                    // Hide the loading status.
-                    showConsoleLoading(false);
-                    // Check specific type.
-                    var error = null;
-                    if (type == CLI_MESSAGE_TYPE_TERMINATE && isConsoleShowing())
-                        error = ERROR_SESSION_CLOSED_REMOTELY;
-                    else if (type == CLI_MESSAGE_TYPE_ERROR)
-                        error = event[ID_ERROR];
-                    if (isConsoleShowing())
-                        showConsoleErrorReconnect(true, error);
-                    if (error != null && (type == CLI_MESSAGE_TYPE_ERROR ||
-                            (type == CLI_MESSAGE_TYPE_TERMINATE && isConsoleShowing())))
-                        toastr.error(error);
-                    // Un-flag session terminating.
-                    cliSessionTerminating = false;
-                    window.clearTimeout(cliTerminateFlagTimer);
-                    break;
-                case CLI_MESSAGE_TYPE_START:
-                    // Hide the loading status.
-                    showConsoleLoading(false);
-                    break;
-            }
+        if (!isDashboardShowing() || term == null || term == "undefined")
+            return;
+
+        var event = JSON.parse(e.data);
+        var type = event[ID_TYPE];
+        switch (type) {
+            case CLI_MESSAGE_TYPE_DATA:
+                var data = event[ID_DATA];
+                var decodedData = atob(data);
+                if (isConsoleShowing())
+                    term.write(decodedData);
+                break;
+            case CLI_MESSAGE_TYPE_TERMINATE:
+            case CLI_MESSAGE_TYPE_ERROR:
+                cliSessionID = null;
+                if (cliSocket != null && cliSocket != "undefined")
+                    cliSocket.close();
+                // Hide the loading status.
+                showConsoleLoading(false);
+                // Check specific type.
+                var error = null;
+                if (type == CLI_MESSAGE_TYPE_TERMINATE && isConsoleShowing())
+                    error = ERROR_SESSION_CLOSED_REMOTELY;
+                else if (type == CLI_MESSAGE_TYPE_ERROR)
+                    error = event[ID_ERROR];
+                if (isConsoleShowing())
+                    showConsoleErrorReconnect(true, error);
+                if (error != null && (type == CLI_MESSAGE_TYPE_ERROR ||
+                        (type == CLI_MESSAGE_TYPE_TERMINATE && isConsoleShowing())))
+                    toastr.error(error);
+                // Un-flag session terminating.
+                cliSessionTerminating = false;
+                window.clearTimeout(cliTerminateFlagTimer);
+                break;
+            case CLI_MESSAGE_TYPE_START:
+                // Hide the loading status.
+                showConsoleLoading(false);
+                break;
+        }
+    };
+    // Once socket connection is established, subscribe monitor.
+    cliSocket.onopen = function(e) {
+        cliSocket.send("Subscribe monitor");
+    }
+    // If socket is closed unexpectedly, reconnect.
+    cliSocket.onclose = function(event) {
+        if (!event.wasClean) {
+            cliSocket = null;
+            subscribeCLISession();
         }
     };
 }

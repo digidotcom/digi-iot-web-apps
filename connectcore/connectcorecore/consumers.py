@@ -12,6 +12,8 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
+import time
+
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
 
@@ -26,6 +28,8 @@ GROUP_UPLOAD_PROGRESS = "upload_progress.{}"
 
 ID_ERROR = "error"
 ID_MONITOR_ID = "monitor_id"
+
+REGISTER_MONITOR_RETRIES = 5
 
 TEMPLATE_ERROR = "{" \
                  "  \"type\": \"error\"," \
@@ -43,28 +47,45 @@ class WsCLIConsumer(WebsocketConsumer):
     def __init__(self):
         WebsocketConsumer.__init__(self)
         self._monitor_id = -1
+        self._device_id = -1
         self._session_id = -1
 
     def connect(self):
         session = self.scope["session"]
-        device_id = self.scope["url_route"]["kwargs"]["device_id"]
+        self._device_id = self.scope["url_route"]["kwargs"]["device_id"]
         self._session_id = self.scope["url_route"]["kwargs"]["cli_session_id"]
         # Sanity checks.
-        if session is None or device_id is None or self._session_id is None:
+        if session is None or self._device_id is None or self._session_id is None:
             return
         # Accept the connection.
         self.accept()
+
+    def receive(self, text_data=None, bytes_data=None):
+        if self._monitor_id != -1:
+            return
+
         # Subscribe CLI monitor.
-        answer = drm_requests.register_cli_monitor(session, device_id, self._session_id, self)
+        retries = REGISTER_MONITOR_RETRIES
+        answer = drm_requests.register_cli_monitor(self.scope["session"], self._device_id,
+                                                   self._session_id, self)
+        while answer == -1 and retries > 0:
+            retries -= 1
+            time.sleep(.2)
+            answer = drm_requests.register_cli_monitor(self.scope["session"], self._device_id,
+                                                       self._session_id, self)
+
         # Check errors.
+        if answer == -1:
+            return
         if ID_ERROR in answer:
             self._monitor_id = -1
             self.send(text_data=TEMPLATE_ERROR % ERROR_REGISTER_CLI_MONITOR % answer[ID_ERROR])
             return
         self._monitor_id = answer[ID_MONITOR_ID]
+
         # Start CLI session.
         try:
-            answer = drm_requests.start_cli_session(session, device_id, self._session_id)
+            answer = drm_requests.start_cli_session(self.scope["session"], self._device_id, self._session_id)
             if answer and ID_ERROR in answer:
                 self.send(text_data=TEMPLATE_ERROR % (ERROR_START_CLI_SESSION % answer[ID_ERROR]))
         except Exception as e:
@@ -85,20 +106,34 @@ class DataPointConsumer(WebsocketConsumer):
     def __init__(self):
         WebsocketConsumer.__init__(self)
         self._monitor_id = -1
+        self._device_id = None
 
     def connect(self):
         # Initialize variables.
         session = self.scope["session"]
-        device_id = self.scope["url_route"]["kwargs"]["device_id"]
+        self._device_id = self.scope["url_route"]["kwargs"]["device_id"]
         # Sanity checks.
-        if session is None or device_id is None:
+        if session is None or self._device_id is None:
             return
 
         # Accept the connection.
         self.accept()
+
+    def receive(self, text_data=None, bytes_data=None):
+        if self._monitor_id != -1:
+            return
+
         # Subscribe Data Point monitor.
-        answer = drm_requests.register_datapoints_monitor(session, device_id, self)
+        retries = REGISTER_MONITOR_RETRIES
+        answer = drm_requests.register_datapoints_monitor(self.scope["session"], self._device_id, self)
+        while answer == -1 and retries > 0:
+            retries -= 1
+            time.sleep(.2)
+            answer = drm_requests.register_datapoints_monitor(self.scope["session"], self._device_id, self)
+
         # Check errors.
+        if answer == -1:
+            return
         if ID_ERROR in answer:
             self._monitor_id = -1
             self.send(text_data=TEMPLATE_ERROR % ERROR_REGISTER_DATAPOINT_MONITOR % answer[ID_ERROR])
@@ -146,20 +181,34 @@ class DeviceConsumer(WebsocketConsumer):
     def __init__(self):
         WebsocketConsumer.__init__(self)
         self._monitor_id = -1
+        self._device_id = -1
 
     def connect(self):
         # Initialize variables.
         session = self.scope["session"]
-        device_id = self.scope["url_route"]["kwargs"]["device_id"]
+        self._device_id = self.scope["url_route"]["kwargs"]["device_id"]
         # Sanity checks.
-        if session is None or device_id is None:
+        if session is None or self._device_id is None:
             return
 
         # Accept the connection.
         self.accept()
-        # Subscribe device monitor.
-        answer = drm_requests.register_device_monitor(session, device_id, self)
+
+    def receive(self, text_data=None, bytes_data=None):
+        if self._monitor_id != -1:
+            return
+
+        # Subscribe Device monitor.
+        retries = REGISTER_MONITOR_RETRIES
+        answer = drm_requests.register_device_monitor(self.scope["session"], self._device_id, self)
+        while answer == -1 and retries > 0:
+            retries -= 1
+            time.sleep(.2)
+            answer = drm_requests.register_device_monitor(self.scope["session"], self._device_id, self)
+
         # Check errors.
+        if answer == -1:
+            return
         if ID_ERROR in answer:
             self._monitor_id = -1
             self.send(text_data=TEMPLATE_ERROR % ERROR_REGISTER_DEVICE_MONITOR % answer[ID_ERROR])

@@ -79,7 +79,7 @@ def redirect_dest(request):
     url = ROOT_DIR
     if PARAM_DEST in request.GET:
         url += "{}/?".format((request.GET[PARAM_DEST].replace(ROOT_DIR, "")
-                             if ROOT_DIR is not "/" else request.GET[PARAM_DEST]).replace("/", ""))
+                             if ROOT_DIR != "/" else request.GET[PARAM_DEST]).replace("/", ""))
         args = ""
         for arg in request.GET:
             if arg != PARAM_DEST:

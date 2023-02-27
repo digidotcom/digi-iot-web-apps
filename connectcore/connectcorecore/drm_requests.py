@@ -253,10 +253,11 @@ SCHEMA_MONITOR_DP_FILTER = '{{#eachFiltered this}}' \
                            '{' \
                            '"stream": "{{remainingPathComponents (remainingPathComponents DataPoint.streamId)}}",' \
                            '"value": {{DataPoint.data}} ' \
-                           '}@@SEPARATOR@@' \
+                           '},' \
                            '{{/if}}' \
                            '{{/endsWith}}' \
                            '{{/eachFiltered}}'
+SCHEMA_MONITOR_DP_DUMMY = '{"a": 0}'
 
 SERVICE_WEB_SERVICE = "WebService messaging"
 SERVICE_MONITOR = "Push Monitoring"
@@ -1076,7 +1077,7 @@ def register_cli_monitor(session, device_id, session_id, consumer):
         monitor_managers[session_id] = monitor_manager
 
     # Clean inactive monitors.
-    remove_inactive_monitors(dc, "CLIEvent", device_id)
+    remove_inactive_monitors(dc)
 
     # Create the monitor for the CLI session.
     try:
@@ -1978,18 +1979,13 @@ def register_datapoints_monitor(session, device_id, consumer):
         monitor_managers[session_key] = monitor_manager
 
     # Clean inactive monitors.
-    remove_inactive_monitors(dc, "DataPoint", device_id)
+    remove_inactive_monitors(dc)
 
     # Build the monitor schema.
     schema = "["
     for stream in STREAMS_LIST:
-        if STREAMS_LIST.index(stream) != len(STREAMS_LIST) - 1:
-            # Separate data point entries with comma.
-            schema = schema + SCHEMA_MONITOR_DP_FILTER.replace("@@SEPARATOR@@", ",") % stream
-        else:
-            # Remove last datapoint separator to avoid JSON error.
-            schema = schema + SCHEMA_MONITOR_DP_FILTER.replace("@@SEPARATOR@@", "") % stream
-    schema = schema + "]"
+        schema = schema + SCHEMA_MONITOR_DP_FILTER % stream
+    schema = schema + SCHEMA_MONITOR_DP_DUMMY + "]"
 
     # Create the monitor to receive data points updates.
     try:
@@ -2084,7 +2080,7 @@ def register_device_monitor(session, device_id, consumer):
         monitor_managers[session_key] = monitor_manager
 
     # Clean inactive monitors.
-    remove_inactive_monitors(dc, "devices", device_id)
+    remove_inactive_monitors(dc)
 
     # Create the monitor to receive device events for the given device id.
     try:
@@ -2145,25 +2141,19 @@ def remove_device_monitor(session, monitor_id):
         print(e)
 
 
-def remove_inactive_monitors(dc, topic_hint, device_id=None):
+def remove_inactive_monitors(dc):
     """
-    Removes inactive Remote Manager monitors containing the given topic hint and device ID.
+    Removes inactive Remote Manager monitors.
 
     Args:
         dc (:class:`.DeviceCloud`): The Device Cloud instance.
-        topic_hint (String): Hint that must be included in the inactive monitor topic.
-        device_id (String): Device ID that must be contained in the inactive monitor topic.
     """
     # Clean inactive monitors.
-    monitors = dc.monitor.get_monitors(MON_TRANSPORT_TYPE_ATTR == "tcp" and MON_STATUS_ATTR == "INACTIVE")
+    monitors = dc.monitor.get_monitors(MON_TRANSPORT_TYPE_ATTR == "tcp")
     for monitor in monitors:
-        if topic_hint in monitor.get_metadata()["monTopic"]:
-            del_monitor = True
-            if device_id and device_id not in monitor.get_metadata()["monTopic"]:
-                del_monitor = False
-            if del_monitor:
-                print("Deleted inactive monitor %s" % monitor.get_metadata()["monId"])
-                monitor.delete()
+        if monitor.get_metadata()["monStatus"] != "ACTIVE":
+            print("Deleted inactive monitor %s" % monitor.get_metadata()["monId"])
+            monitor.delete()
 
 
 class MonitorManager(MonitorAPI):
