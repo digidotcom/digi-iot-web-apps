@@ -355,7 +355,7 @@ function getInterfaceData(element, iface) {
     var ipMode = document.getElementById(iface + FIELD_IP_MODE).value;
     // Fill network data.
     networkData[ID_ENABLE] = enable;
-    if (ipMode == 1) {
+    if (ipMode == IP_MODE_STATIC) {
         networkData[ID_IP_MODE] = 0;
         networkData[ID_IP] = document.getElementById(iface + FIELD_IP_ADDRESS).value;
         networkData[ID_NETMASK] = document.getElementById(iface + FIELD_SUBNET_MASK).value;
