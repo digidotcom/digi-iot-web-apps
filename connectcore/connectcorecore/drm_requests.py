@@ -129,12 +129,14 @@ ID_MODULE_VARIANT = "module_variant"
 ID_MONITOR_ID = "monitor_id"
 ID_NAME = "name"
 ID_N_DP_UPLOAD = "n_dp_upload"
+ID_N_DP_UPLOAD_CCCSD = "system_monitor_upload_samples_size"
 ID_NUM_SAMPLES_UPLOAD = "num_samples_upload"
 ID_PATH = "path"
 ID_PLAY = "play"
 ID_PROGRESS = "progress"
 ID_RESOLUTION = "resolution"
 ID_SAMPLE_RATE = "sample_rate"
+ID_SAMPLE_RATE_CCCSD = "system_monitor_sample_rate"
 ID_SERIAL_NUMBER = "serial_number"
 ID_SERVICE_DESCRIPTION = "service_description"
 ID_SESSION_ID = "session_id"
@@ -274,9 +276,11 @@ STREAMS_LIST = ["wlan0/state", "wlan0/rx_bytes", "wlan0/tx_bytes", "hci0/state",
 
 TARGET_DEVICE_INFO = "device_info"
 TARGET_GET_CONFIG = "get_config"
+TARGET_GET_CCCSD_CONFIG = "cccsd_get_config"
 TARGET_PLAY_MUSIC = "play_music"
 TARGET_SET_AUDIO_VOLUME = "set_audio_volume"
 TARGET_SET_CONFIG = "set_config"
+TARGET_SET_CCCSD_CONFIG = "cccsd_set_config"
 TARGET_SET_LED = "user_led"
 TARGET_SET_VIDEO_BRIGHTNESS = "set_video_brightness"
 
@@ -1776,7 +1780,7 @@ def list_fileset(request, file_set):
     return answer
 
 
-def get_configuration(request, device_id, elements):
+def _get_cfg(request, device_id, settings, target=None):
     """
     Retrieves the device configuration for the given element.
 
@@ -1784,18 +1788,21 @@ def get_configuration(request, device_id, elements):
         request (:class:`.WSGIRequest`): The request used to generate the
             Device Cloud instance.
         device_id (String): The device ID for which to retrieve the configuration.
-        elements (List): The elements to retrieve their configuration.
+        settings (List): The settings to retrieve their configuration.
+        target (String): Request target. If not set, 'cccsd_get_config' is used.
 
     Returns:
         Dictionary: Dictionary containing the answer.
     """
     dc = get_device_cloud(request)
-    request_data = json.dumps({"element": elements})
+    request_data = "%s" % json.dumps(settings)
     answer = {}
 
+    if not target:
+        target = TARGET_GET_CCCSD_CONFIG
+
     try:
-        response = send_request(dc, device_id, TARGET_GET_CONFIG,
-                                data=request_data)
+        response = send_request(dc, device_id, target, data=request_data)
         if not response:
             answer[ID_ERROR] = ERROR_DEVICE_NOT_ANSWER
         elif ("not registered" in response
@@ -1813,7 +1820,27 @@ def get_configuration(request, device_id, elements):
     return answer
 
 
-def set_configuration(request, device_id, configuration):
+def get_configuration(request, device_id, elements):
+    """
+    Retrieves the device configuration for the given element.
+
+    Args:
+        request (:class:`.WSGIRequest`): The request used to generate the
+            Device Cloud instance.
+        device_id (String): The device ID for which to retrieve the configuration.
+        elements (List): The elements to retrieve their configuration.
+
+    Returns:
+        Dictionary: Dictionary containing the answer.
+    """
+    settings = {
+               "element": elements
+               }
+
+    return _get_cfg(request, device_id, settings, target=TARGET_GET_CONFIG)
+
+
+def _set_cfg(request, device_id, configuration, target=None):
     """
     Changes the device configuration with the provided one.
 
@@ -1822,6 +1849,7 @@ def set_configuration(request, device_id, configuration):
             Device Cloud instance.
         device_id (String): The device ID for which to change the configuration.
         configuration (Dictionary): The new configuration.
+        target (String): Request target. If not set, 'cccsd_set_config' is used.
 
     Returns:
         Dictionary: Dictionary containing the answer.
@@ -1830,9 +1858,11 @@ def set_configuration(request, device_id, configuration):
     request_data = "%s" % json.dumps(configuration)
     answer = {}
 
+    if not target:
+        target = TARGET_SET_CCCSD_CONFIG
+
     try:
-        response = send_request(dc, device_id, TARGET_SET_CONFIG,
-                                data=request_data)
+        response = send_request(dc, device_id, target, data=request_data)
         if not response:
             answer[ID_ERROR] = ERROR_DEVICE_NOT_ANSWER
         elif ("not registered" in response
@@ -1848,6 +1878,23 @@ def set_configuration(request, device_id, configuration):
             answer[ID_ERROR] = ERROR_SET_CONFIG % exc.response.status_code
 
     return answer
+
+
+def set_configuration(request, device_id, configuration):
+    """
+    Changes the device configuration with the provided one.
+
+    Args:
+        request (:class:`.WSGIRequest`): The request used to generate the
+            Device Cloud instance.
+        device_id (String): The device ID for which to change the configuration.
+        configuration (Dictionary): The new configuration.
+        target (String): If not set, 'cccsd_set_config' is used.
+
+    Returns:
+        Dictionary: Dictionary containing the answer.
+    """
+    return _set_cfg(request, device_id, configuration, target=TARGET_SET_CONFIG)
 
 
 def query_rci_system_monitor_settings(request, device_id):
@@ -1912,31 +1959,51 @@ def get_system_monitor_settings(request, device_id):
     # Initialize variables.
     answer = {}
     dc = get_device_cloud(request)
+    settings = {
+                 "settings": [ID_SAMPLE_RATE_CCCSD, ID_N_DP_UPLOAD_CCCSD]
+               }
 
-    response = get_configuration(request, device_id, ["sys-monitor"])
-    if ID_ERROR in response:
-        # Try with RCI.
-        if "Invalid format" in response[ID_ERROR]:
-            try:
-                response = query_rci_system_monitor_settings(request, device_id)
-                if not response:
-                    return {ID_ERROR: "Could not get system monitor settings"}
-                if ID_ERROR in response:
-                    return {ID_ERROR: response[ID_ERROR]}
-                answer[ID_SAMPLE_RATE] = response[ID_SAMPLE_RATE]
-                answer[ID_NUM_SAMPLES_UPLOAD] = response[ID_NUM_SAMPLES_UPLOAD]
+    response = _get_cfg(request, device_id, settings, target=TARGET_GET_CCCSD_CONFIG)
+    if ID_ERROR not in response:
+       data = json.loads(response.get(ID_DATA, "{}"))
+       answer[ID_SAMPLE_RATE] = data.get(ID_SAMPLE_RATE_CCCSD, DEFAULT_SAMPLE_RATE)
+       answer[ID_NUM_SAMPLES_UPLOAD] = data.get(ID_N_DP_UPLOAD_CCCSD, DEFAULT_NUM_SAMPLES_UPLOAD)
 
-                return answer
-            except DeviceCloudHttpException as exc:
-                return {ID_ERROR: exc.response.text}
-        else:
+       return answer
+
+    if "not registered" not in response[ID_ERROR]:
+        return {ID_ERROR: response[ID_ERROR]}
+
+    # Try legacy 'get_config' with 'sys-monitor'
+    settings = {
+               "element": ["sys-monitor"]
+               }
+
+    response = _get_cfg(request, device_id, settings, target=TARGET_GET_CONFIG)
+    if ID_ERROR not in response:
+        data = json.loads(response.get(ID_DATA, "{}")).get("sys-monitor", {})
+        answer[ID_SAMPLE_RATE] = data.get(ID_SAMPLE_RATE, DEFAULT_SAMPLE_RATE)
+        answer[ID_NUM_SAMPLES_UPLOAD] = data.get(ID_N_DP_UPLOAD, DEFAULT_NUM_SAMPLES_UPLOAD)
+
+        return answer
+
+    if "Invalid format" not in response[ID_ERROR]:
+        return {ID_ERROR: response[ID_ERROR]}
+
+    # Try with RCI.
+    try:
+        response = query_rci_system_monitor_settings(request, device_id)
+        if not response:
+            return {ID_ERROR: "Could not get system monitor settings"}
+        if ID_ERROR in response:
             return {ID_ERROR: response[ID_ERROR]}
 
-    data = json.loads(response.get(ID_DATA, "{}")).get("sys-monitor", {})
-    answer[ID_SAMPLE_RATE] = data.get(ID_SAMPLE_RATE, DEFAULT_SAMPLE_RATE)
-    answer[ID_NUM_SAMPLES_UPLOAD] = data.get(ID_N_DP_UPLOAD, DEFAULT_NUM_SAMPLES_UPLOAD)
+        answer[ID_SAMPLE_RATE] = response[ID_SAMPLE_RATE]
+        answer[ID_NUM_SAMPLES_UPLOAD] = response[ID_NUM_SAMPLES_UPLOAD]
 
-    return answer
+        return answer
+    except DeviceCloudHttpException as exc:
+        return {ID_ERROR: exc.response.text}
 
 
 def set_rci_system_monitor_settings(request, device_id, sample_rate, samples_buffer):
@@ -1998,30 +2065,45 @@ def set_system_monitor_settings(request, device_id, sample_rate, samples_buffer)
     # Initialize variables.
     dc = get_device_cloud(request)
     config = {
+                 ID_SAMPLE_RATE_CCCSD: int(sample_rate),
+                 ID_N_DP_UPLOAD_CCCSD: int(samples_buffer)
+             }
+
+    response = _set_cfg(request, device_id, config, target=TARGET_SET_CCCSD_CONFIG)
+
+    if ID_ERROR not in response:
+        return json.loads(response.get(ID_DATA, "{}"))
+
+    if "not registered" not in response[ID_ERROR]:
+        return {ID_ERROR: response[ID_ERROR]}
+
+    # Try legacy 'set_config' with 'sys-monitor'
+    config = {
                  "sys-monitor" : {
                      ID_SAMPLE_RATE: int(sample_rate),
                      ID_N_DP_UPLOAD: int(samples_buffer)
                  }
              }
 
-    response = set_configuration(request, device_id, config)
-    if ID_ERROR in response:
-        # Try with RCI.
-        if "Invalid format" in response[ID_ERROR]:
-            try:
-                resp = set_rci_system_monitor_settings(request, device_id, sample_rate, samples_buffer)
-                if not resp:
-                    return resp
-                if ID_ERROR in resp:
-                    return {ID_ERROR: resp[ID_ERROR] if ERROR_DEVICE_NOT_SUPPORT_RCI not in resp[ID_ERROR] else "Could not set system monitor"}
+    response = _set_cfg(request, device_id, config, target=TARGET_SET_CONFIG)
 
-                return resp
-            except DeviceCloudHttpException as exc:
-                return {ID_ERROR: exc.response.text}
-        else:
-            return {ID_ERROR: response[ID_ERROR]}
+    if ID_ERROR not in response:
+        return json.loads(response.get(ID_DATA, "{}"))
 
-    return json.loads(response.get(ID_DATA, "{}"))
+    if "Invalid format" not in response[ID_ERROR]:
+        return {ID_ERROR: response[ID_ERROR]}
+
+    # Try with RCI.
+    try:
+        resp = set_rci_system_monitor_settings(request, device_id, sample_rate, samples_buffer)
+        if not resp:
+            return resp
+        if ID_ERROR in resp:
+            return {ID_ERROR: resp[ID_ERROR] if ERROR_DEVICE_NOT_SUPPORT_RCI not in resp[ID_ERROR] else "Could not set system monitor"}
+
+        return resp
+    except DeviceCloudHttpException as exc:
+        return {ID_ERROR: exc.response.text}
 
 
 def get_account_data_usage(request):
