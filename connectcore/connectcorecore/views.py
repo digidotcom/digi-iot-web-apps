@@ -1,4 +1,4 @@
-# Copyright 2022,2023, Digi International Inc.
+# Copyright 2022, 2023, Digi International Inc.
 #
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -11,6 +11,8 @@
 # WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+import os
 
 from django.http import HttpResponse
 from django.shortcuts import redirect
@@ -64,8 +66,9 @@ ID_PROVISION_VALUE = "provision_value"
 ID_SESSION_ID = "session_id"
 
 MESSAGE_NO_DEVICES = "No ConnectCore devices have been added to your DRM account. "
-MESSAGE_SETUP_MODULES = "Please, verify the <a target='_blank' rel='noopener noreferrer' href='https://www.digi.com/" \
-                        "resources/documentation/digidocs/90002422/#tasks/t_config_devices.htm'>documentation</a> " \
+MESSAGE_SETUP_MODULES = "Please, verify the <a target='_blank' rel='noopener noreferrer' " \
+                        "href='https://www.digi.com/resources/documentation/digidocs/90002422/" \
+                        "#tasks/t_config_devices.htm'>documentation</a> " \
                         "on how to set up your modules to run the ConnectCore demo."
 
 STREAM_TEMPERATURE = "system_monitor/cpu_temperature"
@@ -170,8 +173,8 @@ def verify_parameters(request):
         if not found:
             return JsonResponse({ID_REDIRECT: ROOT_DIR})
         return JsonResponse({ID_VALID: True}, status=200)
-    else:
-        return redirect_login(request)
+
+    return redirect_login(request)
 
 
 def redirect_login(request):
@@ -203,17 +206,14 @@ def register_device(request):
     Returns:
         :class:`.JsonResponse`: A JSON response with the result.
     """
-    # Check if the AJAX request is valid.
     error = check_ajax_request(request)
-    if error is not None:
+    if error:
         return error
 
-    # Get the device ID, path and is file information from the POST request.
     data = json.loads(request.body.decode(request.encoding))
     provision_value = data[ID_PROVISION_VALUE]
     provision_type = data[ID_PROVISION_TYPE]
 
-    # Register the device.
     result = provision_device(request, provision_value, provision_type)
     if ID_ERROR in result:
         return JsonResponse(result, status=400)
@@ -232,19 +232,17 @@ def get_devices(request):
         :class:`.JsonResponse`: A JSON response with the list of the ConnectCore
             devices within the DRM account.
     """
-    # Check if the AJAX request is valid.
     error = check_ajax_request(request)
-    if error is not None:
+    if error:
         return error
 
     cc_devices = get_cc_devices(request)
     if len(cc_devices) > 0:
         return JsonResponse({ID_DEVICES: [device.to_json() for device in cc_devices]},
                             status=200)
-    else:
-        return JsonResponse({ID_ERROR_TITLE: TITLE_NO_DEVICES,
-                             ID_ERROR_MSG: MESSAGE_NO_DEVICES,
-                             ID_ERROR_GUIDE: MESSAGE_SETUP_MODULES})
+    return JsonResponse({ID_ERROR_TITLE: TITLE_NO_DEVICES,
+                         ID_ERROR_MSG: MESSAGE_NO_DEVICES,
+                         ID_ERROR_GUIDE: MESSAGE_SETUP_MODULES})
 
 
 def get_device_info(request):
@@ -258,22 +256,19 @@ def get_device_info(request):
     Returns:
         :class:`.JsonResponse`: A JSON response with the information of the device.
     """
-    # Check if the AJAX request is valid.
     error = check_ajax_request(request)
-    if error is not None:
+    if error:
         return error
 
     try:
-        # Get the device ID from the POST request.
         data = json.loads(request.body.decode(request.encoding))
         device_id = data[ID_DEVICE_ID]
 
-        # Get the device information.
         device_information = get_device_information(request, device_id)
 
         return JsonResponse(device_information, status=200)
-    except Exception as e:
-        return get_exception_response(e)
+    except Exception as exc:
+        return get_exception_response(exc)
 
 
 def get_device_status(request):
@@ -287,22 +282,19 @@ def get_device_status(request):
     Returns:
         :class:`.JsonResponse`: A JSON response with the status of the device.
     """
-    # Check if the AJAX request is valid.
     error = check_ajax_request(request)
-    if error is not None:
+    if error:
         return error
 
     try:
-        # Get the device ID from the POST request.
         data = json.loads(request.body.decode(request.encoding))
         device_id = data[ID_DEVICE_ID]
 
-        # Get the device status.
         status = get_general_device_status(request, device_id)
 
         return JsonResponse(status, status=200)
-    except Exception as e:
-        return get_exception_response(e)
+    except Exception as exc:
+        return get_exception_response(exc)
 
 
 def play_music(request):
@@ -316,13 +308,11 @@ def play_music(request):
     Returns:
         :class:`.JsonResponse`: A JSON response with the operation result.
     """
-    # Check if the AJAX request is valid.
     music_file = None
     error = check_ajax_request(request)
-    if error is not None:
+    if error:
         return error
 
-    # Get the device ID and volume from the POST request.
     data = json.loads(request.body.decode(request.encoding))
     device_id = data[ID_DEVICE_ID]
     play = data[ID_PLAY]
@@ -336,8 +326,8 @@ def play_music(request):
         if ANSWER_TARGET_NOT_REGISTERED in answer:
             return JsonResponse({ID_ERROR: ERROR_TARGET_NOT_REGISTERED}, status=400)
         return JsonResponse({ID_ERROR: answer}, status=400)
-    except Exception as e:
-        return get_exception_response(e)
+    except Exception as exc:
+        return get_exception_response(exc)
 
 
 def set_audio_volume(request):
@@ -351,12 +341,10 @@ def set_audio_volume(request):
     Returns:
         :class:`.JsonResponse`: A JSON response with the operation result.
     """
-    # Check if the AJAX request is valid.
     error = check_ajax_request(request)
-    if error is not None:
+    if error:
         return error
 
-    # Get the device ID and volume from the POST request.
     data = json.loads(request.body.decode(request.encoding))
     device_id = data[ID_DEVICE_ID]
     value = data[ID_VALUE]
@@ -368,8 +356,8 @@ def set_audio_volume(request):
         if ANSWER_TARGET_NOT_REGISTERED in answer:
             return JsonResponse({ID_ERROR: ERROR_TARGET_NOT_REGISTERED}, status=400)
         return JsonResponse({ID_ERROR: answer}, status=400)
-    except Exception as e:
-        return get_exception_response(e)
+    except Exception as exc:
+        return get_exception_response(exc)
 
 
 def set_video_brightness(request):
@@ -383,12 +371,10 @@ def set_video_brightness(request):
     Returns:
         :class:`.JsonResponse`: A JSON response with the operation result.
     """
-    # Check if the AJAX request is valid.
     error = check_ajax_request(request)
-    if error is not None:
+    if error:
         return error
 
-    # Get the device ID and brightness from the POST request.
     data = json.loads(request.body.decode(request.encoding))
     device_id = data[ID_DEVICE_ID]
     value = data[ID_VALUE]
@@ -400,8 +386,8 @@ def set_video_brightness(request):
         if ANSWER_TARGET_NOT_REGISTERED in answer:
             return JsonResponse({ID_ERROR: ERROR_TARGET_NOT_REGISTERED}, status=400)
         return JsonResponse({ID_ERROR: answer}, status=400)
-    except Exception as e:
-        return get_exception_response(e)
+    except Exception as exc:
+        return get_exception_response(exc)
 
 
 def set_led_value(request):
@@ -415,12 +401,10 @@ def set_led_value(request):
     Returns:
         :class:`.JsonResponse`: A JSON response with the operation result.
     """
-    # Check if the AJAX request is valid.
     error = check_ajax_request(request)
-    if error is not None:
+    if error:
         return error
 
-    # Get the device ID and LED values from the POST request.
     data = json.loads(request.body.decode(request.encoding))
     device_id = data[ID_DEVICE_ID]
     led_name = data[ID_LED_NAME]
@@ -433,8 +417,8 @@ def set_led_value(request):
         if ANSWER_TARGET_NOT_REGISTERED in answer:
             return JsonResponse({ID_ERROR: ERROR_TARGET_NOT_REGISTERED}, status=400)
         return JsonResponse({ID_ERROR: answer}, status=400)
-    except Exception as e:
-        return get_exception_response(e)
+    except Exception as exc:
+        return get_exception_response(exc)
 
 
 def get_request_data(request):
@@ -466,12 +450,10 @@ def cli_init_session(request):
     Returns:
          :class:`.JsonResponse`: a JSON with the session ID or the error.
     """
-    # Check if the AJAX request is valid.
     error = check_ajax_request(request)
-    if error is not None:
+    if error:
         return error
 
-    # Get the device ID from the POST request.
     data = json.loads(request.body.decode(request.encoding))
     device_id = data[ID_DEVICE_ID]
 
@@ -480,11 +462,11 @@ def cli_init_session(request):
         if answer is not None:
             if ID_SESSION_ID in answer:
                 return JsonResponse({ID_SESSION_ID: answer[ID_SESSION_ID]}, status=200)
-            elif ID_ERROR in answer:
+            if ID_ERROR in answer:
                 return JsonResponse({ID_ERROR: answer[ID_ERROR]}, status=400)
         return JsonResponse({ID_ERROR: ERROR_CLI_INITIALIZE}, status=400)
-    except Exception as e:
-        return get_exception_response(e)
+    except Exception as exc:
+        return get_exception_response(exc)
 
 
 def cli_data(request):
@@ -497,12 +479,10 @@ def cli_data(request):
     Returns:
          :class:`.JsonResponse`: a JSON with the result.
     """
-    # Check if the AJAX request is valid.
     error = check_ajax_request(request)
-    if error is not None:
+    if error:
         return error
 
-    # Get the data from the POST request.
     data = json.loads(request.body.decode(request.encoding))
     device_id = data[ID_DEVICE_ID]
     session_id = data[ID_SESSION_ID]
@@ -515,8 +495,8 @@ def cli_data(request):
                 return JsonResponse({ID_ERROR: answer[ID_ERROR]}, status=400)
             return JsonResponse({}, status=200)
         return JsonResponse({ID_ERROR: ERROR_CLI_SEND_DATA}, status=400)
-    except Exception as e:
-        return get_exception_response(e)
+    except Exception as exc:
+        return get_exception_response(exc)
 
 
 def cli_terminate_session(request):
@@ -529,12 +509,10 @@ def cli_terminate_session(request):
     Returns:
          :class:`.JsonResponse`: a JSON with the result.
     """
-    # Check if the AJAX request is valid.
     error = check_ajax_request(request)
-    if error is not None:
+    if error:
         return error
 
-    # Get the device ID and session ID from the POST request.
     data = json.loads(request.body.decode(request.encoding))
     device_id = data[ID_DEVICE_ID]
     session_id = data[ID_SESSION_ID]
@@ -546,8 +524,8 @@ def cli_terminate_session(request):
                 return JsonResponse({ID_ERROR: answer[ID_ERROR]}, status=400)
             return JsonResponse({}, status=200)
         return JsonResponse({ID_ERROR: ERROR_CLI_TERMINATE}, status=400)
-    except Exception as e:
-        return get_exception_response(e)
+    except Exception as exc:
+        return get_exception_response(exc)
 
 
 def fs_list_directory(request):
@@ -561,12 +539,10 @@ def fs_list_directory(request):
     Returns:
          :class:`.JsonResponse`: a JSON with the result.
     """
-    # Check if the AJAX request is valid.
     error = check_ajax_request(request)
-    if error is not None:
+    if error:
         return error
 
-    # Get the device ID and directory from the POST request.
     data = json.loads(request.body.decode(request.encoding))
     device_id = data[ID_DEVICE_ID]
     directory = data[ID_DIRECTORY]
@@ -578,8 +554,8 @@ def fs_list_directory(request):
                 return JsonResponse({ID_ERROR: answer[ID_ERROR]}, status=400)
             return JsonResponse(answer, status=200)
         return JsonResponse({ID_ERROR: ERROR_LIST_DIRECTORY}, status=400)
-    except Exception as e:
-        return get_exception_response(e)
+    except Exception as exc:
+        return get_exception_response(exc)
 
 
 def fs_remove_file(request):
@@ -592,12 +568,10 @@ def fs_remove_file(request):
     Returns:
          :class:`.JsonResponse`: a JSON with the result.
     """
-    # Check if the AJAX request is valid.
     error = check_ajax_request(request)
-    if error is not None:
+    if error:
         return error
 
-    # Get the device ID, path and is file information from the POST request.
     data = json.loads(request.body.decode(request.encoding))
     device_id = data[ID_DEVICE_ID]
     path = data[ID_PATH]
@@ -610,8 +584,8 @@ def fs_remove_file(request):
                 return JsonResponse({ID_ERROR: answer[ID_ERROR]}, status=400)
             return JsonResponse(answer, status=200)
         return JsonResponse({ID_ERROR: ERROR_REMOVE_FILE}, status=400)
-    except Exception as e:
-        return get_exception_response(e)
+    except Exception as exc:
+        return get_exception_response(exc)
 
 
 def fs_upload_file(request):
@@ -624,28 +598,26 @@ def fs_upload_file(request):
     Returns:
          :class:`.JsonResponse`: a JSON with the result.
     """
-    # Check if the AJAX request is valid.
     error = check_ajax_request(request)
-    if error is not None:
+    if error:
         return error
 
-    # Get the device ID and path parameters from the POST request.
     device_id = request.POST[ID_DEVICE_ID]
     path = request.POST[ID_PATH]
 
-    # Get the file from the FILES request.
     file = request.FILES[ID_FILE]
 
     try:
-        answer = upload_file(request, device_id, path, file.file.getvalue() if not file.multiple_chunks()
+        answer = upload_file(request, device_id, path,
+                             file.file.getvalue() if not file.multiple_chunks()
                              else file.read())
         if answer is not None:
             if ID_ERROR in answer:
                 return JsonResponse({ID_ERROR: answer[ID_ERROR]}, status=400)
             return JsonResponse(answer, status=200)
         return JsonResponse({ID_ERROR: ERROR_UPLOAD_FILE}, status=400)
-    except Exception as e:
-        return get_exception_response(e)
+    except Exception as exc:
+        return get_exception_response(exc)
 
 
 def fs_download_file(request):
@@ -658,12 +630,10 @@ def fs_download_file(request):
     Returns:
          :class:`.JsonResponse`: a JSON with the result.
     """
-    # Check if the AJAX request is valid.
     error = check_ajax_request(request)
-    if error is not None:
+    if error:
         return error
 
-    # Get the device ID and path parameters from the POST request.
     data = json.loads(request.body.decode(request.encoding))
     device_id = data[ID_DEVICE_ID]
     path = data[ID_PATH]
@@ -673,11 +643,10 @@ def fs_download_file(request):
         if answer is not None:
             if isinstance(answer, dict) and ID_ERROR in answer:
                 return JsonResponse({ID_ERROR: answer[ID_ERROR]}, status=400)
-            # Return binary data.
             return HttpResponse(answer, content_type="application/octet-stream", status=200)
         return JsonResponse({ID_ERROR: ERROR_DOWNLOAD_FILE}, status=400)
-    except Exception as e:
-        return get_exception_response(e)
+    except Exception as exc:
+        return get_exception_response(exc)
 
 
 def fs_create_dir(request):
@@ -690,12 +659,10 @@ def fs_create_dir(request):
     Returns:
          :class:`.JsonResponse`: a JSON with the result.
     """
-    # Check if the AJAX request is valid.
     error = check_ajax_request(request)
-    if error is not None:
+    if error:
         return error
 
-    # Get the device ID and path from the POST request.
     data = json.loads(request.body.decode(request.encoding))
     device_id = data[ID_DEVICE_ID]
     path = data[ID_PATH]
@@ -707,8 +674,8 @@ def fs_create_dir(request):
                 return JsonResponse({ID_ERROR: answer[ID_ERROR]}, status=400)
             return JsonResponse(answer, status=200)
         return JsonResponse({ID_ERROR: ERROR_CREATE_DIRECTORY}, status=400)
-    except Exception as e:
-        return get_exception_response(e)
+    except Exception as exc:
+        return get_exception_response(exc)
 
 
 def history_temperature(request):
@@ -728,8 +695,8 @@ def history_temperature(request):
                 return JsonResponse({ID_ERROR: answer[ID_ERROR]}, status=400)
             return JsonResponse(answer, status=200)
         return JsonResponse({ID_ERROR: ERROR_HISTORY_TEMPERATURE}, status=400)
-    except Exception as e:
-        return get_exception_response(e)
+    except Exception as exc:
+        return get_exception_response(exc)
 
 
 def history_cpu(request):
@@ -749,8 +716,8 @@ def history_cpu(request):
                 return JsonResponse({ID_ERROR: answer[ID_ERROR]}, status=400)
             return JsonResponse(answer, status=200)
         return JsonResponse({ID_ERROR: ERROR_HISTORY_CPU}, status=400)
-    except Exception as e:
-        return get_exception_response(e)
+    except Exception as exc:
+        return get_exception_response(exc)
 
 
 def history_memory(request):
@@ -770,8 +737,8 @@ def history_memory(request):
                 return JsonResponse({ID_ERROR: answer[ID_ERROR]}, status=400)
             return JsonResponse(answer, status=200)
         return JsonResponse({ID_ERROR: ERROR_HISTORY_MEMORY}, status=400)
-    except Exception as e:
-        return get_exception_response(e)
+    except Exception as exc:
+        return get_exception_response(exc)
 
 
 def reboot_device(request):
@@ -784,12 +751,10 @@ def reboot_device(request):
     Returns:
          :class:`.JsonResponse`: a JSON with the result.
     """
-    # Check if the AJAX request is valid.
     error = check_ajax_request(request)
-    if error is not None:
+    if error:
         return error
 
-    # Get the device ID from the POST request.
     data = json.loads(request.body.decode(request.encoding))
     device_id = data[ID_DEVICE_ID]
 
@@ -800,8 +765,8 @@ def reboot_device(request):
                 return JsonResponse({ID_ERROR: answer[ID_ERROR]}, status=400)
             return JsonResponse(answer, status=200)
         return JsonResponse({ID_ERROR: ERROR_REBOOT_DEVICE}, status=400)
-    except Exception as e:
-        return get_exception_response(e)
+    except Exception as exc:
+        return get_exception_response(exc)
 
 
 def upload_firmware(request):
@@ -814,17 +779,14 @@ def upload_firmware(request):
     Returns:
          :class:`.JsonResponse`: a JSON with the result.
     """
-    # Check if the AJAX request is valid.
     error = check_ajax_request(request)
-    if error is not None:
+    if error:
         return error
 
-    # Get the parameters from the POST request.
     file_set = request.POST[ID_FILE_SET]
     path = request.POST[ID_PATH]
     file_name = request.POST[ID_FILE_NAME]
 
-    # Get the file from the FILES request.
     file = request.FILES[ID_FILE]
 
     try:
@@ -834,8 +796,8 @@ def upload_firmware(request):
                 return JsonResponse({ID_ERROR: answer[ID_ERROR]}, status=400)
             return JsonResponse(answer, status=200)
         return JsonResponse({ID_ERROR: ERROR_UPLOAD_FIRMWARE}, status=400)
-    except Exception as e:
-        return get_exception_response(e)
+    except Exception as exc:
+        return get_exception_response(exc)
 
 
 def update_firmware(request):
@@ -848,12 +810,10 @@ def update_firmware(request):
     Returns:
          :class:`.JsonResponse`: a JSON with the result.
     """
-    # Check if the AJAX request is valid.
     error = check_ajax_request(request)
-    if error is not None:
+    if error:
         return error
 
-    # Get the device ID from the POST request.
     data = json.loads(request.body.decode(request.encoding))
     device_id = data[ID_DEVICE_ID]
     file = data[ID_FILE]
@@ -865,8 +825,8 @@ def update_firmware(request):
                 return JsonResponse({ID_ERROR: answer[ID_ERROR]}, status=400)
             return JsonResponse(answer, status=200)
         return JsonResponse({ID_ERROR: ERROR_UPDATE_FIRMWARE}, status=400)
-    except Exception as e:
-        return get_exception_response(e)
+    except Exception as exc:
+        return get_exception_response(exc)
 
 
 def check_firmware_update_running(request):
@@ -880,9 +840,8 @@ def check_firmware_update_running(request):
     Returns:
          :class:`.JsonResponse`: a JSON with the result.
     """
-    # Check if the AJAX request is valid.
     error = check_ajax_request(request)
-    if error is not None:
+    if error:
         return error
 
     # Get the device ID from the POST request.
@@ -903,12 +862,10 @@ def check_firmware_update_status(request):
     Returns:
          :class:`.JsonResponse`: a JSON with the result.
     """
-    # Check if the AJAX request is valid.
     error = check_ajax_request(request)
-    if error is not None:
+    if error:
         return error
 
-    # Get the device ID from the POST request.
     data = json.loads(request.body.decode(request.encoding))
     device_id = data[ID_DEVICE_ID]
 
@@ -919,8 +876,8 @@ def check_firmware_update_status(request):
                 return JsonResponse({ID_ERROR: answer[ID_ERROR]}, status=400)
             return JsonResponse(answer, status=200)
         return JsonResponse({ID_ERROR: ERROR_CHECK_FW_UPDATE_STATUS}, status=400)
-    except Exception as e:
-        return get_exception_response(e)
+    except Exception as exc:
+        return get_exception_response(exc)
 
 
 def check_firmware_update_progress(request):
@@ -934,12 +891,10 @@ def check_firmware_update_progress(request):
     Returns:
          :class:`.JsonResponse`: a JSON with the result.
     """
-    # Check if the AJAX request is valid.
     error = check_ajax_request(request)
-    if error is not None:
+    if error:
         return error
 
-    # Get the device ID from the POST request.
     data = json.loads(request.body.decode(request.encoding))
     device_id = data[ID_DEVICE_ID]
 
@@ -950,8 +905,8 @@ def check_firmware_update_progress(request):
                 return JsonResponse({ID_ERROR: answer[ID_ERROR]}, status=400)
             return JsonResponse(answer, status=200)
         return JsonResponse({ID_ERROR: ERROR_CHECK_FIRMWARE_UPDATE_PROGRESS}, status=400)
-    except Exception as e:
-        return get_exception_response(e)
+    except Exception as exc:
+        return get_exception_response(exc)
 
 
 def cancel_firmware_update(request):
@@ -965,12 +920,10 @@ def cancel_firmware_update(request):
     Returns:
          :class:`.JsonResponse`: a JSON with the result.
     """
-    # Check if the AJAX request is valid.
     error = check_ajax_request(request)
-    if error is not None:
+    if error:
         return error
 
-    # Get the device ID from the POST request.
     data = json.loads(request.body.decode(request.encoding))
     device_id = data[ID_DEVICE_ID]
 
@@ -981,8 +934,9 @@ def cancel_firmware_update(request):
                 return JsonResponse({ID_ERROR: answer[ID_ERROR]}, status=400)
             return JsonResponse(answer, status=200)
         return JsonResponse({ID_ERROR: ERROR_CANCEL_FW_UPDATE}, status=400)
-    except Exception as e:
-        return get_exception_response(e)
+    except Exception as exc:
+        return get_exception_response(exc)
+
 
 
 def list_fileset_files(request):
@@ -995,12 +949,10 @@ def list_fileset_files(request):
     Returns:
          :class:`.JsonResponse`: a JSON with the result.
     """
-    # Check if the AJAX request is valid.
     error = check_ajax_request(request)
-    if error is not None:
+    if error:
         return error
 
-    # Get the fileset from the POST request.
     data = json.loads(request.body.decode(request.encoding))
     file_set = data[ID_FILE_SET]
 
@@ -1011,8 +963,8 @@ def list_fileset_files(request):
                 return JsonResponse({ID_ERROR: answer[ID_ERROR]}, status=400)
             return JsonResponse(answer, status=200)
         return JsonResponse({ID_ERROR: ERROR_LIST_FILESET}, status=400)
-    except Exception as e:
-        return get_exception_response(e)
+    except Exception as exc:
+        return get_exception_response(exc)
 
 
 def get_config(request):
@@ -1025,12 +977,10 @@ def get_config(request):
     Returns:
          :class:`.JsonResponse`: a JSON with the result.
     """
-    # Check if the AJAX request is valid.
     error = check_ajax_request(request)
-    if error is not None:
+    if error:
         return error
 
-    # Get the parameters from the POST request.
     data = json.loads(request.body.decode(request.encoding))
     device_id = data[ID_DEVICE_ID]
     elements = data[ID_ELEMENTS]
@@ -1042,8 +992,8 @@ def get_config(request):
                 return JsonResponse({ID_ERROR: answer[ID_ERROR]}, status=400)
             return JsonResponse(answer, status=200)
         return JsonResponse({ID_ERROR: ERROR_GET_CONFIG}, status=400)
-    except Exception as e:
-        return get_exception_response(e)
+    except Exception as exc:
+        return get_exception_response(exc)
 
 
 def set_config(request):
@@ -1056,12 +1006,10 @@ def set_config(request):
     Returns:
          :class:`.JsonResponse`: a JSON with the result.
     """
-    # Check if the AJAX request is valid.
     error = check_ajax_request(request)
-    if error is not None:
+    if error:
         return error
 
-    # Get the parameters from the POST request.
     data = json.loads(request.body.decode(request.encoding))
     device_id = data[ID_DEVICE_ID]
     configuration = data[ID_CONFIGURATION]
@@ -1073,8 +1021,8 @@ def set_config(request):
                 return JsonResponse({ID_ERROR: answer[ID_ERROR]}, status=400)
             return JsonResponse(answer, status=200)
         return JsonResponse({ID_ERROR: ERROR_SET_CONFIG}, status=400)
-    except Exception as e:
-        return get_exception_response(e)
+    except Exception as exc:
+        return get_exception_response(exc)
 
 
 def get_sample_rate(request):
@@ -1087,12 +1035,10 @@ def get_sample_rate(request):
     Returns:
          :class:`.JsonResponse`: a JSON with the result.
     """
-    # Check if the AJAX request is valid.
     error = check_ajax_request(request)
-    if error is not None:
+    if error:
         return error
 
-    # Get the parameters from the POST request.
     data = json.loads(request.body.decode(request.encoding))
     device_id = data[ID_DEVICE_ID]
 
@@ -1103,8 +1049,8 @@ def get_sample_rate(request):
                 return JsonResponse({ID_ERROR: answer[ID_ERROR]}, status=400)
             return JsonResponse(answer, status=200)
         return JsonResponse({ID_ERROR: ERROR_GET_SAMPLE_RATE}, status=400)
-    except Exception as e:
-        return get_exception_response(e)
+    except Exception as exc:
+        return get_exception_response(exc)
 
 
 def set_sample_rate(request):
@@ -1117,12 +1063,10 @@ def set_sample_rate(request):
     Returns:
          :class:`.JsonResponse`: a JSON with the result.
     """
-    # Check if the AJAX request is valid.
     error = check_ajax_request(request)
-    if error is not None:
+    if error:
         return error
 
-    # Get the parameters from the POST request.
     data = json.loads(request.body.decode(request.encoding))
     device_id = data[ID_DEVICE_ID]
     sample_rate = data[ID_SAMPLE_RATE]
@@ -1135,8 +1079,8 @@ def set_sample_rate(request):
                 return JsonResponse({ID_ERROR: answer[ID_ERROR]}, status=400)
             return JsonResponse(answer, status=200)
         return JsonResponse({ID_ERROR: ERROR_SET_SAMPLE_RATE}, status=400)
-    except Exception as e:
-        return get_exception_response(e)
+    except Exception as exc:
+        return get_exception_response(exc)
 
 
 def get_data_usage(request):
@@ -1149,9 +1093,8 @@ def get_data_usage(request):
     Returns:
          :class:`.JsonResponse`: a JSON with the result.
     """
-    # Check if the AJAX request is valid.
     error = check_ajax_request(request)
-    if error is not None:
+    if error:
         return error
 
     try:
@@ -1161,8 +1104,8 @@ def get_data_usage(request):
                 return JsonResponse({ID_ERROR: answer[ID_ERROR]}, status=400)
             return JsonResponse(answer, status=200)
         return JsonResponse({ID_ERROR: ERROR_GET_DATA_USAGE}, status=400)
-    except Exception as e:
-        return get_exception_response(e)
+    except Exception as exc:
+        return get_exception_response(exc)
 
 
 def check_device_connection_status(request):
@@ -1176,12 +1119,10 @@ def check_device_connection_status(request):
     Returns:
         A JSON with the status of the device or the error.
     """
-    # Check if the AJAX request is valid.
     error = check_ajax_request(request)
-    if error is not None:
+    if error:
         return error
 
-    # Get the device ID from the POST request.
     data = json.loads(request.body.decode(request.encoding))
     device_id = data[ID_DEVICE_ID]
 

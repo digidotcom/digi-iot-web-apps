@@ -1,4 +1,4 @@
-# Copyright 2022, Digi International Inc.
+# Copyright 2022, 2023, Digi International Inc.
 #
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -54,10 +54,10 @@ class WsCLIConsumer(WebsocketConsumer):
         session = self.scope["session"]
         self._device_id = self.scope["url_route"]["kwargs"]["device_id"]
         self._session_id = self.scope["url_route"]["kwargs"]["cli_session_id"]
-        # Sanity checks.
+
         if session is None or self._device_id is None or self._session_id is None:
             return
-        # Accept the connection.
+
         self.accept()
 
     def receive(self, text_data=None, bytes_data=None):
@@ -74,7 +74,6 @@ class WsCLIConsumer(WebsocketConsumer):
             answer = drm_requests.register_cli_monitor(self.scope["session"], self._device_id,
                                                        self._session_id, self)
 
-        # Check errors.
         if answer == -1:
             return
         if ID_ERROR in answer:
@@ -85,16 +84,18 @@ class WsCLIConsumer(WebsocketConsumer):
 
         # Start CLI session.
         try:
-            answer = drm_requests.start_cli_session(self.scope["session"], self._device_id, self._session_id)
+            answer = drm_requests.start_cli_session(
+                self.scope["session"], self._device_id, self._session_id)
             if answer and ID_ERROR in answer:
                 self.send(text_data=TEMPLATE_ERROR % (ERROR_START_CLI_SESSION % answer[ID_ERROR]))
-        except Exception as e:
-            self.send(text_data=TEMPLATE_ERROR % (ERROR_START_CLI_SESSION % str(e)))
+        except Exception as exc:
+            self.send(text_data=TEMPLATE_ERROR % (ERROR_START_CLI_SESSION % str(exc)))
 
-    def disconnect(self, close_code):
+    def disconnect(self, _code):
         if self._monitor_id != -1:
             # Unsubscribe CLI monitor.
-            drm_requests.remove_cli_monitor(self.scope["session"], self._session_id, self._monitor_id)
+            drm_requests.remove_cli_monitor(
+                self.scope["session"], self._session_id, self._monitor_id)
             self._monitor_id = -1
             self._session_id = -1
 
@@ -109,14 +110,12 @@ class DataPointConsumer(WebsocketConsumer):
         self._device_id = None
 
     def connect(self):
-        # Initialize variables.
         session = self.scope["session"]
         self._device_id = self.scope["url_route"]["kwargs"]["device_id"]
-        # Sanity checks.
+
         if session is None or self._device_id is None:
             return
 
-        # Accept the connection.
         self.accept()
 
     def receive(self, text_data=None, bytes_data=None):
@@ -125,13 +124,14 @@ class DataPointConsumer(WebsocketConsumer):
 
         # Subscribe Data Point monitor.
         retries = REGISTER_MONITOR_RETRIES
-        answer = drm_requests.register_datapoints_monitor(self.scope["session"], self._device_id, self)
+        answer = drm_requests.register_datapoints_monitor(
+            self.scope["session"], self._device_id, self)
         while answer == -1 and retries > 0:
             retries -= 1
             time.sleep(.2)
-            answer = drm_requests.register_datapoints_monitor(self.scope["session"], self._device_id, self)
+            answer = drm_requests.register_datapoints_monitor(
+                self.scope["session"], self._device_id, self)
 
-        # Check errors.
         if answer == -1:
             return
         if ID_ERROR in answer:
@@ -140,7 +140,7 @@ class DataPointConsumer(WebsocketConsumer):
             return
         self._monitor_id = answer[ID_MONITOR_ID]
 
-    def disconnect(self, close_code):
+    def disconnect(self, _close_code):
         if self._monitor_id != -1:
             # Unsubscribe CLI monitor.
             drm_requests.remove_datapoints_monitor(self.scope["session"], self._monitor_id)
@@ -160,10 +160,10 @@ class FileUploadProgressConsumer(WebsocketConsumer):
         self._file_name = self.scope["url_route"]["kwargs"]["file_name"]
         self._unique_group_name = GROUP_UPLOAD_PROGRESS.format(self._file_name)
         async_to_sync(self.channel_layer.group_add)(self._unique_group_name, self.channel_name)
-        # Accept the connection.
+
         self.accept()
 
-    def disconnect(self, close_code):
+    def disconnect(self, _close_code):
         async_to_sync(self.channel_layer.group_discard)(self._unique_group_name, self.channel_name)
 
     def receive(self, text_data=None, bytes_data=None):
@@ -184,14 +184,12 @@ class DeviceConsumer(WebsocketConsumer):
         self._device_id = -1
 
     def connect(self):
-        # Initialize variables.
         session = self.scope["session"]
         self._device_id = self.scope["url_route"]["kwargs"]["device_id"]
-        # Sanity checks.
+
         if session is None or self._device_id is None:
             return
 
-        # Accept the connection.
         self.accept()
 
     def receive(self, text_data=None, bytes_data=None):
@@ -204,9 +202,9 @@ class DeviceConsumer(WebsocketConsumer):
         while answer == -1 and retries > 0:
             retries -= 1
             time.sleep(.2)
-            answer = drm_requests.register_device_monitor(self.scope["session"], self._device_id, self)
+            answer = drm_requests.register_device_monitor(
+                self.scope["session"], self._device_id, self)
 
-        # Check errors.
         if answer == -1:
             return
         if ID_ERROR in answer:
@@ -215,7 +213,7 @@ class DeviceConsumer(WebsocketConsumer):
             return
         self._monitor_id = answer[ID_MONITOR_ID]
 
-    def disconnect(self, close_code):
+    def disconnect(self, _code):
         if self._monitor_id != -1:
             # Unsubscribe monitor.
             drm_requests.remove_device_monitor(self.scope["session"], self._monitor_id)
