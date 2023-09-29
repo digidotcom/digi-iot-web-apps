@@ -15,9 +15,9 @@ demo.
 The best place to get started is the documentation of the specific demo you want
 to run:
 
-* [Smart Agriculture](http://www.digi.com/resources/documentation/digidocs/90002422/#containers/cont_demo_title.htm).
-* [Tank Monitoring](http://www.digi.com/resources/documentation/digidocs/90002422/#containers/cont_demo_tank.htm).
-
+* [Smart Agriculture](http://www.digi.com/resources/documentation/digidocs/90002422/#containers/cont_demo_title.htm)
+* [Tank Monitoring](http://www.digi.com/resources/documentation/digidocs/90002422/#containers/cont_demo_tank.htm)
+* [ConnectCore Cloud Services demo](https://www.digi.com/resources/documentation/digidocs/embedded/dey/4.0/cc93/yocto-ccdemo-intro_c)
 
 ## How to Contribute
 
@@ -28,7 +28,7 @@ document.
 
 ## License
 
-Copyright 2020-2022, Digi International Inc.
+Copyright 2020-2023, Digi International Inc.
 
 This Source Code Form is subject to the terms of the Mozilla Public
 License, v. 2.0. If a copy of the MPL was not distributed with this
