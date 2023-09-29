@@ -39,6 +39,7 @@ CLI_TYPE_START = "start"
 CLI_TYPE_TERMINATE = "terminate"
 
 CONTENT_TYPE_PRETTY_JSON = "application/pretty+json"
+CONTENT_TYPE_OCTET_STREAM = "application/octet-stream"
 
 DATA_POINTS_BUFFER_DURATION = 5
 DATA_POINTS_BUFFER_SIZE = 10
@@ -54,6 +55,7 @@ DEFAULT_VIDEO_RESOLUTION = "No video device found"
 DUMMY_FILE_CONTENT = "Ignore me"
 DUMMY_FILE_NAME = "dummy_file_for_dir_creation"
 
+ERROR_ADD_FW_VERSION = "Error adding new firmware version: %s"
 ERROR_CANCEL_FW_UPDATE = "Error canceling firmware update process: %s"
 ERROR_CHECK_FW_UPDATE_PROGRESS = "Error checking firmware update progress: %s"
 ERROR_CHECK_FW_UPDATE_STATUS = "Error checking firmware update status: %s"
@@ -66,6 +68,7 @@ ERROR_DRM_REQUEST = "Error in the DRM request: {}."
 ERROR_GET_CONFIG = "Error reading configuration: %s"
 ERROR_GET_DATA_USAGE = "Error reading account data usage: %s"
 ERROR_LIST_DIR = "Error '%s' listing directory: %s"
+ERROR_LIST_FW_REPO = "Error listing firmware repository files: %s"
 ERROR_LIST_FILESET = "Error listing fileset files: %s"
 ERROR_NO_POST_REQUEST = "AJAX request must be sent using POST"
 ERROR_NO_PROGRESS_INFO = "No progress information"
@@ -101,6 +104,7 @@ ID_DATA_USAGE_MONITORS = "data_usage_monitors"
 ID_DATA_USAGE_TOTAL = "data_usage_total"
 ID_DATA_USAGE_WEB = "data_usage_web"
 ID_DATA_USAGE_WEB_SERVICES = "data_usage_web_services"
+ID_DEPRECATED = "deprecated"
 ID_DESC = "desc"
 ID_DEVICE_ID = "device_id"
 ID_DEVICE_TYPE = "device_type"
@@ -110,9 +114,13 @@ ID_ERROR = "error"
 ID_ERROR_MSG = "error_msg"
 ID_ERROR_MESSAGE = "error_message"
 ID_FILE = "file"
+ID_FILENAME = "filename"
 ID_FILES = "files"
+ID_FILE_SIZE = "file_size"
 ID_FLASH_SIZE = "flash_size"
+ID_FW_VERSION = "firmware_version"
 ID_HARDWARE = "hardware"
+ID_INFO = "information_link"
 ID_INITIALIZE = "initialize"
 ID_INTERVAL = "interval"
 ID_INVENTORY = "inventory"
@@ -134,10 +142,12 @@ ID_N_DP_UPLOAD_CCCSD = "system_monitor_upload_samples_size"
 ID_NUM_SAMPLES_UPLOAD = "num_samples_upload"
 ID_PATH = "path"
 ID_PLAY = "play"
+ID_PRODUCTION = "production"
 ID_PROGRESS = "progress"
 ID_RESOLUTION = "resolution"
 ID_SAMPLE_RATE = "sample_rate"
 ID_SAMPLE_RATE_CCCSD = "system_monitor_sample_rate"
+ID_SECURITY = "security_related"
 ID_SERIAL_NUMBER = "serial_number"
 ID_SERVICE_DESCRIPTION = "service_description"
 ID_SESSION_ID = "session_id"
@@ -157,6 +167,7 @@ ID_USAGE = "usage"
 ID_UPDATE_RUNNING = "update_running"
 ID_VALID = "valid"
 ID_VALUE = "value"
+ID_VERSION = "version"
 ID_VIDEO_RESOLUTION = "video_resolution"
 ID_WIFI_IP = "wifi_ip"
 ID_WIFI_MAC = "wifi_mac"
@@ -290,6 +301,7 @@ TARGET_SET_VIDEO_BRIGHTNESS = "set_video_brightness"
 
 WS_DATA_USAGE_API = "/ws/v1/reports/usage/{}"
 WS_FILES_API = "/ws/v1/files/{}"
+WS_FW_REPOSITORY_API = "/ws/v1/firmware/inventory/FE080003/{}"
 WS_FIRMWARE_UPDATES_API = "/ws/v1/firmware_updates/{}"
 WS_MONITOR_API = "/ws/Monitor/{}"
 
@@ -855,6 +867,14 @@ def get_device_information(request, device_id):
         info[ID_ERROR] = exc.response.text
         return info
 
+    # Get firmware version
+    info[ID_FW_VERSION] = "-"
+    devices = list(dc_session.devicecore.get_devices())
+    for device in devices:
+        if device.get_connectware_id() != device_id:
+            continue
+        info[ID_FW_VERSION] = device.get_firmware_level_description()
+
     # Check if we have all the required information.
     if not info.get(ID_UBOOT_VERSION, None):
         information = query_rci_device_state(request, device_id)
@@ -1388,6 +1408,102 @@ def reboot_remote_device(request, device_id):
     return answer
 
 
+def list_repository(request, device_type):
+    """
+    Lists all the firmware files of the Remote Manager account for the given device type.
+
+    Args:
+        request (:class:`.WSGIRequest`): The request used to generate the
+            Device Cloud instance.
+        device_type (String): The device type of the firmwares to list.
+
+    Returns:
+        Dictionary: Dictionary containing the answer.
+    """
+    answer = {}
+    dc_session = get_device_cloud(request)
+    request_url = WS_FW_REPOSITORY_API.format(device_type)
+
+    try:
+        resp = dc_session.get_connection().get(request_url)
+        if resp.status_code == 200:
+            files = []
+            for file in json.loads(resp.text)[ID_LIST]:
+                file_entry = {
+                    ID_FW_VERSION: file[ID_FW_VERSION],
+                    ID_NAME: file[ID_FILENAME],
+                    ID_SIZE: file[ID_FILE_SIZE],
+                    ID_PRODUCTION: file[ID_PRODUCTION],
+                    ID_SECURITY: file[ID_SECURITY],
+                    ID_INFO: file[ID_INFO],
+                    ID_DEPRECATED: file[ID_DEPRECATED]
+                }
+                files.append(file_entry)
+            answer[ID_FILES] = files
+        else:
+            if resp.text:
+                answer[ID_ERROR] = ERROR_LIST_FW_REPO % json.loads(resp.text)[ID_ERROR_MESSAGE]
+            else:
+                answer[ID_ERROR] = ERROR_LIST_FW_REPO % resp.status_code
+    except DeviceCloudHttpException as exc:
+        if exc.response.text:
+            answer[ID_ERROR] = ERROR_LIST_FW_REPO % json.loads(exc.response.text)[ID_ERROR_MESSAGE]
+        else:
+            answer[ID_ERROR] = ERROR_LIST_FW_REPO % exc.response.status_code
+
+    return answer
+
+
+def add_fw_version(request, file, device_type, file_name, version, release_notes,
+                   security="not-identified", production=False, deprecated=False):
+    """
+    Uploads the provided firmware to the firmware repository.
+
+    Args:
+        request (:class:`.WSGIRequest`): The request used to generate the
+            Device Cloud instance.
+        file (:class:.`TemporaryUploadedFile`): The firmware file to upload.
+        device_type (String): The device type of the firmware to upload.
+        file_name (String): Firmware file name to store in the repository.
+        version (String): Version string of the firmware.
+        release_notes (String): URL of the firmware release notes.
+        security (String): String with the CVSS score.
+        production (Boolean): `True` to mark firmware as production.
+        deprecated (Boolean): `True` to mark as drepecated.
+    Returns:
+        Dictionary: Dictionary containing the answer.
+    """
+    answer = {}
+    dc_session = get_device_cloud(request)
+    request_url = WS_FW_REPOSITORY_API.format(
+            "%s?firmware_version=%s&information_link=%s&security_related=%s&production=%s&deprecated=%s&filename=%s" %
+            (device_type, version, release_notes, security, production, deprecated, file_name))
+    headers = {ID_CONTENT_TYPE: CONTENT_TYPE_OCTET_STREAM}
+    timeouts = (2.0, 2.0)
+
+    try:
+        if file.multiple_chunks():
+            resp = dc_session.get_connection().post(
+                request_url, IterableToFileAdapter(file, file_name),
+                timeout=timeouts, headers=headers)
+        else:
+            resp = dc_session.get_connection().post(
+                request_url, file.file.getvalue(), timeout=timeouts,
+                headers=headers)
+        if resp.status_code != 200:
+            if resp.text:
+                answer[ID_ERROR] = ERROR_ADD_FW_VERSION % json.loads(resp.text)[ID_ERROR_MESSAGE]
+            else:
+                answer[ID_ERROR] = ERROR_ADD_FW_VERSION % resp.status_code
+    except DeviceCloudHttpException as exc:
+        if exc.response.text:
+            answer[ID_ERROR] = ERROR_ADD_FW_VERSION % json.loads(exc.response.text)[ID_ERROR_MESSAGE]
+        else:
+            answer[ID_ERROR] = ERROR_ADD_FW_VERSION % exc.response.status_code
+
+    return answer
+
+
 def create_new_file(request, file_set, path, file_name, file):
     """
     Creates a new file in the DRM account using the given information.
@@ -1421,56 +1537,6 @@ def create_new_file(request, file_set, path, file_name, file):
         except DeviceCloudHttpException:
             pass
 
-    class IterableToFileAdapter:
-        def __init__(self, iterable, name):
-            self.iterator = iter(iterable)
-            self.file_name = name
-            self.length = len(iterable)
-            self.total_read = 0
-            self.prev_progress = 0
-            self.offset = 0
-            self.chunk = bytes()
-            self.canceled = False
-            # Register the cancel callback.
-            get_cancel_request_manager().add_callback(self.file_name, self.request_canceled)
-
-        def up_to_iter(self, size):
-            while size:
-                if self.offset == len(self.chunk):
-                    try:
-                        self.chunk = next(self.iterator)
-                    except StopIteration:
-                        break
-                    else:
-                        self.offset = 0
-                to_yield = min(size, len(self.chunk) - self.offset)
-                self.offset = self.offset + to_yield
-                size -= to_yield
-                yield self.chunk[self.offset - to_yield:self.offset]
-
-        def read(self, size=-1):
-            value = bytes().join(self.up_to_iter(float('inf') if size is None or size < 0 else size))
-            if value is None or self.canceled:
-                get_cancel_request_manager().remove_callback(self.file_name)
-                return None
-            self.total_read = self.total_read + len(value) if value else self.total_read
-            progress = int(self.total_read * 100 / self.length)
-            if progress != self.prev_progress:
-                self.prev_progress = progress
-                # Notify to subscribed channels.
-                channel_layer = get_channel_layer()
-                async_to_sync(channel_layer.group_send)(
-                    GROUP_UPLOAD_PROGRESS.format(self.file_name),
-                    {ID_TYPE: "progress.received", ID_DATA: progress}
-                )
-            return value
-
-        def request_canceled(self):
-            self.canceled = True
-
-        def __len__(self):
-            return self.length
-
     timeouts = (2.0, 2.0)
     try:
         if file.multiple_chunks():
@@ -1492,7 +1558,45 @@ def create_new_file(request, file_set, path, file_name, file):
     return answer
 
 
-def update_remote_firmware(request, device_id, file):
+def update_remote_firmware(request, device_id, version):
+    """
+    Updates the firmware of the remote device with the given device ID.
+
+    Args:
+        request (:class:`.WSGIRequest`): The request used to generate the
+            Device Cloud instance.
+        device_id (String): The ID of the ConnectCore device to update the
+            firmware of.
+        version (String): The firmware version in the custom firmware
+            repository to use in the update.
+
+    Returns:
+        Dictionary: Dictionary containing the answer.
+    """
+    answer = {}
+    dc_session = get_device_cloud(request)
+    request_url = WS_FIRMWARE_UPDATES_API.format(ID_INVENTORY)
+    request_data = {ID_TARGETS: {ID_DEVICES: [device_id]}, ID_VERSION: version}
+    headers = {ID_CONTENT_TYPE: CONTENT_TYPE_PRETTY_JSON}
+
+    try:
+        resp = dc_session.get_connection().post(
+            request_url, data=json.dumps(request_data), headers=headers)
+        if resp.status_code != 200:
+            if resp.text:
+                answer[ID_ERROR] = ERROR_UPDATE_FW_REQUEST % json.loads(resp.text)[ID_ERROR_MESSAGE]
+            else:
+                answer[ID_ERROR] = ERROR_UPDATE_FW_REQUEST % resp.status_code
+    except DeviceCloudHttpException as exc:
+        if exc.response.text:
+            answer[ID_ERROR] = ERROR_UPDATE_FW_REQUEST % json.loads(exc.response.text)[ID_ERROR_MESSAGE]
+        else:
+            answer[ID_ERROR] = ERROR_UPDATE_FW_REQUEST % exc.response.status_code
+
+    return answer
+
+
+def update_remote_firmware_from_fileset(request, device_id, file):
     """
     Updates the firmware of the remote device with the given device ID.
 
@@ -2289,6 +2393,57 @@ def remove_inactive_monitors(dc_session):
         if monitor.get_metadata()["monStatus"] != "ACTIVE":
             print("Deleted inactive monitor %s" % monitor.get_metadata()["monId"])
             monitor.delete()
+
+
+class IterableToFileAdapter:
+    def __init__(self, iterable, name):
+        self.iterator = iter(iterable)
+        self.file_name = name
+        self.length = len(iterable)
+        self.total_read = 0
+        self.prev_progress = 0
+        self.offset = 0
+        self.chunk = bytes()
+        self.canceled = False
+        # Register the cancel callback.
+        get_cancel_request_manager().add_callback(self.file_name, self.request_canceled)
+
+    def up_to_iter(self, size):
+        while size:
+            if self.offset == len(self.chunk):
+                try:
+                    self.chunk = next(self.iterator)
+                except StopIteration:
+                    break
+                else:
+                    self.offset = 0
+            to_yield = min(size, len(self.chunk) - self.offset)
+            self.offset = self.offset + to_yield
+            size -= to_yield
+            yield self.chunk[self.offset - to_yield:self.offset]
+
+    def read(self, size=-1):
+        value = bytes().join(self.up_to_iter(float('inf') if size is None or size < 0 else size))
+        if value is None or self.canceled:
+            get_cancel_request_manager().remove_callback(self.file_name)
+            return None
+        self.total_read = self.total_read + len(value) if value else self.total_read
+        progress = int(self.total_read * 100 / self.length)
+        if progress != self.prev_progress:
+            self.prev_progress = progress
+            # Notify to subscribed channels.
+            channel_layer = get_channel_layer()
+            async_to_sync(channel_layer.group_send)(
+                GROUP_UPLOAD_PROGRESS.format(self.file_name),
+                {ID_TYPE: "progress.received", ID_DATA: progress}
+            )
+        return value
+
+    def request_canceled(self):
+        self.canceled = True
+
+    def __len__(self):
+        return self.length
 
 
 class MonitorManager(MonitorAPI):

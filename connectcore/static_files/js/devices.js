@@ -510,6 +510,7 @@ class ConnectCoreDevice {
     #platformName;
     #deviceID;
     #serialNumber;
+    #fwVersion;
     #ubootVersion;
     #kernelVersion;
     #deyVersion;
@@ -541,6 +542,7 @@ class ConnectCoreDevice {
     #initDevice(deviceData) {
         this.#ubootVersion = deviceData[ID_UBOOT_VERSION];
         this.#serialNumber = deviceData[ID_SERIAL_NUMBER];
+        this.#fwVersion = deviceData[ID_FW_VERSION];
         this.#kernelVersion = deviceData[ID_KERNEL_VERSION];
         this.#deyVersion = deviceData[ID_DEY_VERSION];
         this.#moduleVariant = deviceData[ID_MODULE_VARIANT];
@@ -590,6 +592,11 @@ class ConnectCoreDevice {
     // Returns the board image scale.
     getBoardImageScale() {
         return this.BOARD_IMAGE_SCALE;
+    }
+
+    // Returns the device firmware version.
+    getFirmareVersion() {
+        return this.#fwVersion;
     }
 
     // Returns the device U-Boot version.

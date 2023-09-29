@@ -1,4 +1,4 @@
-# Copyright 2022, Digi International Inc.
+# Copyright 2022, 2023, Digi International Inc.
 #
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -44,11 +44,14 @@ urlpatterns = [
     path('ajax/history_memory', views.history_memory, name="history_memory"),
     path('ajax/reboot_device', views.reboot_device, name="reboot_device"),
     path('ajax/upload_firmware', views.upload_firmware, name="upload_firmware"),
+    path('ajax/upload_firmware_to_fileset', views.upload_firmware_to_fileset, name="upload_firmware_to_fileset"),
     path('ajax/update_firmware', views.update_firmware, name="update_firmware"),
+    path('ajax/update_firmware_from_fileset', views.update_firmware_from_fileset, name="update_firmware_from_fileset"),
     path('ajax/cancel_firmware_update', views.cancel_firmware_update, name="cancel_firmware_update"),
     path('ajax/check_firmware_update_running', views.check_firmware_update_running, name="check_firmware_update_running"),
     path('ajax/check_firmware_update_status', views.check_firmware_update_status, name="check_firmware_update_status"),
     path('ajax/check_firmware_update_progress', views.check_firmware_update_progress, name="check_firmware_update_progress"),
+    path('ajax/list_repo_files', views.list_repo_files, name="list_repo_files"),
     path('ajax/list_fileset_files', views.list_fileset_files, name="list_fileset_files"),
     path('ajax/get_config', views.get_config, name="get_config"),
     path('ajax/set_config', views.set_config, name="set_config"),

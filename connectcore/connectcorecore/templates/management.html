@@ -5,7 +5,8 @@ Digi Demo - Management
 {% endblock %}
 {% block inner_content %}
 <!--            <input type="file" id="firmware_file" style="display:none" onchange="firmwareFileChanged()" accept=".swu,.json,.txt"/>-->
-            <input type="file" id="firmware_file" style="display:none" onchange="firmwareFileChanged()"/>
+            <input type="file" id="firmware_file" style="display:none" onchange="firmwareFileChanged(ID_UPDATE_FIRMWARE_FILE)"/>
+            <input type="file" id="fileset_fw_file" style="display:none" onchange="firmwareFileChanged(ID_UPLOAD_FIRMWARE_FILESET)"/>
             <div class="row justify-content-lg-center">
                 <div class="col-lg-12 col-xl-12">
                     <div id="loading_popup" class="popup popup-loading shadow">
@@ -36,13 +37,13 @@ Digi Demo - Management
                                 <div class="param-container">
                                     <span class="param-label">Time between samples:</span>
                                     <input id="sample_rate" class="input-control" type="text"/>
-                                    <button class="fas fa-question-circle system-monitor-help" title="Time to wait between samples read (in seconds). Must be a positive number greater than 0." data-toggle="tooltip" data-placement="right"></button>
+                                    <button class="fas fa-question-circle management-help" title="Time to wait between samples read (in seconds). Must be a positive number greater than 0." data-toggle="tooltip" data-placement="right"></button>
                                 </div>
                                 <div id="sample_rate_error" class="error-label"></div>
                                 <div class="param-container">
                                     <span class="param-label">Samples to buffer:</span>
                                     <input id="num_samples_upload" class="input-control" type="text"/>
-                                    <button class="fas fa-question-circle system-monitor-help" title="Number of samples of each parameter to gather before uploading them to Digi Remote Manager. Must be a positive number greater than 0." data-toggle="tooltip" data-placement="right"></button>
+                                    <button class="fas fa-question-circle management-help" title="Number of samples of each parameter to gather before uploading them to Digi Remote Manager. Must be a positive number greater than 0." data-toggle="tooltip" data-placement="right"></button>
                                 </div>
                                 <div id="samples_buffer_error" class="error-label"></div>
                                 <div id="save_button" class="device-card-button config-button config-button-disabled" onclick="saveSystemMonitor()">Save</div>
@@ -59,9 +60,17 @@ Digi Demo - Management
                             <div class="card-body">
                                 <h5 class="card-title">Firmware update</h5>
                                 <table style="margin: 15px;">
+                                     <tr>
+                                        <td style="width: 180px; vertical-align: top;">
+                                            <span class="device-card-content-text">Firmware version:</span>
+                                        </td>
+                                        <td>
+                                            <span id="firmware_version" class="device-card-content-value">-</span>
+                                        </td>
+                                    </tr>
                                     <tr>
                                         <td style="width: 180px; vertical-align: top;">
-                                            <span class="device-card-content-text">Current DEY version:</span>
+                                            <span class="device-card-content-text">DEY version:</span>
                                         </td>
                                         <td>
                                             <span id="dey_version" class="device-card-content-value">-</span>
@@ -69,7 +78,7 @@ Digi Demo - Management
                                     </tr>
                                     <tr>
                                         <td style="vertical-align: top;">
-                                            <span class="device-card-content-text">Current kernel version:</span>
+                                            <span class="device-card-content-text">Kernel version:</span>
                                         </td>
                                         <td>
                                             <span id="kernel_version" class="device-card-content-value">-</span>
@@ -77,7 +86,7 @@ Digi Demo - Management
                                     </tr>
                                     <tr>
                                         <td style="vertical-align: top;">
-                                            <span class="device-card-content-text">Current U-Boot version:</span>
+                                            <span class="device-card-content-text">U-Boot version:</span>
                                         </td>
                                         <td>
                                             <span id="uboot_version" class="device-card-content-value">-</span>
@@ -87,20 +96,72 @@ Digi Demo - Management
                                 <div class="firmware-tabs">
                                     <div id="firmware_tab_upload_header" class="firmware-tab-header firmware-tab-header-active" onclick="showFirmwareTab(ID_FIRMWARE_TAB_UPLOAD)">
                                         <span class="fas fa-upload fa-lg"></span>
-                                        <span class="firmware-tab-text">Upload file</span>
+                                        <span class="firmware-tab-text">Upload a new firmware version</span>
+                                    </div>
+                                    <div id="firmware_tab_repository_header" class="firmware-tab-header" onclick="showFirmwareTab(ID_FIRMWARE_TAB_REPOSITORY)">
+                                        <span class="fas fa-database fa-lg"></span>
+                                        <span class="firmware-tab-text">Download from firmware repository</span>
                                     </div>
                                     <div id="firmware_tab_fileset_header" class="firmware-tab-header" onclick="showFirmwareTab(ID_FIRMWARE_TAB_FILESET)">
                                         <span class="fas fa-database fa-lg"></span>
-                                        <span class="firmware-tab-text">Download from storage</span>
+                                        <span class="firmware-tab-text">Download from file storage</span>
                                     </div>
                                 </div>
                                 <div class="firmware-tab-container">
                                     <div id="firmware_tab_upload" class="firmware-tab firmware-tab-upload">
-                                        <div>Upload and install a firmware file from your computer.</div>
+                                        <div>Add firmware to Digi Remote Manager firmware repository and install in the device.</div>
                                         <div class="firmware-file-container">
-                                            <div id="select_firmware_button" class="device-card-button browse-firmware-button" onclick="openFirmwareBrowser()">Choose file...</div>
-                                            <div id="firmware_file_label" class="firmware-file-label">No file chosen</div>
+                                            <div class="firmware-param-container ">
+                                                <span class="param-label">Firmware version:</span>
+                                                <input id="fw_version" class="input-control input-control-wide" style="width: 300px !important;" type="text"/>
+                                                <button class="fas fa-question-circle management-help" title="The version of the firmware following the format X.X.X.X (X between 0 and 255)" data-toggle="tooltip" data-placement="right"></button>
+                                            </div>
+                                            <div id="fw_version_error" class="error-label"></div>
+                                            <div class="firmware-param-container">
+                                                <span class="param-label">Production:</span>
+                                                <label class="switch-control">
+                                                    <input id="fw_production" type="checkbox"/>
+                                                    <span class="slider-control round"></span>
+                                                </label>
+                                                <button class="fas fa-question-circle management-help" title="Mark the firmware as production." data-toggle="tooltip" data-placement="right"></button>
+                                            </div>
+                                            <div class="firmware-param-container">
+                                                <span class="param-label">Security:</span>
+                                                <select name="fw_security" id="fw_security" class="select-control" style="width: 300px !important;">
+                                                   <option value="not-identified">Security fixes have not been identified</option>
+                                                   <option value="none">Contains no security fixes</option>
+                                                   <option value="low">Contains security fixes rated low</option>
+                                                   <option value="medium">Contains security fixes rated medium</option>
+                                                   <option value="high">Contains security fixes rated high</option>
+                                                   <option value="critical">Contains security fixes rated critical</option>
+                                                </select>
+                                                <button class="fas fa-question-circle management-help" title="The CSVV score of the highest security related bug in the firmware." data-toggle="tooltip" data-placement="right"></button>
+                                            </div>
+                                            <div class="firmware-param-container">
+                                                <span class="param-label">Release notes:</span>
+                                                <input id="fw_release_notes" class="input-control input-control-wide" style="width: 300px !important;" type="text"/>
+                                                <button class="fas fa-question-circle management-help" title="URL of the firmware release notes." data-toggle="tooltip" data-placement="right"></button>
+                                            </div>
+                                            <div id="fw_release_notes_error" class="error-label"></div>
+                                            <div class="firmware-param-container">
+                                                <div id="select_firmware_button" class="device-card-button browse-firmware-button" onclick="openFirmwareBrowser(ID_UPDATE_FIRMWARE_FILE)">Choose file...</div>
+                                                <div id="firmware_file_label" class="firmware-file-label">No file chosen</div>
+                                            </div>
                                         </div>
+                                    </div>
+                                    <div id="firmware_tab_repository" class="firmware-tab firmware-tab-repository">
+                                        <div>Download and install firmware from Digi Remote Manager firmware repository.</div>
+                                        <div class="repository-items-header">
+                                            <div class="repository-entry-icon"></div>
+                                            <div class="repository-entry-version">Version</div>
+                                            <div class="repository-entry-production">Production</div>
+                                            <div class="repository-entry-security">Security</div>
+                                            <div class="repository-entry-name">Name</div>
+                                            <div class="repository-entry-size">Size</div>
+                                            <div class="repository-entry-info">Release notes</div>
+                                        </div>
+                                        <div id="repository_items_container" class="repository-items-container"></div>
+                                        <div id="refresh_repository_button" class="device-card-button refresh-repository-button" onclick="refreshRepositoryFiles()">Refresh</div>
                                     </div>
                                     <div id="firmware_tab_fileset" class="firmware-tab firmware-tab-fileset">
                                         <div>Download and install firmware from Digi Remote Manager storage.</div>
@@ -113,6 +174,7 @@ Digi Demo - Management
                                         </div>
                                         <div id="fileset_items_container" class="fileset-items-container"></div>
                                         <div id="refresh_fileset_button" class="device-card-button refresh-fileset-button" onclick="refreshFilesetFiles()">Refresh</div>
+                                        <div id="upload_fileset_button" class="device-card-button refresh-fileset-button" onclick="openFirmwareBrowser(ID_UPLOAD_FIRMWARE_FILESET)">Upload file...</div>
                                     </div>
                                 </div>
                                 <div id="update_firmware_progress" class="update-firmware-progress">
@@ -140,14 +202,23 @@ Digi Demo - Management
         deviceRebooting = false;
         updatingFirmware = false;
         firmwareUpdateTimer = null;
+        selectedRepositoryEntry = null;
         selectedFilesetEntry = null;
         filesLoaded = false;
+        fwLoaded = false;
         // Register system monitor input changed.
         $("#sample_rate").on("input", function(event) {
             validateSystemMonitor(event.target.value);
         });
         $("#num_samples_upload").on("input", function(event) {
             validateSystemMonitor();
+        });
+        // Register input changed events.
+        $("#fw_version").on("input", function(event) {
+            validateFwVersionInfo();
+        });
+        $("#fw_release_notes").on("input", function(event) {
+            validateFwVersionInfo();
         });
     });
     </script>

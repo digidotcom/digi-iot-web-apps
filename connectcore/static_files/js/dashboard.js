@@ -598,6 +598,8 @@ function updateInfoValues() {
     updateFieldValue(ID_DEVICE_ID, device.getDeviceID());
     // Set serial number.
     updateFieldValue(ID_SERIAL_NUMBER, device.getSerialNumber());
+    // Set firmware version.
+    updateFieldValue(ID_FW_VERSION, device.getFirmareVersion());
     // Set DEY version.
     updateFieldValue(ID_DEY_VERSION, device.getDEYVersion());
     // Set Kernel version.

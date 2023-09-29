@@ -38,6 +38,7 @@ ERROR_HISTORY_TEMPERATURE = "Could not get the temperature history"
 ERROR_HISTORY_CPU = "Could not get the CPU load history"
 ERROR_HISTORY_MEMORY = "Could not get the memory history"
 ERROR_LIST_DIRECTORY = "Could not list directory contents."
+ERROR_LIST_REPOSITORY = "Could not list firmware repository files."
 ERROR_LIST_FILESET = "Could not list fileset files."
 ERROR_REBOOT_DEVICE = "Could not reboot device."
 ERROR_REMOVE_FILE = "Could not remove file"
@@ -783,6 +784,43 @@ def upload_firmware(request):
     if error:
         return error
 
+    device_type = request.POST[ID_DEVICE_TYPE]
+    file_name = request.POST[ID_FILE_NAME]
+    version = request.POST[ID_FW_VERSION]
+    release_notes = request.POST[ID_INFO]
+    security = request.POST[ID_SECURITY]
+    production = request.POST[ID_PRODUCTION]
+    deprecated = request.POST[ID_DEPRECATED]
+
+    file = request.FILES[ID_FILE]
+
+    try:
+        answer = add_fw_version(request, file, device_type, file_name, version,
+                                release_notes, security=security,
+                                production=production, deprecated=deprecated)
+        if answer is not None:
+            if ID_ERROR in answer:
+                return JsonResponse({ID_ERROR: answer[ID_ERROR]}, status=400)
+            return JsonResponse(answer, status=200)
+        return JsonResponse({ID_ERROR: ERROR_UPLOAD_FIRMWARE}, status=400)
+    except Exception as exc:
+        return get_exception_response(exc)
+
+
+def upload_firmware_to_fileset(request):
+    """
+    Uploads a new firmware file to DRM with the information contained in the request.
+
+    Args:
+        request (:class:`.WSGIRequest`): the AJAX request.
+
+    Returns:
+         :class:`.JsonResponse`: a JSON with the result.
+    """
+    error = check_ajax_request(request)
+    if error:
+        return error
+
     file_set = request.POST[ID_FILE_SET]
     path = request.POST[ID_PATH]
     file_name = request.POST[ID_FILE_NAME]
@@ -816,10 +854,39 @@ def update_firmware(request):
 
     data = json.loads(request.body.decode(request.encoding))
     device_id = data[ID_DEVICE_ID]
+    version = data[ID_FW_VERSION]
+
+    try:
+        answer = update_remote_firmware(request, device_id, version)
+        if answer is not None:
+            if ID_ERROR in answer:
+                return JsonResponse({ID_ERROR: answer[ID_ERROR]}, status=400)
+            return JsonResponse(answer, status=200)
+        return JsonResponse({ID_ERROR: ERROR_UPDATE_FIRMWARE}, status=400)
+    except Exception as exc:
+        return get_exception_response(exc)
+
+
+def update_firmware_from_fileset(request):
+    """
+    Updates the firmware of the device with the device ID contained in the request.
+
+    Args:
+        request (:class:`.WSGIRequest`): the AJAX request.
+
+    Returns:
+         :class:`.JsonResponse`: a JSON with the result.
+    """
+    error = check_ajax_request(request)
+    if error:
+        return error
+
+    data = json.loads(request.body.decode(request.encoding))
+    device_id = data[ID_DEVICE_ID]
     file = data[ID_FILE]
 
     try:
-        answer = update_remote_firmware(request, device_id, file)
+        answer = update_remote_firmware_from_fileset(request, device_id, file)
         if answer is not None:
             if ID_ERROR in answer:
                 return JsonResponse({ID_ERROR: answer[ID_ERROR]}, status=400)
@@ -937,6 +1004,33 @@ def cancel_firmware_update(request):
     except Exception as exc:
         return get_exception_response(exc)
 
+
+def list_repo_files(request):
+    """
+    Lists all the firmware files belonging to the device type specified in the request.
+
+    Args:
+        request (:class:`.WSGIRequest`): the AJAX request.
+
+    Returns:
+         :class:`.JsonResponse`: a JSON with the result.
+    """
+    error = check_ajax_request(request)
+    if error:
+        return error
+
+    data = json.loads(request.body.decode(request.encoding))
+    device_type = data[ID_DEVICE_TYPE]
+
+    try:
+        answer = list_repository(request, device_type)
+        if answer is not None:
+            if ID_ERROR in answer:
+                return JsonResponse({ID_ERROR: answer[ID_ERROR]}, status=400)
+            return JsonResponse(answer, status=200)
+        return JsonResponse({ID_ERROR: ERROR_LIST_REPOSITORY}, status=400)
+    except Exception as exc:
+        return get_exception_response(exc)
 
 
 def list_fileset_files(request):

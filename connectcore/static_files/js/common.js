@@ -1,5 +1,5 @@
 /*
- * Copyright 2022,2023, Digi International Inc.
+ * Copyright 2022, 2023, Digi International Inc.
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -47,6 +47,7 @@ const ID_DATA_USAGE_MONITORS = "data_usage_monitors";
 const ID_DATA_USAGE_TOTAL = "data_usage_total";
 const ID_DATA_USAGE_WEB = "data_usage_web";
 const ID_DATA_USAGE_WEB_SERVICES = "data_usage_web_services";
+const ID_DEPRECATED = "deprecated";
 const ID_DESC = "desc";
 const ID_DEVICE_ID = "device_id";
 const ID_DEVICE_NAME = "device_name";
@@ -70,12 +71,14 @@ const ID_ETHERNET1_SENT_DATA = "ethernet1_sent_data";
 const ID_ETHERNET0_STATE = "ethernet0_state";
 const ID_ETHERNET1_STATE = "ethernet1_state";
 const ID_FILES = "files";
+const ID_FW_VERSION = "firmware_version";
 const ID_FLASH_MEMORY = "flash_memory";
 const ID_FLASH_SIZE = "flash_size";
 const ID_HAS_ARROW = "has-arrow";
 const ID_HAS_PANEL = "has-panel";
 const ID_ICON = "icon";
 const ID_ID = "id";
+const ID_INFO = "information_link";
 const ID_INFO_POPUP = "info_popup";
 const ID_INFO_POPUP_MESSAGE = "info_popup_message";
 const ID_INFO_POPUP_TITLE = "info_popup_title";
@@ -102,8 +105,10 @@ const ID_PANEL_HORIZONTAL_MARGIN = "panel-horizontal-margin";
 const ID_PANEL_ORIENTATION = "panel-orientation";
 const ID_PANEL_VERTICAL_MARGIN = "panel-vertical-margin";
 const ID_PATH = "path";
+const ID_PRODUCTION = "production";
 const ID_PROGRESS = "progress";
 const ID_SAMPLE_RATE = "sample_rate";
+const ID_SECURITY = "security_related";
 const ID_SERIAL_NUMBER = "serial_number";
 const ID_SESSION_ID = "session_id";
 const ID_SIZE = "size";
