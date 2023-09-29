@@ -96,7 +96,6 @@ const FIRMWARE_UPDATE_CHECK_INTERVAL = 10000;
 
 // Variables.
 var readingManagementInfo = false;
-var managementInfoRead = false;
 var deviceRebooting = false;
 var updatingFirmware = false;
 var firmwareUpdateTimer = null;
@@ -108,7 +107,7 @@ var selectedFilesetEntry = null;
 // Initializes the management page.
 function initializeManagementPage() {
     // Sanity checks.
-    if (!isManagementShowing() || managementInfoRead)
+    if (!isManagementShowing())
         return;
     // Read management information.
     readDeviceInfoManagement();
@@ -213,8 +212,6 @@ function processSystemMonitorInfoResponse(response) {
     if (!checkErrorResponse(response, false)) {
         // Fill system monitor info.
         fillSystemMonitorInfo(response);
-        // Flag device info read.
-        managementInfoRead = true;
         // Check if there is a firmware update running.
         checkFirmwareUpdateRunning();
     }
@@ -399,7 +396,6 @@ function processRebootDeviceResponse(response) {
         // Show info dialog.
         showInfoPopup(true, TITLE_DEVICE_REBOOTING, MESSAGE_DEVICE_REBOOTING);
         deviceRebooting = true;
-        managementInfoRead = false;
         // TODO: This should not be necessary when implementing device connection monitor.
         prevDeviceConnectionStatus = false;
     }
@@ -700,8 +696,6 @@ function processCheckFirmwareUpdateStatusResponse(response) {
             if (response[ID_STATUS] == VALUE_FAILED || response[ID_STATUS] == VALUE_CANCELED)
                 setFirmwareUpdateProgressError(ERROR_TITLE + ": " + response[ID_MESSAGE]);
             else {
-                // Reset read info variable so info is read again after device reboots.
-                managementInfoRead = false;
                 // Set update as successful.
                 setFirmwareUpdateProgressSuccess(response[ID_MESSAGE]);
             }

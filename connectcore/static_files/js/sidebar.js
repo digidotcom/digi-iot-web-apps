@@ -190,7 +190,6 @@ function connection_status_changed() {
         if (deviceConnectionStatus)
             initializeManagementPage();
         else if (!isDeviceRebooting()) {
-            managementInfoRead = false;
             displayDeviceDisconnectedError();
         }
     } else if (isHistoryShowing()) {
