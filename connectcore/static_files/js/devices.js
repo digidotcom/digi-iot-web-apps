@@ -63,7 +63,7 @@ const TEMPLATE_DEVICE_LIST_ENTRY = "" +
     "        <thead>" +
     "            <tr>" +
     "                <td rowspan='2'><img class='device-list-entry-status' src=" + getPostURL('static/images/@@STATUS_IMAGE@@') + "></td>" +
-    "                <td><span class='device-list-entry-name'>@@TYPE@@</span></td>" +
+    "                <td><span class='device-list-entry-name'>@@NAME@@</span></td>" +
     "            </tr>" +
     "            <tr>" +
     "                <td><span class='device-list-entry-id'>@@ID@@</span></td>" +
@@ -127,8 +127,11 @@ function processListDevicesAnswer(response) {
         // Add a new device entry to the list of devices.
         devices.push(device);
         let deviceDivContent = TEMPLATE_DEVICE_LIST_ENTRY;
+        let deviceName = device[ID_TYPE];
+        if (device[ID_NAME] != "")
+            deviceName = device[ID_NAME] + " - " + deviceName;
+        deviceDivContent = deviceDivContent.replace(/@@NAME@@/g, deviceName);
         deviceDivContent = deviceDivContent.replace(/@@ID@@/g, device[ID_ID]);
-        deviceDivContent = deviceDivContent.replace(/@@TYPE@@/g, device[ID_TYPE]);
         if (device[ID_ONLINE] == true)
             deviceDivContent = deviceDivContent.replace(/@@STATUS_IMAGE@@/g, IMAGE_ONLINE);
         else

@@ -17,16 +17,18 @@ DEFAULT_LOCATION = (33.813980, -117.923089)  # Batuu (Star Wars Galaxy's Edge)
 
 class ConnectCoreDevice:
 
-    def __init__(self, device_id, device_type):
+    def __init__(self, device_id, device_type, device_name):
         """
         Class constructor. Instantiates a new ``ConnectCore``.
 
         Args:
             device_id (String): The ID of the ConnectCore device.
             device_type (String): The type of the ConnectCore device.
+            device_name (String): The name of the ConnectCore device.
         """
         self._id = device_id
         self._type = device_type
+        self._name = device_name
         self._location = DEFAULT_LOCATION
         self._online = False
 
@@ -49,6 +51,16 @@ class ConnectCoreDevice:
              String: The type of the ConnectCore device.
         """
         return self._type
+
+    @property
+    def name(self):
+        """
+        Returns the name of the ConnectCore device.
+
+        Returns:
+             String: The name of the ConnectCore device.
+        """
+        return self._name
 
     @property
     def location(self):
@@ -102,7 +114,8 @@ class ConnectCoreDevice:
         json_dict = {
             "id": self._id,
             "type": self._type,
+            "name": self._name,
             "location": self._location,
-            "online": self._online
+            "online": self._online,
         }
         return json_dict

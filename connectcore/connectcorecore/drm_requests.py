@@ -110,6 +110,7 @@ ID_DEVICE_ID = "device_id"
 ID_DEVICE_TYPE = "device_type"
 ID_DEVICES = "devices"
 ID_DEY_VERSION = "dey_version"
+ID_DPNAME = "dpName"
 ID_ERROR = "error"
 ID_ERROR_MSG = "error_msg"
 ID_ERROR_MESSAGE = "error_message"
@@ -517,7 +518,9 @@ def get_cc_devices(request):
                 or not device.get_device_type().startswith(PREFIX_VALID_DEVICE)):
             continue
 
-        cc_device = ConnectCoreDevice(device.get_connectware_id(), device.get_device_type())
+        cc_device = ConnectCoreDevice(device.get_connectware_id(), device.get_device_type(),
+                                      device.get_device_json()[ID_DPNAME] if ID_DPNAME in device.get_device_json()
+                                      else "")
         cc_devices.append(cc_device)
         # Set the online property to the farm.
         cc_device.is_online = device.is_connected()
@@ -525,6 +528,11 @@ def get_cc_devices(request):
         lat, lon = device.get_latlon()
         if lat is not None and lon is not None:
             cc_device.location = (lat, lon)
+
+    # Sort list.
+    cc_devices.sort(key=lambda element: element.type)
+    cc_devices.sort(key=lambda element: element.name)
+    cc_devices.sort(key=lambda element: element.is_online, reverse=True)
 
     return cc_devices
 
