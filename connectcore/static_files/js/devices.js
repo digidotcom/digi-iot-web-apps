@@ -847,8 +847,13 @@ class ConnectCoreDevice {
         return this.SUPPORTS_VIDEO_BRIGHTNESS;
     }
 
-     // Returns whether the device supports dual ethernet or not.
+    // Returns whether the device supports dual ethernet or not.
     supportsDualEthernet() {
         return this.SUPPORTS_DUAL_ETHERNET;
+    }
+
+    // Returns the color of the device PCB.
+    getPCBColor() {
+        return this.PCB_COLOR;
     }
 }

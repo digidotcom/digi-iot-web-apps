@@ -140,6 +140,9 @@ class CCIMX8MNANO extends ConnectCoreDevice {
     SUPPORTS_VIDEO_BRIGHTNESS = false;
     SUPPORTS_DUAL_ETHERNET = false;
 
+    // Misc info
+    PCB_COLOR = ID_COLOR_BLUE;
+
     // Constructor.
     constructor(deviceID, deviceData) {
         super(CCIMX8MNANO.DEVICE_TYPE, CCIMX8MNANO.PLATFORM_NAME, deviceID, deviceData);
