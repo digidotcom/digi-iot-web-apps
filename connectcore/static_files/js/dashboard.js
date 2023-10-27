@@ -339,6 +339,12 @@ function createDevice(deviceData) {
         case CCIMX93.DEVICE_TYPE:
             device = new CCIMX93(getDeviceID(), deviceData);
             break;
+        case CCIMX6SBC.DEVICE_TYPE:
+            device = new CCIMX6SBC(getDeviceID(), deviceData);
+            break;
+        case CCIMX6QPSBC.DEVICE_TYPE:
+            device = new CCIMX6QPSBC(getDeviceID(), deviceData);
+            break;
     }
     if (device != null) {
         // Draw the device.
