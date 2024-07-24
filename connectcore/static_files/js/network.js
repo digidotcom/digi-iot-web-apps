@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, Digi International Inc.
+ * Copyright (C) 2022-2024 Digi International Inc.
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -191,7 +191,10 @@ function fillNetworkInfo(response, parseElement) {
     if (parseElement == ALL_ELEMENTS) {
         if (numEthernetIfaces == 1) {
             document.getElementById(IFACE_ETH1).style.display = "none";
+            document.getElementById(IFACE_ETH2).style.display = "none";
             document.getElementById(ID_ETH0_TITLE).innerHTML = "Ethernet";
+        } else if (numEthernetIfaces == 2) {
+            document.getElementById(IFACE_ETH2).style.display = "none";
         }
         if (numWifiIfaces == 0)
             document.getElementById(IFACE_WIFI).style.display = "none";
@@ -206,6 +209,7 @@ function fillNetworkInfo(response, parseElement) {
 function updateAllControls() {
     updateInterfaceControls(IFACE_ETH0);
     updateInterfaceControls(IFACE_ETH1);
+    updateInterfaceControls(IFACE_ETH2);
     updateInterfaceControls(IFACE_WIFI);
 }
 
