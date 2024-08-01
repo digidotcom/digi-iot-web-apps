@@ -354,6 +354,9 @@ function createDevice(deviceData) {
         case CCIMX93.DEVICE_TYPE:
             device = new CCIMX93(getDeviceID(), deviceData);
             break;
+        case CCIMX91.DEVICE_TYPE:
+            device = new CCIMX91(getDeviceID(), deviceData);
+            break;
         case CCIMX6SBC.DEVICE_TYPE:
             device = new CCIMX6SBC(getDeviceID(), deviceData);
             break;
