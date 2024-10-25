@@ -234,7 +234,7 @@ body {
 }
 
 #sidebar-contents {
-  height: 100%;
+  height: calc(100dvh - var(--nav-img-size) - 20px);
   display: flex;
   flex-direction: column;
   white-space: nowrap;
@@ -430,6 +430,7 @@ body {
 
 .card-body {
   padding: 10px;
+  height: 100%;
 }
 
 .card-img-digi {
@@ -451,6 +452,8 @@ body {
   -moz-transition: height 0.2s; /* Firefox 4 */
   -webkit-transition: height 0.2s; /* Safari and Chrome */
   -o-transition: height 0.2s; /* Opera */
+
+  height: 100%;
 }
 
 .column .card-body {
@@ -556,8 +559,7 @@ body {
   /* This height is to set the "Continue" button at the bottom and the header at the top.
   The height of the div is 100% of its parent minus 60px of the "Continue" button plus 60px
   of the "Add device" section. */
-  height: calc(100% - 60px - 60px);
-  max-height: 740px;
+  height: calc(100% - 60px - 60px - 15px);
   padding: 10px;
 }
 
