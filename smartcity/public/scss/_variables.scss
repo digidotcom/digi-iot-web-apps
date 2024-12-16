@@ -1,0 +1,71 @@
+// Colors
+$color-white: #FFFFFF;
+$color-green: #91D46C;
+$color-darkgreen: #5FAD56;
+$color-very-lightgray: #F6F8F8;
+$color-lightgray: #DAD8D8;
+$color-darkgray: #3F4245;
+$color-red: #CC6033;
+$color-orange: #FFBB42;
+
+$success-green: $color-darkgreen;
+$warning-yellow: $color-orange;
+$failure-red: $color-red;
+
+$error: $color-red;
+$danger: $color-red;
+
+// Main styles
+$primary: $color-green;
+$secondary: $color-lightgray;
+
+$body-bg: $color-very-lightgray;
+$body-color: $color-darkgray;
+
+$font-size-base: 0.9rem;
+
+// Header
+$header-bg: $color-white;
+$header-min-height: 57px;
+$header-padding-x: 0;
+$header-padding-y: 0;
+$margin-top: 15px;
+
+// Sidebar
+$sidebar-bg: $color-white;
+$sidebar-border-width: 1px;
+$sidebar-border-color: $color-lightgray;
+$sidebar-nav-link-color: $color-darkgray;
+$sidebar-nav-link-icon-color: $color-darkgray;
+$sidebar-nav-link-active-bg: $primary;
+$sidebar-nav-link-active-color: $color-darkgray;
+$sidebar-nav-link-active-icon-color: $color-darkgray;
+$sidebar-nav-link-hover-bg: $color-lightgray;
+$sidebar-nav-link-hover-color: $color-darkgray;
+$sidebar-nav-link-hover-icon-color: $primary;
+
+// Cards
+$card-bg: $color-white;
+$bottom-card-height: 550px;
+
+// Tables
+$table-color: $body-color;
+
+// List groups
+$list-group-bg: $color-white;
+
+// Inputs
+$input-bg: $color-white;
+$input-font-size: 16px;
+$input-btn-focus-width: 1px !default;
+$input-btn-focus-color: $primary !default;
+$input-btn-focus-box-shadow: 0 0 0 1px $primary !default;
+
+// Selects
+$form-select-focus-box-shadow: 0 0 0 1px $primary !default;
+
+// Dropdowns
+$dropdown-bg: $color-white;
+$dropdown-link-active-color: $color-darkgray;
+$dropdown-padding-y: 0;
+$dropdown-padding-x: 0;

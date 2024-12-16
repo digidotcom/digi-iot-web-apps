@@ -1,38 +1,32 @@
 # Digi IoT Web Applications
 
-This repository contains the source code of the web applications of the Digi
-IoT solution demos, which demonstrate the end-to-end connection technology
-using Digi products and services.
+This repository contains the source code of the web applications of the Digi IoT solution demos, which demonstrate the end-to-end connection technology using Digi products and services.
 
-The web applications are built with the Django framework and can be run locally.
-They use the [Python Device Cloud Library](https://github.com/digidotcom/python-devicecloud)
-to communicate with Digi Remote Manager and manage the devices set up for the
-demo.
+The web applications are built with the **Django** or **Next.js** frameworks and can be run locally. Those developed with Django use the [Python Device Cloud Library](https://github.com/digidotcom/python-devicecloud) to communicate with Digi Remote Manager and manage the devices set up for the demo.
 
 
 ## Start Here
 
-The best place to get started is the documentation of the specific demo you want
-to run:
+The best place to get started is the documentation of the specific demo you want to run:
 
-* [Smart Agriculture](http://www.digi.com/resources/documentation/digidocs/90002422/#containers/cont_demo_title.htm)
-* [Tank Monitoring](http://www.digi.com/resources/documentation/digidocs/90002422/#containers/cont_demo_tank.htm)
-* [ConnectCore Cloud Services demo](https://www.digi.com/resources/documentation/digidocs/embedded/dey/4.0/cc93/yocto-ccdemo-intro_c)
+* [Smart Agriculture Demo](https://www.digi.com/resources/documentation/digidocs/90002422/#containers/cont_demo_title.htm)
+* [Tank Monitoring Demo](https://www.digi.com/resources/documentation/digidocs/90002422/#containers/cont_demo_tank.htm)
+* [ConnectCore Cloud Services Demo](https://www.digi.com/resources/documentation/digidocs/embedded/dey/4.0/cc93/yocto-ccdemo-intro_c)
+* [IoT Fleet Management Demo for Smart City](/smartcity/README.md)
+
 
 ## How to Contribute
 
-The contributing guidelines are in the 
-[CONTRIBUTING.md](https://github.com/digidotcom/digi-iot-web-apps/blob/master/CONTRIBUTING.md)
-document.
+The contributing guidelines are in the [CONTRIBUTING.md](/CONTRIBUTING.md) document.
 
 
 ## License
 
-Copyright 2020-2023, Digi International Inc.
+Copyright 2020-2024, Digi International Inc.
 
 This Source Code Form is subject to the terms of the Mozilla Public
 License, v. 2.0. If a copy of the MPL was not distributed with this
-file, you can obtain one at http://mozilla.org/MPL/2.0/.
+file, you can obtain one at https://mozilla.org/MPL/2.0/.
 
 THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
 WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
