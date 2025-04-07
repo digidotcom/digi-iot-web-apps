@@ -10,7 +10,7 @@ import { useRoutesContext } from '@contexts/routes-provider';
 import { faCircleNotch, faCrosshairs, faGears } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-const LocationPage = () => {
+const MapPage = () => {
     const { devices, isLoading } = useDevicesContext();
     const { routes } = useRoutesContext();
 
@@ -61,4 +61,4 @@ const LocationPage = () => {
     );
 };
 
-export default LocationPage;
+export default MapPage;

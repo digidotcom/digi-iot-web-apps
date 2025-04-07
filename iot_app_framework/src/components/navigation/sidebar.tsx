@@ -53,9 +53,9 @@ const Sidebar = () => {
                     <FontAwesomeIcon icon={faGaugeHigh} className="nav-icon" />
                     Dashboard
                 </Link>
-                <Link prefetch href="/location" className={`nav-link js-location-nav ${_.startsWith('/location', currentNav, 1) ? 'active' : ''}`} onClick={linkClicked}>
+                <Link prefetch href="/map" className={`nav-link js-location-nav ${_.startsWith('/map', currentNav, 1) ? 'active' : ''}`} onClick={linkClicked}>
                     <FontAwesomeIcon icon={faCompass} className="nav-icon" />
-                    Location
+                    Map
                 </Link>
                 <Link prefetch href="/management" className={`nav-link js-management-nav ${_.startsWith('/management', currentNav, 1) ? 'active' : ''}`} onClick={linkClicked}>
                     <FontAwesomeIcon icon={faGears} className="nav-icon" />
