@@ -19,7 +19,7 @@ import { Button, Card, CardTitle, CloseButton, Modal, ModalBody } from 'reactstr
 
 // Props interface.
 interface Props {
-    group: string;
+    groups: string[];
 };
 
 // Constants.
@@ -52,7 +52,7 @@ const COLUMNS: SortableTableColumn[] = [
 ];
 
 const FirmwareList = (props: Props) => {
-    const { group } = props;
+    const { groups } = props;
 
     // Used to show or hide the loading icons.
     const [initialLoadingFirmware, setInitialLoadingFirmware] = React.useState(false);
@@ -77,7 +77,7 @@ const FirmwareList = (props: Props) => {
     }, []);
 
     /**
-     * Fetches the list of custom firmware for the groups of the demo.
+     * Fetches the list of custom firmware for the groups of the app.
      * 
      * @param initial `true` for the initial fetch, `false` for subsequent fetches.
      */
@@ -85,10 +85,10 @@ const FirmwareList = (props: Props) => {
         setLoadingFirmware(true);
         setInitialLoadingFirmware(initial ?? false);
         try {
-            // Get the list of vendor IDs and types for the simulated group.
+            // Get the list of vendor IDs and types for the groups.
             let vat = vendorsAndTypes;
             if (vat.length == 0) {
-                vat = await getVendorIdAndType(group);
+                vat = await getVendorIdAndType(groups);
                 setVendorsAndTypes(vat);
             }
             const pairs: { vendorId: number, deviceType: string }[] = [];
@@ -220,7 +220,6 @@ const FirmwareList = (props: Props) => {
                 </div>
                 <ModalBody>
                     <NewFirmware
-                        vendorsAndTypes={vendorsAndTypes}
                         closeModal={closeModal}
                     />
                 </ModalBody>

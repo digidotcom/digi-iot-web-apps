@@ -11,14 +11,15 @@ const log = logLevel.getLogger("templates-functions");
  * Returns the list of templates that target the given group. If no group is provided,
  * all templates are returned.
  * 
- * @param group The group all templates target to.
+ * @param group The groups all templates target to.
  * 
  * @returns The list of templates.
  */
-export const getTemplates = async (group?: string) => {
-    const queryParams = {
-        ...(group && { query: `groups='${group}'` })
-    };
+export const getTemplates = async (groups?: string[]) => {
+    const queryParams: { query?: string } = {};
+    if (groups && groups.length > 0) {
+        queryParams.query = groups ? groups.map(group => `groups = '${group}'`).join(' or ') : "";
+    }
     try {
         const res = await DRMRest.get({ url: TEMPLATES_INVENTORY, params: queryParams });
         if (!res.body) {

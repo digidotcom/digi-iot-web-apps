@@ -1,11 +1,13 @@
 'use client';
 
 import IconButton from '@components/widgets/icon-button';
+import { APP_GROUPS } from '@configs/app-config';
 import { INewFirmware } from '@customTypes/firmware-types';
 import { VendorIdAndType } from '@customTypes/report-types';
 import { faInfoCircle } from '@fortawesome/free-solid-svg-icons';
 import { AppError } from '@models/AppError';
 import { createCustomFirmware } from '@services/drm/firmware';
+import { getVendorIdAndType } from '@services/drm/reports';
 import { isValidFirmwareVersion, isValidUrl } from '@utils/string-utils';
 import { showError, showSuccess } from '@utils/toast-utils';
 import React from 'react';
@@ -17,12 +19,11 @@ export const SIZE_RIGHT_COLUMN = 9;
 
 // Properties interface.
 interface Props {
-    vendorsAndTypes: VendorIdAndType[];
     closeModal: () => void;
 }
 
 const NewFirmware = (props: Props) => {
-    const { vendorsAndTypes, closeModal } = props;
+    const { closeModal } = props;
 
     // Used to determine if the form is valid or not.
     const [formValid, setFormValid] = React.useState(false);
@@ -37,10 +38,56 @@ const NewFirmware = (props: Props) => {
     const [cvss, setCvss] = React.useState("not-identified");
     const [releaseNotes, setReleaseNotes] = React.useState("");
     const [firmwareFile, setFirmwareFile] = React.useState<File>();
+    const [group, setGroup] = React.useState("");
+
+    // Used to store the list of vendor IDs and types.
+    const [vendorsAndTypes, setVendorsAndTypes] = React.useState<VendorIdAndType[]>([]);
+
+    // Used to store the list of groups.
+    const [groups, setGroups] = React.useState<string[]>([]);
+
+    // Used to show a 'Loading' text while the vendor IDs and types are fetched.
+    const [loadingTypes, setLoadingTypes] = React.useState(false);
+
+    // Used to show a 'Loading' text while the groups are fetched.
+    const [loadingGroups, setLoadingGroups] = React.useState(false);
 
     // Used to validate fields.
     const [firmwareVersionValid, setFirmwareVersionValid] = React.useState(true);
     const [releaseNotesUrlValid, setReleaseNotesUrlValid] = React.useState(true);
+
+    // Fetch the list of vendor IDs and types when the component loads.
+    React.useEffect(() => {
+        const fetchVendorsAndTypes = async () => {
+            // Fetch the list of vendor IDs and types.
+            setLoadingTypes(true);
+            try {
+                setVendorsAndTypes(await getVendorIdAndType([group]));
+            } catch (e) {
+                showError((e as AppError).message);
+            }
+            setLoadingTypes(false);
+        };
+
+        if (group != "") {
+            fetchVendorsAndTypes();
+        }
+    }, [group]);
+
+    // Fetch the list of groups when the component loads.
+    React.useEffect(() => {
+        const fetchGroups = async () => {
+            // Fetch the list of groups.
+            setLoadingGroups(true);
+            try {
+                setGroups(APP_GROUPS);
+            } catch (e) {
+                showError((e as AppError).message);
+            }
+            setLoadingGroups(false);
+        };
+        fetchGroups();
+    }, []);
 
     // Change the valid status when the value of any element changes.
     React.useEffect(() => {
@@ -84,6 +131,19 @@ const NewFirmware = (props: Props) => {
         setReleaseNotesUrlValid(isValidUrl(url));
     };
 
+        /**
+     * Sets the group based on the given group.
+     * 
+     * @param group Selected device group.
+     */
+        const onGroupChange = (selectedGroup: string) => {
+            // Make sure the selected group exists.
+            const group = groups.find(g => g === selectedGroup);
+            if (group) {
+                setGroup(group);
+            }
+        };
+
     /**
      * Creates the custom firmware with the entered data.
      */
@@ -96,7 +156,7 @@ const NewFirmware = (props: Props) => {
             information_link: releaseNotes,
             security_related: cvss,
             // @ts-ignore
-            file: firmwareFile
+            file: firmwareFile,
         };
         try {
             await createCustomFirmware(newFirmware);
@@ -113,12 +173,25 @@ const NewFirmware = (props: Props) => {
         <>
             <Form>
                 <FormGroup row>
+                    <Label for="group" sm={SIZE_LEFT_COLUMN}>
+                        <IconButton icon={faInfoCircle} title="The group of the devices that will be updated by this template" /> Group:
+                    </Label>
+                    <Col sm={SIZE_RIGHT_COLUMN}>
+                        <Input id="group" type="select" onChange={e => onGroupChange(e.target.value)} value={group} disabled={loadingGroups}>
+                            <option value="" disabled>{loadingGroups ? "Loading..." : "Select a group..."}</option>
+                            {groups.map(g => (
+                                <option key={g} value={g}>{g}</option>
+                            ))}
+                        </Input>
+                    </Col>
+                </FormGroup>
+                <FormGroup row>
                     <Label for="device-type" sm={SIZE_LEFT_COLUMN}>
                         <IconButton icon={faInfoCircle} title="The type of the devices for this firmware version" /> Device Type:
                     </Label>
                     <Col sm={SIZE_RIGHT_COLUMN}>
-                        <Input id="device-type" type="select" onChange={e => onTypeChange(e.target.value)} value={deviceType}>
-                            <option value="" disabled>Select a device type...</option>
+                        <Input id="device-type" type="select" onChange={e => onTypeChange(e.target.value)} value={deviceType} disabled={loadingTypes}>
+                        <option value="" disabled>{loadingTypes ? "Loading..." : "Select a device type..."}</option>
                             {vendorsAndTypes.map(vt => (
                                 <option key={vt.values.type} value={vt.values.type}>{vt.values.type}</option>
                             ))}

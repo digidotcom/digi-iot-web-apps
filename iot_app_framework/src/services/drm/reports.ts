@@ -91,16 +91,17 @@ export const getMaintenanceWindowStatus = async (group?: string) => {
  * Returns the list of vendor IDs and types of all devices included in the given group
  * (or all devices if no group is provided).
  * 
- * @param group Name of the group devices belong to.
+ * @param group Name of the groups devices belong to.
  * 
  * @returns An array of {@link VendorIdAndType}.
  * 
  * @throws An {@link AppError} if there is any error reading the vendor ID and type report.
  */
-export const getVendorIdAndType = async (group?: string) => {
-    const queryParams = {
-        ...(group && { query: `group='${group}'` })
-    };
+export const getVendorIdAndType = async (groups?: string[]) => {
+    const queryParams: { query?: string } = {};
+    if (groups && groups.length > 0) {
+        queryParams.query = groups ? groups.map(group => `group = '${group}'`).join(' or ') : "";
+    }
     try {
         const res = await DRMRest.get({ url: REPORTS_VENDOR_ID_DEVICE_TYPE, params: queryParams });
         if (!res.body) {

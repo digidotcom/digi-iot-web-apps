@@ -18,7 +18,7 @@ import { Button, Card, CardTitle, CloseButton, Modal, ModalBody } from 'reactstr
 
 // Props interface.
 interface Props {
-    group: string;
+    groups: string[];
 };
 
 // Constants.
@@ -28,6 +28,7 @@ const DESCRIPTION_ID = "description";
 const FW_VERSION_ID = "fw-version";
 const TYPE_ID = "device-type";
 const SCAN_FREQUENCY_ID = "frequency";
+const GROUP_ID = "group";
 
 const COLUMNS: SortableTableColumn[] = [
     {
@@ -52,6 +53,13 @@ const COLUMNS: SortableTableColumn[] = [
         getValue: (rsc) => rsc.description
     },
     {
+        id: GROUP_ID,
+        name: "Group",
+        width: 15,
+        sortable: true,
+        getValue: (rsc) => rsc.groups.join(',\n') 
+    },
+    {
         id: FW_VERSION_ID,
         name: "Firmware version",
         width: 15,
@@ -70,12 +78,12 @@ const COLUMNS: SortableTableColumn[] = [
         name: "Scan frequency",
         width: 10,
         sortable: true,
-        getValue: (rsc) => rsc.scan_frequency.charAt(0).toUpperCase() + rsc.scan_frequency.slice(1)
+        getValue: (rsc) => (rsc.scan_frequency?.charAt(0).toUpperCase() + rsc.scan_frequency?.slice(1)) || ''
     },
 ];
 
 const TemplatesList = (props: Props) => {
-    const { group } = props;
+    const { groups } = props;
 
     // Used to show or hide the loading icons.
     const [initialLoadingTemplates, setInitialLoadingTemplates] = React.useState(false);
@@ -97,7 +105,7 @@ const TemplatesList = (props: Props) => {
     }, []);
 
     /**
-     * Fetches the list of templates for the groups of the demo.
+     * Fetches the list of templates for the groups.
      * 
      * @param initial `true` for the initial fetch, `false` for subsequent fetches.
      */
@@ -106,7 +114,7 @@ const TemplatesList = (props: Props) => {
         setInitialLoadingTemplates(initial ?? false);
         try {
             // Get the templates.
-            setTemplates(await getTemplates(group));
+            setTemplates(await getTemplates(groups));
             // Sort the templates in the table.
             templatesTableRef.current?.sort();
         } catch (e) {

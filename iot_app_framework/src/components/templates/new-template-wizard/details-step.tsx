@@ -2,7 +2,7 @@
 
 import { SIZE_LEFT_COLUMN, SIZE_RIGHT_COLUMN } from '@components/templates/new-template-wizard/new-template-wizard';
 import IconButton from '@components/widgets/icon-button';
-import { GROUP_BUSES } from '@configs/buses-config';
+import { APP_GROUPS } from '@configs/app-config';
 import { VendorIdAndType } from '@customTypes/report-types';
 import { faInfoCircle } from '@fortawesome/free-solid-svg-icons';
 import { AppError } from '@models/AppError';
@@ -21,10 +21,10 @@ interface Props {
 export interface DetailsStepRef {
     getName: () => string;
     getDescription: () => string;
-    getGroup: () => string;
     getVendorId: () => number;
     getDeviceType: () => string;
     getMaintWindow: () => string;
+    getGroup: () => string;
 }
 
 const DetailsStep = React.forwardRef((props: Props, ref: Ref<DetailsStepRef>) => {
@@ -36,12 +36,19 @@ const DetailsStep = React.forwardRef((props: Props, ref: Ref<DetailsStepRef>) =>
     const [vendorId, setVendorId] = React.useState(0);
     const [deviceType, setDeviceType] = React.useState("");
     const [maintWindow, setMaintWindow] = React.useState("Cancel");
+    const [group, setGroup] = React.useState("");
 
     // Used to store the list of vendor IDs and types.
     const [vendorsAndTypes, setVendorsAndTypes] = React.useState<VendorIdAndType[]>([]);
 
+    // Used to store the list of groups.
+    const [groups, setGroups] = React.useState<string[]>([]);
+
     // Used to show a 'Loading' text while the vendor IDs and types are fetched.
     const [loadingTypes, setLoadingTypes] = React.useState(false);
+
+    // Used to show a 'Loading' text while the groups are fetched.
+    const [loadingGroups, setLoadingGroups] = React.useState(false);
 
     // Fetch the list of vendor IDs and types when the component loads.
     React.useEffect(() => {
@@ -49,22 +56,48 @@ const DetailsStep = React.forwardRef((props: Props, ref: Ref<DetailsStepRef>) =>
             // Fetch the list of vendor IDs and types.
             setLoadingTypes(true);
             try {
-                setVendorsAndTypes(await getVendorIdAndType(GROUP_BUSES));
+                setVendorsAndTypes(await getVendorIdAndType([group]));
             } catch (e) {
                 showError((e as AppError).message);
             }
             setLoadingTypes(false);
         };
-        fetchVendorsAndTypes();
+
+        if (group != "") {
+            fetchVendorsAndTypes();
+        }
+    }, [group]);
+
+    // Fetch the list of groups when the component loads.
+    React.useEffect(() => {
+        const fetchGroups = async () => {
+            // Fetch the list of groups.
+            setLoadingGroups(true);
+            try {
+                setGroups(APP_GROUPS);
+            } catch (e) {
+                showError((e as AppError).message);
+            }
+            setLoadingGroups(false);
+        };
+        fetchGroups();
     }, []);
 
     // Change the valid status when the value of any element changes.
     React.useEffect(() => {
         if (visible) {
-            setValid(name !== "" && vendorId != 0 && deviceType !== "");
+            setValid(name !== "" && vendorId !== 0 && deviceType !== "");
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [name, vendorId, deviceType, visible]);
+
+    // Change the valid status when the value of any element changes.
+    React.useEffect(() => {
+        if (visible) {
+            setValid(name !== "" && group !== "");
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [name, group, visible]);
 
     /**
      * Sets the vendor ID and type based on the given type.
@@ -80,6 +113,19 @@ const DetailsStep = React.forwardRef((props: Props, ref: Ref<DetailsStepRef>) =>
         }
     };
 
+    /**
+     * Sets the group based on the given group.
+     * 
+     * @param group Selected device group.
+     */
+    const onGroupChange = (selectedGroup: string) => {
+        // Make sure the selected group exists.
+        const group = groups.find(g => g === selectedGroup);
+        if (group) {
+            setGroup(group);
+        }
+    };
+
     // Export the following functions so that they can be used in the parent component.
     React.useImperativeHandle(ref, () => ({
         getName() {
@@ -87,9 +133,6 @@ const DetailsStep = React.forwardRef((props: Props, ref: Ref<DetailsStepRef>) =>
         },
         getDescription() {
             return description;
-        },
-        getGroup() {
-            return GROUP_BUSES;
         },
         getVendorId() {
             return vendorId;
@@ -99,7 +142,10 @@ const DetailsStep = React.forwardRef((props: Props, ref: Ref<DetailsStepRef>) =>
         },
         getMaintWindow() {
             return maintWindow;
-        }
+        },
+        getGroup() {
+            return group;
+        },
     }));
 
     return (
@@ -121,6 +167,19 @@ const DetailsStep = React.forwardRef((props: Props, ref: Ref<DetailsStepRef>) =>
                     </Label>
                     <Col sm={SIZE_RIGHT_COLUMN}>
                         <Input id="description" type="textarea" placeholder="Enter the template description..." value={description} onChange={e => setDescription(e.target.value)} maxLength={1000} />
+                    </Col>
+                </FormGroup>
+                <FormGroup row>
+                    <Label for="group" sm={SIZE_LEFT_COLUMN}>
+                        <IconButton icon={faInfoCircle} title="The group of the devices that will be updated by this template" /> Group:
+                    </Label>
+                    <Col sm={SIZE_RIGHT_COLUMN}>
+                        <Input id="group" type="select" onChange={e => onGroupChange(e.target.value)} value={group} disabled={loadingGroups}>
+                            <option value="" disabled>{loadingGroups ? "Loading..." : "Select a group..."}</option>
+                            {groups.map(g => (
+                                <option key={g} value={g}>{g}</option>
+                            ))}
+                        </Input>
                     </Col>
                 </FormGroup>
                 <FormGroup row>

@@ -1,6 +1,6 @@
 import FirmwareList from '@components/firmware/firmware-list';
 import TemplatesList from '@components/templates/templates-list';
-import { GROUP_BUSES } from '@configs/buses-config';
+import { APP_GROUPS } from '@configs/app-config';
 import { Col, Container, Row } from 'reactstrap';
 
 const ManagementPage = () => {
@@ -10,13 +10,13 @@ const ManagementPage = () => {
             <Row className="pb-3">
                 <Col>
                     {/* List of templates and option to create new ones. */}
-                    <TemplatesList group={GROUP_BUSES}/>
+                    <TemplatesList groups={APP_GROUPS}/>
                 </Col>
             </Row>
             <Row className="pb-3">
                 <Col>
                     {/* List of custom firmware and option to create new versions. */}
-                    <FirmwareList group={GROUP_BUSES} />
+                    <FirmwareList groups={APP_GROUPS}/>
                 </Col>
             </Row>
         </Container>
