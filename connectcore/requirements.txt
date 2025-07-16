@@ -17,7 +17,7 @@ cryptography==39.0.0
 daphne==3.0.2
 devicecloud==0.5.9
 Django==4.0.4
-hiredis==2.0.0; sys_platform=='linux'
+hiredis==3.2.1; sys_platform=='linux'
 hyperlink==21.0.0
 idna==3.3
 incremental==21.3.0
