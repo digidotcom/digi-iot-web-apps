@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # Define variables
-APP_NAME="IoT Fleet Management Demo"
+APP_NAME="Digi IoT Application Framework"
 BUILD_DIR="build_output"
-ZIP_FILE="iot_fleet_management_demo.zip"
+ZIP_FILE="digi_iot_application_framework.zip"
 LOG_FILE="build.log"
 
 # Clear previous log.

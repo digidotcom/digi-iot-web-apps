@@ -1,5 +1,5 @@
 /** @type {import('next').NextConfig} */
-const BASE_PATH = "/iot-fleet-management-demo";
+const BASE_PATH = "/iot-application-framework";
 
 const cspPolicies = `
     default-src 'self';

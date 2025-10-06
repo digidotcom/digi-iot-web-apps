@@ -1,4 +1,4 @@
-export const APP_PREFIX = "[IoTFleetMgmtDemo]";
+export const APP_PREFIX = "[DigiIoTAppFramework]";
 
 export const ALERT_TYPE_DATAPOINT = "DataPoint condition";
 export const ALERT_TYPE_DEVICE_OFFLINE = "Device Offline";

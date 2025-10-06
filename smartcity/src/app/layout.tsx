@@ -21,7 +21,7 @@ const font = ss3({
 const RootLayout = ({ children }: React.PropsWithChildren): React.ReactNode => (
     <html lang="en" className={font.variable}>
         <head>
-            <title>Digi IoT Fleet Management Demo for Smart City</title>
+            <title>Digi IoT Application Framework</title>
             <link rel="shortcut icon" href={`${BASE_PATH}/images/favicon.ico`} />
         </head>
         <body>

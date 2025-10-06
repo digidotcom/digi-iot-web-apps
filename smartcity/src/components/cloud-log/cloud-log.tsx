@@ -195,7 +195,7 @@ const CloudLog = () => {
         // Create a temporary link to download the JSON file.
         const link = document.createElement("a");
         link.href = URL.createObjectURL(data);
-        link.download = `fleet_mgmt_demo_log_${new Date().toISOString()}.json`;
+        link.download = `digi_iot_app_framework_log_${new Date().toISOString()}.json`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
