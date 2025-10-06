@@ -12,7 +12,7 @@ The best place to get started is the documentation of the specific demo you want
 * [Smart Agriculture Demo](https://www.digi.com/resources/documentation/digidocs/90002422/#containers/cont_demo_title.htm)
 * [Tank Monitoring Demo](https://www.digi.com/resources/documentation/digidocs/90002422/#containers/cont_demo_tank.htm)
 * [ConnectCore Cloud Services Demo](https://www.digi.com/resources/documentation/digidocs/embedded/dey/4.0/cc93/yocto-ccdemo-intro_c)
-* [IoT Fleet Management Demo for Smart City](/smartcity/README.md)
+* [IoT Application Framework](/iot_app_framework/README.md)
 
 
 ## How to Contribute
@@ -22,7 +22,7 @@ The contributing guidelines are in the [CONTRIBUTING.md](/CONTRIBUTING.md) docum
 
 ## License
 
-Copyright 2020-2024, Digi International Inc.
+Copyright 2020-2025, Digi International Inc.
 
 This Source Code Form is subject to the terms of the Mozilla Public
 License, v. 2.0. If a copy of the MPL was not distributed with this
