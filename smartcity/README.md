@@ -1,6 +1,6 @@
-# Digi IoT Fleet Management Demo for Smart City
+# Digi IoT Application Framework
 
-Welcome to the **Digi IoT Fleet Management Demo for Smart City**! This web application demonstrates how to interact with and utilize the APIs offered by Digi Remote Manager to manage a fleet of devices, such as Digi ConnectCore modules or Digi XBee devices.
+Welcome to the **Digi IoT Application Framework**! This web application demonstrates how to interact with and utilize the APIs offered by Digi Remote Manager to manage a fleet of devices, such as Digi ConnectCore modules or Digi XBee devices.
 
 The demo application is tailored for the public tranportation market and works in conjunction with the **Digi IoT Device Simulator**, which simulates a fleet of transit buses. However, it can also serve as a foundation for other markets. If you are developing your own web application, you can use the simulator to replicate a fleet of devices before deploying real devices in the field.
 
@@ -146,7 +146,7 @@ This folder stores JSON files that define the various bus lines simulated by the
 
 ## License
 
-Copyright 2024, Digi International Inc.
+Copyright 2024-2025, Digi International Inc.
 
 This Source Code Form is subject to the terms of the Mozilla Public
 License, v. 2.0. If a copy of the MPL was not distributed with this
