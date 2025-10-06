@@ -13,6 +13,8 @@ export class IoTDevice implements IoTDeviceInterface {
     maintenance: boolean;
     position?: google.maps.LatLngLiteral;
     lastUpdate: Date;
+    incidence?: boolean;
+    incidenceDate?: Date;
 
     // Variables (for the class)
     faIcon: string;
@@ -59,7 +61,8 @@ export class IoTDevice implements IoTDeviceInterface {
                     lastUpdate: undefined,
                     stream: `${this.id}/${propertyDef.stream}`,
                     color: propertyDef.color,
-                    samplesHistoryRead: false
+                    samplesHistoryRead: false,
+                    visible: propertyDef.visible ?? true
                 }
             );
         });

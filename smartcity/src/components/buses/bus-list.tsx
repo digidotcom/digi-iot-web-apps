@@ -12,7 +12,7 @@ import Loading from '@components/widgets/loading';
 import SortableTable, { SortableTableRef } from '@components/widgets/tables/sortable-table';
 import { ColorStyles } from '@configs/style-constants';
 import { SortableTableColumn } from '@customTypes/table-types';
-import { faAnglesRight, faBus, faCircleNotch, faLink, faLinkSlash } from '@fortawesome/free-solid-svg-icons';
+import { faAnglesRight, faBus, faCircleNotch, faLink, faLinkSlash, faTriangleExclamation } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Bus } from '@models/Bus';
 import { naturalCompare } from '@utils/string-utils';
@@ -48,7 +48,7 @@ const COLUMNS_REDUCED: SortableTableColumn[] = [
         id: NAME_ID,
         name: "Name",
         sortable: true,
-        getValue: (rsc) => rsc.name
+        getValue: (rsc) => <span>{rsc.incidence ? <FontAwesomeIcon icon={faTriangleExclamation} color={ColorStyles.warningYellow} fixedWidth /> : ""} {rsc.name}</span>
     },
     {
         id: ID_ID,

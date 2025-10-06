@@ -70,6 +70,8 @@ export interface IoTDeviceInterface {
     maintenance: boolean;
     position?: google.maps.LatLngLiteral;
     lastUpdate: Date;
+    incidence?: boolean;
+    incidenceDate?: Date;
 }
 
 /**
@@ -79,6 +81,7 @@ export interface IoTMarkerImage {
     connected: string;
     disconnected: string;
     maintenance: string;
+    incidence: string;
 }
 
 /**
@@ -95,6 +98,7 @@ export interface IoTDeviceProperty {
     color?: string;
     samplesHistory?: IoTSample[];
     samplesHistoryRead: boolean;
+    visible: boolean;
 }
 
 /**
@@ -107,6 +111,7 @@ export interface IoTDevicePropertyDef {
     faIcon?: string;
     color?: string;
     units?: string;
+    visible?: boolean;
 }
 
 /**

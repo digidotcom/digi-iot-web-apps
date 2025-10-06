@@ -7,6 +7,7 @@ import React, { Suspense, useEffect } from 'react';
 import { useSWRConfig } from 'swr';
 
 import Loading from '@components/widgets/loading';
+import AlertsManager from '@services/alerts-manager';
 import CloudLogManager from '@services/cloud-log-manager';
 import DevicesManager from '@services/devices-manager';
 import MonitorsManager from '@services/monitors-manager';
@@ -30,6 +31,8 @@ const SignOut: NextComponentType = () => {
         RoutesManager.clear();
         // Clear the cloud log.
         CloudLogManager.clearLog();
+        // Clear the alerts list.
+        AlertsManager.clear();
         await Promise.all([...cache.keys()].map((key) => mutate(key, undefined, { revalidate: false })));
     }, [cache, mutate]);
 

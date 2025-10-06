@@ -1,5 +1,5 @@
-import { APP_PREFIX,ALERT_PARAMS_TYPE_NUMERIC, ALERT_PARAMS_TYPE_STRING, ALERT_PARAMS_UNIT_MINUTES, ALERT_PARAMS_UNIT_SECONDS, ALERT_SCOPE_TYPE_GROUP, ALERT_SCOPE_TYPE_RESOURCE, ALERT_TYPE_DATAPOINT, ALERT_TYPE_DEVICE_OFFLINE, ALERT_TYPE_MISSING_DATAPOINT } from '@configs/app-constants';
-import { IAlert } from '@customTypes/alert-types';
+import { ALERT_PARAMS_TYPE_NUMERIC, ALERT_PARAMS_TYPE_STRING, ALERT_PARAMS_UNIT_MINUTES, ALERT_PARAMS_UNIT_SECONDS, ALERT_SCOPE_TYPE_GROUP, ALERT_SCOPE_TYPE_RESOURCE, ALERT_TYPE_DATAPOINT, ALERT_TYPE_DEVICE_OFFLINE, ALERT_TYPE_MISSING_DATAPOINT, APP_PREFIX } from '@configs/app-constants';
+import { ColorStyles } from '@configs/style-constants';import { IAlert } from '@customTypes/alert-types';
 import { IoTDevicePropertyDef, IoTMarkerImage } from '@customTypes/device-types';
 
 // Group name.
@@ -19,7 +19,8 @@ export const BUS_FA_ICON = "fa-solid fa-bus-simple";
 export const BUS_MARKER_IMAGE: IoTMarkerImage = {
     connected: "/images/marker_bus_connected.png",
     disconnected: "/images/marker_bus_disconnected.png",
-    maintenance: "/images/marker_bus_connected_maint.png"
+    maintenance: "/images/marker_bus_connected_maint.png",
+    incidence: "/images/marker_bus_incidence.png"
 }
 
 // Streams.
@@ -28,13 +29,15 @@ const STREAM_PASSENGERS = "passengers";
 const STREAM_PRESSURE = "pressure";
 const STREAM_TEMPERATURE = "temperature";
 const STREAM_POWER_LEVEL = "power_level";
+const STREAM_INCIDENCE = "incidence";
 
 export const BUSES_STREAMS: string[] = [
     STREAM_LINE,
     STREAM_PASSENGERS,
     STREAM_PRESSURE,
     STREAM_TEMPERATURE,
-    STREAM_POWER_LEVEL
+    STREAM_POWER_LEVEL,
+    STREAM_INCIDENCE
 ];
 
 // Properties.
@@ -43,6 +46,7 @@ export const BUS_PROPERTY_PASSENGERS = "passengers";
 export const BUS_PROPERTY_POWER = "power";
 export const BUS_PROPERTY_PRESSURE = "pressure";
 export const BUS_PROPERTY_TEMPERATURE = "temperature";
+export const BUS_PROPERTY_INCIDENCE = "incidence";
 
 export const BUSES_PROPERTIES: IoTDevicePropertyDef[] = [
     {
@@ -81,12 +85,21 @@ export const BUSES_PROPERTIES: IoTDevicePropertyDef[] = [
         faIcon: "fa-solid fa-route",
         color: "#fc6f03"
     },
+    {
+        id: BUS_PROPERTY_INCIDENCE,
+        name: "Incidence",
+        stream: STREAM_INCIDENCE,
+        faIcon: "fa-solid fa-exclamation-triangle",
+        color: ColorStyles.warningYellow,
+        visible: false
+    },
 ]
 
 // Alerts.
 const ALERT_TRESHOLD_TEMPERATURE = "100";
 const ALERT_TRESHOLD_PRESSURE = "7.5";
 const ALERT_TRESHOLD_POWER_LEVEL = "20";
+const ALERT_TRESHOLD_INCIDENCE = "0";
 
 const ALERT_TIMEOUT_DATAPOINTS_SECS = "1";
 const ALERT_TIMEOUT_OFFLINE_MINS = "1";
@@ -253,11 +266,42 @@ const ALERT_BUS_OFFLINE: IAlert = {
     }
 };
 
+const ALERT_BUS_INCIDENCE: IAlert = {
+    name: "Bus incidence",
+    description: APP_PREFIX,
+    type: ALERT_TYPE_DATAPOINT,
+    scope: {
+        type: ALERT_SCOPE_TYPE_RESOURCE,
+        value: `*/${STREAM_INCIDENCE}`
+    },
+    fire: {
+        disabled: false,
+        parameters: {
+            thresholdValue: ALERT_TRESHOLD_INCIDENCE,
+            type: ALERT_PARAMS_TYPE_NUMERIC,
+            operator: "<>",
+            timeout: ALERT_TIMEOUT_DATAPOINTS_SECS,
+            timeUnit: ALERT_PARAMS_UNIT_SECONDS
+        }
+    },
+    reset: {
+        disabled: false,
+        parameters: {
+            thresholdValue: ALERT_TRESHOLD_INCIDENCE,
+            type: ALERT_PARAMS_TYPE_NUMERIC,
+            operator: "=",
+            timeout: ALERT_TIMEOUT_DATAPOINTS_SECS,
+            timeUnit: ALERT_PARAMS_UNIT_SECONDS
+        }
+    }
+};
+
 export const BUSES_ALERTS: IAlert[] = [
     ALERT_BUS_TEMPERATURE,
     ALERT_BUS_PRESSURE,
     ALERT_BUS_POWER_LEVEL,
     ALERT_BUS_OUT_OF_ROUTE,
     ALERT_BUS_MISSING_LOCATION,
-    ALERT_BUS_OFFLINE
+    ALERT_BUS_OFFLINE,
+    ALERT_BUS_INCIDENCE
 ];

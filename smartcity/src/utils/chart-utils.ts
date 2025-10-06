@@ -4,6 +4,8 @@ import { faCircle } from '@fortawesome/free-solid-svg-icons';
 
 const IMAGE_REDUCE_FACTOR = 2.5;
 
+export const CONTAINER_MIN_WIDTH = 300;
+
 /**
  * Creates a Chart.js plugin that places an icon in the center of a chart.
  * 
@@ -68,4 +70,19 @@ export const createImageCenterPlugin = (faIcon: IconLookup, color: string) => {
             }
         },
     };
+};
+
+/**
+ * Gets the initial position for the legend based on the container width.
+ * 
+ * @param elementId ID of the element that contains the chart.
+ * 
+ * @returns Initial position for the legend.
+ */
+export const getLegendInitialPosition = (elementId: string) => {
+    const target = document.getElementById(elementId);
+    if (target) {
+        return target.clientWidth > CONTAINER_MIN_WIDTH ? "right" : "bottom";
+    }
+    return "bottom";
 };

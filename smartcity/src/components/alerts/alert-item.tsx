@@ -1,20 +1,17 @@
 'use client';
 
-import React from "react";
-import { ListGroupItem } from 'reactstrap';
-
 import IconButton from '@components/widgets/icon-button';
 import { ColorStyles } from '@configs/style-constants';
 import { IAlertSummary } from '@customTypes/alert-types';
 import { faCheck, faExclamation, faMinusCircle, faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AppError } from '@models/AppError';
+import { STATUS_ACK, STATUS_FIRED, STATUS_RESET } from '@services/alerts-manager';
 import { acknowledgeAlert, resetAlert } from '@services/drm/alerts';
 import { showError } from "@utils/toast-utils";
 
-const STATUS_FIRED = "fired";
-const STATUS_ACK = "acknowledged";
-const STATUS_RESET = "reset";
+import React from "react";
+import { ListGroupItem } from 'reactstrap';
 
 // Props interface.
 interface Props {

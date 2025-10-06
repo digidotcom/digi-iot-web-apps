@@ -1,4 +1,4 @@
-import { APP_GROUPS, DEFAULT_SAMPLES_NUMBER, MONITOR_DATA_POINTS, MONITOR_DEVICES } from '@configs/app-config';
+import { APP_GROUPS, DEFAULT_SAMPLES_NUMBER, MONITOR_DATA_POINTS, MONITOR_DEVICES, STREAM_INCIDENCE, VALUE_INCIDENCE } from '@configs/app-config';
 import { STATUS_ERROR, STATUS_LOADED, STATUS_LOADING, STATUS_NOT_LOADED } from '@configs/app-constants';
 import { GROUP_BUSES } from '@configs/buses-config';
 import { IDevice, IoTDeviceInterface, IoTDevicesGroup } from '@customTypes/device-types';
@@ -25,6 +25,7 @@ class DevicesManager {
     private statusListeners: ((status: string) => void)[] = [];
     private deviceListeners: ((devices: IoTDevice[]) => void)[] = [];
     private groupListeners: { [groupId: string]: ((devices: IoTDevice[]) => void)[] } = {};
+    private incidenceListeners: ((device: IoTDevice, incidence: boolean) => void)[] = [];
     private _status: string = STATUS_NOT_LOADED;
     private _errorMessage: string | undefined = undefined;
 
@@ -202,6 +203,12 @@ class DevicesManager {
                                 device.route = route;
                             }
                         }
+                        // Check if this property provides the incidence information.
+                       if (property.id === STREAM_INCIDENCE) {
+                            const incidence = property.value === VALUE_INCIDENCE;
+                            device.incidence = incidence;
+                            device.incidenceDate = incidence ? new Date(property.lastUpdate) : undefined;
+                        }
                     }
                 }
         )));
@@ -294,6 +301,12 @@ class DevicesManager {
                     if (route && device.route !== route) {
                         device.route = route;
                     }
+                }
+                // Check if this property provides the incidence information.
+                if (property.id === STREAM_INCIDENCE) {
+                    const incidence = property.value === VALUE_INCIDENCE;
+                    device.incidence = incidence;
+                    device.incidenceDate = incidence ? new Date(property.lastUpdate) : undefined;
                 }
 
                 return device;
@@ -456,6 +469,15 @@ class DevicesManager {
     }
 
     /**
+     * Adds a listener for changes in the incidence status of a device.
+     * 
+     * @param listener The function to be called when the incidence status changes.
+     */
+    subscribeToIncidence(listener: (device: IoTDevice, incidence: boolean) => void) {
+        this.incidenceListeners.push(listener);
+    }
+
+    /**
      * Removes a listener from the status listeners list.
      *
      * @param listener The listener function to be removed.
@@ -486,6 +508,15 @@ class DevicesManager {
     }
 
     /**
+     * Removes a listener from the incidence listeners list.
+     * 
+     * @param listener The listener function to be removed.
+     */
+    unsubscribeFromIncidence(listener: (device: IoTDevice, incidence: boolean) => void) {
+        this.incidenceListeners = this.incidenceListeners.filter((l) => l !== listener);
+    }
+
+    /**
      * Sets the given status and notifies it to all status listeners.
      *
      * @param newStatus The new status to set and notify.
@@ -511,6 +542,32 @@ class DevicesManager {
         if (this.groupListeners[groupId]) {
             this.groupListeners[groupId].forEach((listener) =>
             listener(this.deviceGroups.find(group => group.id === groupId)?.devices ?? []));
+        }
+    }
+
+    /**
+     * Notifies all listeners of a change in the incidence status of a device.
+     * 
+     * @param device The device that changed incidence status.
+     * @param incidence The new incidence status.
+     */
+    private notifyIncidenceListeners(device: IoTDevice, incidence: boolean) {
+        this.incidenceListeners.forEach((listener) => listener(device, incidence));
+    }
+
+    /**
+     * Updates the incidence status of a device.
+     * 
+     * @param deviceId The ID of the device to update.
+     * @param incidence The new incidence status.
+     */
+    public updateDeviceIncidence(deviceId: string, incidence: boolean) {
+        const device = this.deviceGroups.flatMap(group => group.devices).find(device => device.id === deviceId);
+        if (device) {
+            device.incidence = incidence;
+            device.incidenceDate = incidence ? new Date() : undefined;
+            this.notifyDeviceListeners();
+            this.notifyIncidenceListeners(device, incidence);
         }
     }
 }

@@ -11,6 +11,7 @@ export interface DeviceMarker {
     visible: boolean;
     opacity: number;
     popover?: ReactNode;
+    zIndex?: number;
 }
 
 /**

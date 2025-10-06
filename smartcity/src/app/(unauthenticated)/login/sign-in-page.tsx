@@ -59,7 +59,7 @@ const SignIn = () => {
             <div className={classNames('js-login-body login-body flex-row flex-fill align-items-center')}>
                 <Container>
                     <Row className="justify-content-center">
-                        <Col lg="5">
+                        <Col xl="5" lg="6">
                             <CardGroup className="flex-column flex-md-row">
                                 <Card className="p-4 overflow-hidden">
                                     <CardBody className="login-body-card-body position-relative">
