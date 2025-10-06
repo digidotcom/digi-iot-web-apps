@@ -13,8 +13,10 @@ interface Props {
     paths: RoutePath[];
     showPaths: boolean;
     hiddenPaths: string[];
+    showClusters: boolean;
     onShowPathsChanged: (showPaths: boolean) => void;
     onHiddenPathsChanged: (hiddenPaths: string[]) => void;
+    onShowClustersChanged: (showClusters: boolean) => void;
 }
 
 // Component definition.
@@ -24,10 +26,12 @@ const MapMenu = (props: Props) => {
     const paths = props.paths;
     const onShowPathsChanged = props.onShowPathsChanged;
     const onHiddenPathsChanged = props.onHiddenPathsChanged;
+    const onShowClustersChanged = props.onShowClustersChanged;
 
     // Track the status of the switch buttons to force a re-render when they change.
     const [showPaths, setShowPaths] = useState(props.showPaths);
     const [hiddenPaths, setHiddenPaths] = useState<string[]>(props.hiddenPaths);
+    const [showClusters, setShowClusters] = useState(props.showClusters);
 
     // Function to toggle the visibility of a path.
     const togglePathVisibility = (pathId: string) => {
@@ -49,7 +53,13 @@ const MapMenu = (props: Props) => {
         // Notify about the change.
         setShowPaths(show);
         onShowPathsChanged(show);
-    }
+    };
+
+   // Function to toggle the visibility of clusters.
+    const toggleShowClusters = (show: boolean) => {
+        setShowClusters(show);
+        onShowClustersChanged(show);
+    };
 
     return (
         <UncontrolledPopover
@@ -82,6 +92,15 @@ const MapMenu = (props: Props) => {
                         onChange={(e) => toggleShowRoutes(e.target.checked)}
                     />
                     <Label check>Show routes</Label>
+                </FormGroup>
+                <FormGroup switch>
+                    <Input
+                        type="switch"
+                        role="switch"
+                        checked={showClusters}
+                        onChange={(e) => toggleShowClusters(e.target.checked)}
+                    />
+                    <Label check>Group near devices in clusters</Label>
                 </FormGroup>
             </PopoverBody>
         </UncontrolledPopover>

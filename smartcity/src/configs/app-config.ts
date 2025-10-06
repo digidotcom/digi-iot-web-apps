@@ -43,8 +43,13 @@ export const DEFAULT_FA_ICON = "fa-solid fa-microchip";
 export const DEFAULT_MARKER_IMAGE: IoTMarkerImage = {
     connected: "/images/marker_device_connected.png",
     disconnected: "/images/marker_device_disconnected.png",
-    maintenance: "/images/marker_device_connected_maint.png"
+    maintenance: "/images/marker_device_connected_maint.png",
+    incidence: "/images/marker_device_incidence.png"
 }
+
+// Streams.
+export const STREAM_INCIDENCE = "incidence";
+export const VALUE_INCIDENCE = "1";
 
 // Application paths.
 export const ROUTES_PATH = "/data/routes/";
@@ -75,7 +80,7 @@ export const APP_MONITORS: AppMonitorDef[] = [
                         }
                     {{/each}}
                 ]`,
-        batchDuration: 10,
+        batchDuration: 2,
         batchSize: 10
     },
     {

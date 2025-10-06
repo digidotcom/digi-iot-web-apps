@@ -10,6 +10,7 @@ import CloudLog from '@components/cloud-log/cloud-log';
 import Sidebar from '@components/navigation/sidebar';
 import Loading from '@components/widgets/loading';
 import { TOAST_CONFIG } from '@configs/app-config';
+import { AlertsProvider } from '@contexts/alerts-provider';
 import { DevicesProvider } from '@contexts/devices-provider';
 import { RoutesProvider } from '@contexts/routes-provider';
 import appState from '@services/app-state';
@@ -38,16 +39,18 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
     return (
         <RoutesProvider>
             <DevicesProvider>
-                <Sidebar/>
-                <div className="page-layout c-wrapper">
-                    <div className="main position-relative">
-                        <div id="main-content" className="absolute-layout-container container-fluid">
-                            {children}
+                <AlertsProvider>
+                    <Sidebar/>
+                    <div className="page-layout c-wrapper">
+                        <div className="main position-relative">
+                            <div id="main-content" className="absolute-layout-container container-fluid">
+                                {children}
+                            </div>
                         </div>
                     </div>
-                </div>
-                <CloudLog/>
-                <ToastContainer {...TOAST_CONFIG}/>
+                    <CloudLog/>
+                    <ToastContainer {...TOAST_CONFIG}/>
+                </AlertsProvider>
             </DevicesProvider>
         </RoutesProvider>
     );

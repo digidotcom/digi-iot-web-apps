@@ -8,6 +8,8 @@ export const DEFAULT_ZOOM_LEVEL = 3;
 
 export const DEFAULT_CENTER: google.maps.LatLngLiteral = { lat: 20.0, lng: 0.0 };
 
+let zIndex = 0;
+
 export const DEFAULT_OPTIONS = {
     streetViewControl: false,
     styles: [
@@ -42,8 +44,7 @@ const getMarkerPopover = (device: IoTDevice, closePopup: () => void) => {
  * @returns An array of DeviceMarker objects to draw in the map.
  */
 export const getMarkersFromDevices = (devices: IoTDevice[], currentMarkers: DeviceMarker[], hiddenPaths: string[], closePopup: () => void): DeviceMarker[] => {
-    let marker
-    return devices.map(device => {
+    const markers = devices.map(device => {
         // Check if there is a marker for the device. In that case just update device related fields.
         let marker = currentMarkers?.find(marker => marker.device.id == device.id);
         if (marker) {
@@ -57,8 +58,15 @@ export const getMarkersFromDevices = (devices: IoTDevice[], currentMarkers: Devi
                 popover: getMarkerPopover(device, closePopup)
             };
         }
+        // Set the connected devices on top of the disconnected ones.
+        if (marker.device.connected && marker.zIndex === undefined) {
+            incrementMarkerZIndex(marker);
+        }
         return marker;
     });
+    // Set the markers with incidence on top of the others.
+    markers.filter(marker => marker.device.connected && marker.device.incidence).forEach(marker => incrementMarkerZIndex(marker));
+    return markers;
 };
 
 /**
@@ -91,4 +99,15 @@ export const coordsToLatLng = (coords: []) => {
     coords.forEach(coord => latLng.push({lat: coord[0], lng: coord[1]}));
 
     return latLng;
+};
+
+/**
+ * Increments the z-index of the given marker.
+ * 
+ * @param marker The marker to increment the z-index of.
+ */
+export const incrementMarkerZIndex = (marker: DeviceMarker) => {
+    const newZIndex = zIndex + 1;
+    marker.zIndex = newZIndex
+    zIndex = newZIndex;
 };

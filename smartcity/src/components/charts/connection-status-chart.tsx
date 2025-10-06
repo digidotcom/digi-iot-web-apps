@@ -11,7 +11,7 @@ import { faCircleNotch, faLink } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AppError } from '@models/AppError';
 import { getConnectionStatus } from '@services/drm/reports';
-import { createImageCenterPlugin } from '@utils/chart-utils';
+import { CONTAINER_MIN_WIDTH, createImageCenterPlugin, getLegendInitialPosition } from '@utils/chart-utils';
 import { useResizeObserver } from '@utils/react-utils';
 import { showError } from '@utils/toast-utils';
 
@@ -79,7 +79,7 @@ const ConnectionStatusChart = (props: Props) => {
 
     // Adjust the legend position based on the container width.
     useResizeObserver(CONTAINER_ID, (width, height) => {
-        chartRef.current?.setLegendPosition(width > 300 ? "right" : "bottom");
+        chartRef.current?.setLegendPosition(width > CONTAINER_MIN_WIDTH ? "right" : "bottom");
     });
 
     return (
@@ -105,7 +105,7 @@ const ConnectionStatusChart = (props: Props) => {
                             options={{
                                 maintainAspectRatio: false
                             }}
-                            legendPosition="right"
+                            legendPosition={getLegendInitialPosition(CONTAINER_ID)}
                             showCountInLegend={true}
                             plugins={[imageCenterPlugin]}
                         />
