@@ -13,7 +13,7 @@ Before getting started, ensure you have the following tools and accounts:
 * **[Node.js 18.18](https://nodejs.org/)** or later.
 * **[Digi IoT Device Simulator 1.0.1](https://www.digi.com/resources/documentation/digidocs/device-simulator/doc/)** or later.
 * A compatible IDE, such as **[Visual Studio Code](https://code.visualstudio.com/)**.
-* A **[Digi Remote Manager](https://www.digi.com/products/iot-software-services/digi-remote-manager)** account.
+* A **[Digi ConnectCore Cloud Services](https://www.digi.com/products/embedded-systems/digi-connectcore/software-and-tools/cloud-services)** account.
 
 ## Setting up the simulation
 
