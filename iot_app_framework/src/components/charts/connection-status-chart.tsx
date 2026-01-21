@@ -6,7 +6,6 @@ import { Card, CardBody, CardTitle } from 'reactstrap';
 import Chart, { ChartRef } from '@components/charts/chart';
 import Loading from '@components/widgets/loading';
 import { ColorStyles } from '@configs/style-constants';
-import { useBusesContext } from '@contexts/buses-provider';
 import { faCircleNotch, faLink } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AppError } from '@models/AppError';
@@ -14,16 +13,18 @@ import { getConnectionStatus } from '@services/drm/reports';
 import { CONTAINER_MIN_WIDTH, createImageCenterPlugin, getLegendInitialPosition } from '@utils/chart-utils';
 import { useResizeObserver } from '@utils/react-utils';
 import { showError } from '@utils/toast-utils';
+import { IoTDevice } from '@models/IoTDevice';
 
 // Props interface.
 interface Props {
     group?: string;
+    watch_devices: IoTDevice[];
 };
 
 const CONTAINER_ID = "connection-status-chart";
 
 const ConnectionStatusChart = (props: Props) => {
-    const { group } = props;
+    const { group, watch_devices } = props;
 
     // Used to show a spinner when the connection status is being loaded.
     const [loadingConnectionStatus, setLoadingConnectionStatus] = React.useState(false);
@@ -36,9 +37,6 @@ const ConnectionStatusChart = (props: Props) => {
 
     // Used to track when the report is loaded.
     const [reportLoaded, setReportLoaded] = React.useState(false);
-
-    // Track the list of buses.
-    const { buses } = useBusesContext();
 
     // Chart image.
     const imageCenterPlugin = createImageCenterPlugin(faLink, ColorStyles.darkGray);
@@ -59,15 +57,15 @@ const ConnectionStatusChart = (props: Props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    // Update the chart when the buses list changes.
+    // Update the chart when the devices watch list changes.
     React.useEffect(() => {
         // Updates in the list should be attended only after the report is loaded.
         if (!reportLoaded) {
             return;
         }
         let newConnectionStatus = [0, 0];
-        buses.forEach(bus => {
-            if (bus.connected) {
+        watch_devices.forEach(device => {
+            if (device.connected) {
                 newConnectionStatus[0] += 1;
             } else {
                 newConnectionStatus[1] += 1;
@@ -75,7 +73,7 @@ const ConnectionStatusChart = (props: Props) => {
         });
         setConnectionStatus(newConnectionStatus);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [buses]);
+    }, [watch_devices]);
 
     // Adjust the legend position based on the container width.
     useResizeObserver(CONTAINER_ID, (width, height) => {

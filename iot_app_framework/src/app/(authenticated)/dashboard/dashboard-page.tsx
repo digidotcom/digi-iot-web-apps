@@ -18,7 +18,9 @@ const DashboardPage = () => {
         <Container fluid>
             <Row className="gy-3 pb-3">
                 <Col lg="3" md="6" xs="12">
-                    <ConnectionStatusChart group={GROUP_BUSES} />
+                    <ConnectionStatusChart
+                        group={GROUP_BUSES}
+                        watch_devices={buses}/>
                 </Col>
                 <Col lg="3" md="6" xs="12">
                     <MaintenanceStatusChart
