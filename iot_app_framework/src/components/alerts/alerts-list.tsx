@@ -3,13 +3,23 @@
 import AlertItem from '@components/alerts/alert-item';
 import Loading from '@components/widgets/loading';
 import { useAlertsContext } from '@contexts/alerts-provider';
+import { IAlert } from '@customTypes/alert-types';
 import { faCheck, faCircleNotch } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import alertsManager from '@services/alerts-manager';
 import { Card, CardTitle, ListGroup } from 'reactstrap';
 
-const AlertsList = () => {
+// Props interface.
+interface Props {
+    group: string;
+    alertDefinitions: IAlert[];
+}
+
+const AlertsList = (props: Props) => {
+    const { group, alertDefinitions } = props;
     const { alerts, isLoading: loadingAlerts } = useAlertsContext();
+
+    const filteredAlerts = alerts.filter(alert => alertDefinitions.some(template => template.name === alert.name && alert.group === group +"/"));
 
     return (
         <Card className="dashboard-top-card">
@@ -21,7 +31,7 @@ const AlertsList = () => {
             ) : (
                 <div className="alerts-container">
                     <ListGroup className="alerts-list">
-                        {alerts?.map(alert => (
+                        {filteredAlerts?.map(alert => (
                             <AlertItem
                                 key={`${alert.id}/${alert.source}`}
                                 alert={alert}
@@ -29,7 +39,7 @@ const AlertsList = () => {
                         ))}
                     </ListGroup>
                     {/* If there are no alerts, show a message. */}
-                    {alerts && alerts.length == 0 && (
+                    {filteredAlerts && filteredAlerts.length == 0 && (
                         <div className="no-alerts-container">
                             <FontAwesomeIcon icon={faCheck} fixedWidth /> No alerts found
                         </div>

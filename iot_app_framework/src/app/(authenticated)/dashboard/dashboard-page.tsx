@@ -9,6 +9,7 @@ import ConnectionStatusChart from "@components/charts/connection-status-chart";
 import MaintenanceStatusChart from "@components/charts/maintenance-status-chart";
 import { GROUP_BUSES } from '@configs/buses-config';
 import { useBusesContext } from '@contexts/buses-provider';
+import { BUSES_ALERTS } from '@configs/buses-config';
 
 const DashboardPage = () => {
     const { buses, isLoading } = useBusesContext();
@@ -26,7 +27,9 @@ const DashboardPage = () => {
                         labelNotInMaintenance="In route"/>
                 </Col>
                 <Col lg="6" md="12">
-                    <AlertsList />
+                    <AlertsList
+                        group={GROUP_BUSES}
+                        alertDefinitions={BUSES_ALERTS} />
                 </Col>
             </Row>
             <Row className="gy-3">
