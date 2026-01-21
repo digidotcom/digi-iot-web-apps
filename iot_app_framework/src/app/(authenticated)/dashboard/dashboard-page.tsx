@@ -25,8 +25,10 @@ const DashboardPage = () => {
                 <Col lg="3" md="6" xs="12">
                     <MaintenanceStatusChart
                         group={GROUP_BUSES}
-                        labelInMaintenance="Out of route"
-                        labelNotInMaintenance="In route"/>
+                        watch_devices={buses}
+                        title="Route Status"
+                        labelInService="In route"
+                        labelInMaintenance="Out of route"/>
                 </Col>
                 <Col lg="6" md="12">
                     <AlertsList
