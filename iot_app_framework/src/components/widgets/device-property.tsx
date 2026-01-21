@@ -93,6 +93,7 @@ const DeviceProperty = (props: Props) => {
                                         className="iot-property-icon"
                                         fixedWidth
                                         color={property.color}
+                                        size="5x"
                                     />
                                 ) : (
                                     <span><i>No icon</i></span>
