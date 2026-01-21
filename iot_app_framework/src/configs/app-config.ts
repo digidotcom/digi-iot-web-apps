@@ -97,6 +97,8 @@ export const APP_MONITORS: AppMonitorDef[] = [
                             "group": "{{device.group}}",
                             "status": "{{device.connection_status}}",
                             "last_update": "{{device.last_update}}",
+                            "firmware_version": "{{device.firmware_version}}",
+                            "vendor_id": {{device.vendor_id}},
                             {{#if device.geoposition.coordinates}}
                                 "location": {{device.geoposition.coordinates}},
                             {{/if}}

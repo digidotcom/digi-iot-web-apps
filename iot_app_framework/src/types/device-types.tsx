@@ -68,6 +68,8 @@ export interface IoTDeviceInterface {
     group: string;
     connected: boolean;
     maintenance: boolean;
+    firmwareVersion: string;
+    vendorId: number;
     position?: google.maps.LatLngLiteral;
     lastUpdate: Date;
     incidence?: boolean;

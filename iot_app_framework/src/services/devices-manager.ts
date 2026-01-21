@@ -136,6 +136,8 @@ class DevicesManager {
         const lastUpdate = drmDevice.last_update ? new Date(drmDevice.last_update) : new Date();
         const connected = drmDevice.connection_status == 'connected';
         const maintenance = drmDevice.in_maintenance_window == "yes";
+        const firmwareVersion = drmDevice.firmware_version ?? "";
+        const vendorId = drmDevice.vendor_id ?? 0;
         return {
             id: drmDevice.id,
             name: name,
@@ -143,6 +145,8 @@ class DevicesManager {
             group: group,
             connected: connected,
             maintenance: maintenance,
+            firmwareVersion: firmwareVersion,
+            vendorId: vendorId,
             position: position,
             lastUpdate: lastUpdate
         }
@@ -241,6 +245,8 @@ class DevicesManager {
             } : undefined,
             connection_status: deviceMonitorSample.status == "connected" ? "connected" : "disconnected",
             in_maintenance_window: deviceMonitorSample.maintenance,
+            firmware_version: deviceMonitorSample.firmware_version,
+            vendor_id: deviceMonitorSample.vendor_id,
             // Below values are required in the interface but not used by us.
             customer_id: 0,
             last_connect: "",

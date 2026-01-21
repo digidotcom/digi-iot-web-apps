@@ -81,6 +81,8 @@ export interface DevicesMonitorSample {
     location?: [number, number];
     maintenance: string;
     alerts: number;
+    firmware_version: string;
+    vendor_id: number;
 }
 
 /**

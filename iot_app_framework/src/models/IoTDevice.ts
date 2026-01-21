@@ -11,6 +11,8 @@ export class IoTDevice implements IoTDeviceInterface {
     group: string;
     connected: boolean;
     maintenance: boolean;
+    firmwareVersion: string;
+    vendorId: number;
     position?: google.maps.LatLngLiteral;
     lastUpdate: Date;
     incidence?: boolean;
@@ -40,6 +42,8 @@ export class IoTDevice implements IoTDeviceInterface {
         this.group = device.group;
         this.connected = device.connected;
         this.maintenance = device.maintenance;
+        this.firmwareVersion = device.firmwareVersion;
+        this.vendorId = device.vendorId;
         this.position = device.position;
         this.lastUpdate = device.lastUpdate;
 
@@ -103,6 +107,12 @@ export class IoTDevice implements IoTDeviceInterface {
         this.group = deviceData.group;
         this.connected = deviceData.connected;
         this.maintenance = deviceData.maintenance;
+        if (deviceData.firmwareVersion != "") {
+            this.firmwareVersion = deviceData.firmwareVersion;
+        }
+        if (deviceData.vendorId != 0) {
+            this.vendorId = deviceData.vendorId;
+        }
         this.position = deviceData.position;
         this.lastUpdate = deviceData.lastUpdate;
     }
