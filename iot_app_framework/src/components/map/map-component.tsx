@@ -38,6 +38,7 @@ interface Props {
     allowSelection?: boolean,
     forceShowRoutes?: boolean
     saveLocation?: boolean
+    defaultZoom?: number
 }
 
 // Interface with the methods exposed to the parent component.
@@ -56,6 +57,7 @@ const MapComponent = React.forwardRef((props: Props, ref: Ref<MapComponentRef>) 
         allowSelection = true,
         forceShowRoutes = false,
         saveLocation = true,
+        defaultZoom,
     } = props;
 
     // Method used to unslect the current selected path if any.
@@ -254,7 +256,12 @@ const MapComponent = React.forwardRef((props: Props, ref: Ref<MapComponentRef>) 
             west
         });
         if (autoCenter) {
-            map.current?.setZoom((map.current?.getZoom() ?? DEFAULT_ZOOM_LEVEL) - 3);
+            // Use defaultZoom if provided, otherwise reduce current zoom by 3
+            if (defaultZoom !== undefined) {
+                map.current?.setZoom(defaultZoom);
+            } else {
+                map.current?.setZoom((map.current?.getZoom() ?? DEFAULT_ZOOM_LEVEL) - 3);
+            }
         }
     };
 
