@@ -11,7 +11,7 @@ import { IoTDevice } from '@models/IoTDevice';
 import { MarkerF, MarkerClustererF, PolylineF, Libraries, GoogleMap, useJsApiLoader } from '@react-google-maps/api';
 import { Clusterer } from '@react-google-maps/marker-clusterer';
 import { removeElementById, renderHoverMessage } from '@utils/hover-message-utils';
-import { DEFAULT_ZOOM_LEVEL, DEFAULT_CENTER, DEFAULT_OPTIONS, getMarkersFromDevices, getPathsFromRoutes, coordsToLatLng, incrementMarkerZIndex } from '@utils/map-utils';
+import { DEFAULT_ZOOM_LEVEL, DEFAULT_CENTER, DEFAULT_OPTIONS, NO_OVERLAY_BUTTONS_OPTIONS, getMarkersFromDevices, getPathsFromRoutes, coordsToLatLng, incrementMarkerZIndex } from '@utils/map-utils';
 import { BASE_PATH } from '@configs/app-config';
 import devicesManager from '@services/devices-manager';
 import { toast } from 'react-toastify';
@@ -39,6 +39,7 @@ interface Props {
     forceShowRoutes?: boolean
     saveLocation?: boolean
     defaultZoom?: number
+    hideOverlayButtons?: boolean
 }
 
 // Interface with the methods exposed to the parent component.
@@ -58,6 +59,7 @@ const MapComponent = React.forwardRef((props: Props, ref: Ref<MapComponentRef>) 
         forceShowRoutes = false,
         saveLocation = true,
         defaultZoom,
+        hideOverlayButtons = false
     } = props;
 
     // Method used to unslect the current selected path if any.
@@ -409,7 +411,7 @@ const MapComponent = React.forwardRef((props: Props, ref: Ref<MapComponentRef>) 
         return (
             <>
                 <GoogleMap
-                    options={DEFAULT_OPTIONS}
+                    options={hideOverlayButtons ? NO_OVERLAY_BUTTONS_OPTIONS : DEFAULT_OPTIONS}
                     mapContainerClassName="google-map"
                     mapContainerStyle={{width: '100%', height: '100%'}}
                     center={center}

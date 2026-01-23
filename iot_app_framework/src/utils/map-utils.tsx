@@ -19,6 +19,14 @@ export const DEFAULT_OPTIONS = {
     ]
 };
 
+export const NO_OVERLAY_BUTTONS_OPTIONS = {
+    ...DEFAULT_OPTIONS,
+    disableDefaultUI: true,     // Disables all default UI controls
+    mapTypeId: 'roadmap',       // Force roadmap view (no 3D)
+    tilt: 0,                    // Disable tilt (keeps map in 2D mode)
+    gestureHandling: 'greedy'   // Allows map interaction without Ctrl key
+};
+
 /**
  * Creates a MarkerPopover component for the given IoTDevice.
  * 
