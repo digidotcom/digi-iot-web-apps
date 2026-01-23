@@ -1,7 +1,7 @@
-import MarkerPopover from '@components/map/marker-popover';
 import { IoTRoute } from '@customTypes/device-types';
 import { DeviceMarker, RoutePath } from '@customTypes/map-types';
 import { IoTDevice } from '@models/IoTDevice';
+import { createMarkerPopoverForDevice } from '@utils/marker-popover-factory';
 
 // Constants.
 export const DEFAULT_ZOOM_LEVEL = 3;
@@ -28,9 +28,7 @@ export const DEFAULT_OPTIONS = {
  * @returns A MarkerPopover component for the given device.
  */
 const getMarkerPopover = (device: IoTDevice, closePopup: () => void) => {
-    return (
-        <MarkerPopover key={device.id} device={device} closePopup={closePopup} />
-    );
+    return createMarkerPopoverForDevice(device, closePopup);
 };
 
 /**

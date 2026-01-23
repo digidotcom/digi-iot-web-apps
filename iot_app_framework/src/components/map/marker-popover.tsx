@@ -1,34 +1,34 @@
 'use client';
 
-import { useState } from 'react';
 import { Button } from "reactstrap";
-
-import DeviceMessageDialog from '@components/dialogs/device-message-dialog';
 import { far } from '@fortawesome/free-regular-svg-icons';
-import { faPaperPlane, fas, faSquare, faTriangleExclamation } from '@fortawesome/free-solid-svg-icons';
+import { fas, faSquare, faTriangleExclamation } from '@fortawesome/free-solid-svg-icons';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { IoTDevice } from '@models/IoTDevice';
 import { resolveIcon } from '@utils/icon-utils';
 import { ColorStyles } from '@configs/style-constants';
+import { IconProp } from '@fortawesome/fontawesome-svg-core';
 
 // Register all icon packs for dynamic usage
 library.add(fas, far);
 
+// Interface for defining custom button configuration
+export interface MarkerPopoverButtonConfig {
+    text?: string;
+    icon?: IconProp;
+    disabled: boolean;
+    onClick: () => void;
+}
+
 // Interface to exchange data using props.
 interface Props {
     device: IoTDevice;
-    closePopup: () => void;
+    buttonConfig: MarkerPopoverButtonConfig;
 }
 
-// Component definition.
-const MarkerPopover = ({device, closePopup}: Props) => {
-    // Track the message dialog modal open status value.
-    const [modalOpen, setModalOpen] = useState(false);
-
-    // Function to toggle the visibility of the device message dialog modal.
-    const toggleModal = () => setModalOpen(!modalOpen);
-
+// Component definition
+const MarkerPopover = ({device, buttonConfig}: Props) => {
     return (
         <div key={device.id}>
             <FontAwesomeIcon icon={resolveIcon(device.faIcon) as any} fixedWidth />
@@ -47,13 +47,15 @@ const MarkerPopover = ({device, closePopup}: Props) => {
             <hr className="marker-popover-separator" />
             Device ID: {device.id.substring(18)}<br/>
             Last update: {device.lastUpdate?.toLocaleString()}<br/><br/>
-            <Button color="primary" style={{ width: "100%" }} disabled={!device.connected} onClick={() => {
-                toggleModal();
-                closePopup();
-            }}>
-                <FontAwesomeIcon icon={faPaperPlane} fixedWidth /> Send message
+            <Button
+                color="primary"
+                style={{ width: "100%" }}
+                disabled={buttonConfig.disabled}
+                onClick={buttonConfig.onClick}
+            >
+                {buttonConfig.icon != undefined && <FontAwesomeIcon icon={buttonConfig.icon} fixedWidth />}
+                {buttonConfig.text != undefined && buttonConfig.text}
             </Button>
-            <DeviceMessageDialog device={device} isOpen={modalOpen} onClose={toggleModal} />
         </div>
     );
 };
