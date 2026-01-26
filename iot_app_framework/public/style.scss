@@ -996,3 +996,32 @@ input:focus {
   background-color: $color-darkgray;
   margin-top: -25px;
 }
+
+// -----------------------------------------------------------------------------
+// Generic widgets
+// -----------------------------------------------------------------------------
+
+// Colored values.
+.value-field-colored {
+  padding: 0px 5px;
+  border-radius: 5px;
+  color: $color-darkgray;
+  text-align: center;
+  width: 100px;
+  background-color: $color-lightgray;
+}
+
+.value-field-colored-good {
+  background-color: $success-green;
+  color: $color-white;
+}
+
+.value-field-colored-normal {
+  background-color: $warning-yellow;
+  color: $color-white;
+}
+
+.value-field-colored-bad {
+  background-color: $failure-red;
+  color: $color-white;
+}
