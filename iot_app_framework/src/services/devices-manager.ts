@@ -133,7 +133,7 @@ class DevicesManager {
      */
     private initDeviceProperties(streams: IStream[]) {
         this.deviceGroups.forEach(group =>
-            group.devices.forEach(device =>
+            group.devices.forEach(device => {
                 device.properties?.forEach(property => {
                     const stream = streams.find(stream => stream.id === property.stream);
                     if (stream) {
@@ -156,8 +156,10 @@ class DevicesManager {
                             device.incidenceDate = incidence ? new Date(property.lastUpdate) : undefined;
                         }
                     }
-                }
-        )));
+                })
+                device.recomputePropValues();
+            })
+        );
     }
 
     /**
@@ -255,6 +257,10 @@ class DevicesManager {
                     const incidence = property.value === VALUE_INCIDENCE;
                     device.incidence = incidence;
                     device.incidenceDate = incidence ? new Date(property.lastUpdate) : undefined;
+                }
+                // Check if this property is forcing other properties to recompute.
+                if (property.recomputePropValues) {
+                    device.recomputePropValues();
                 }
 
                 return device;

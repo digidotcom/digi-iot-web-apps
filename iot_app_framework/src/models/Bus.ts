@@ -40,4 +40,8 @@ export class Bus extends IoTDevice implements BusInterface {
     get line(): BusLine {
         return this.route as BusLine ?? undefined;
     }
+
+    public recomputePropValues(_changedPropertyId?: string): void {
+        // Nothing to re-calculate.
+    }
 }

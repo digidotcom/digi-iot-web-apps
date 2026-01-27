@@ -101,6 +101,7 @@ export interface IoTDeviceProperty {
     samplesHistory?: IoTSample[];
     samplesHistoryRead: boolean;
     visible: boolean;
+    recomputePropValues?: boolean;
 }
 
 /**
@@ -114,6 +115,7 @@ export interface IoTDevicePropertyDef {
     color?: string;
     units?: string;
     visible?: boolean;
+    recomputePropValues?: boolean;
 }
 
 /**

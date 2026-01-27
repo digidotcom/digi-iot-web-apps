@@ -2,7 +2,7 @@ import { DEFAULT_MARKER_IMAGE, DEFAULT_FA_ICON } from '@configs/app-config';
 import { IoTDeviceInterface, IoTMarkerImage, IoTRoute, IoTDeviceProperty, IoTDevicePropertyDef } from '@customTypes/device-types';
 
 // Class implementing the IoTDevice interface with generic methods.
-export class IoTDevice implements IoTDeviceInterface {
+export abstract class IoTDevice implements IoTDeviceInterface {
     
     // Variables (from interface).
     id: string;
@@ -66,10 +66,13 @@ export class IoTDevice implements IoTDeviceInterface {
                     stream: propertyDef.stream && `${this.id}/${propertyDef.stream}`,
                     color: propertyDef.color,
                     samplesHistoryRead: false,
-                    visible: propertyDef.visible ?? true
+                    visible: propertyDef.visible ?? true,
+                    recomputePropValues: propertyDef.recomputePropValues ?? false
                 }
             );
         });
+
+        this.recomputePropValues();
     }
 
     /**
@@ -131,4 +134,13 @@ export class IoTDevice implements IoTDeviceInterface {
         this.position = deviceData.position;
         this.lastUpdate = deviceData.lastUpdate;
     }
+
+    /**
+     * Called when a property defining the 'recomputePropValues' to true updates its value.
+     * This is useful if the device contains properties whose values depend on other property
+     * values, allowing a recompute when necessary.
+     * 
+     * @param changedPropertyId The ID of the property that has been updated.
+     */
+    public abstract recomputePropValues(changedPropertyId?: string): void;
 }
