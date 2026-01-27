@@ -97,6 +97,21 @@ export class IoTDevice implements IoTDeviceInterface {
     }
 
     /**
+     * Updates the value of the IoTProperty with the given ID.
+     * 
+     * @param propertyId The ID of the property to update its value.
+     * @param value The new value for the property.
+     */
+    updatePropertyValue(propertyId: string, value: string): void {
+        const property = this.getProperty(propertyId);
+
+        if (property) {
+            property.value = value;
+            property.lastUpdate = new Date();
+        }
+    }
+
+    /**
      * Updates the current device data with the provided values.
      *
      * @param deviceData The new data to update the device with.
