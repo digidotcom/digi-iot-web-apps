@@ -2,7 +2,7 @@
 
 import { ChartData, ChartLegendOptions, ChartOptions, ChartType, PositionType } from "chart.js";
 import React, { Ref } from "react";
-import { Bar, Doughnut, Line, Pie } from "react-chartjs-2";
+import { Bar, Doughnut, HorizontalBar, Line, Pie } from "react-chartjs-2";
 
 // Props interface.
 interface Props {
@@ -25,7 +25,7 @@ const Chart = React.forwardRef((props: Props, ref: Ref<ChartRef>) => {
     const { type, showLegend, legendPosition = "bottom", showCountInLegend, ...chartProps } = props;
 
     // Reference to the chart.
-    const chartRef = React.useRef<Bar | Doughnut | Line | Pie | null>();
+    const chartRef = React.useRef<Bar | Doughnut | HorizontalBar | Line | Pie | null>();
 
     /**
      * Sets the legend in the given position.
@@ -117,6 +117,8 @@ const Chart = React.forwardRef((props: Props, ref: Ref<ChartRef>) => {
     switch (type) {
         case "bar":
             return <Bar ref={c => { chartRef.current = c; }} {...chartProps} />
+        case "horizontalBar":
+            return <HorizontalBar ref={c => { chartRef.current = c; }} {...chartProps} />
         case "doughnut":
             return <Doughnut ref={c => { chartRef.current = c; }} {...chartProps} />
         case "line":
