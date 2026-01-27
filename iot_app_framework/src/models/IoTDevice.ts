@@ -63,7 +63,7 @@ export class IoTDevice implements IoTDeviceInterface {
                     faIcon: propertyDef.faIcon,
                     value: "",
                     lastUpdate: undefined,
-                    stream: `${this.id}/${propertyDef.stream}`,
+                    stream: propertyDef.stream && `${this.id}/${propertyDef.stream}`,
                     color: propertyDef.color,
                     samplesHistoryRead: false,
                     visible: propertyDef.visible ?? true

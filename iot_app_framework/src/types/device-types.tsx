@@ -96,7 +96,7 @@ export interface IoTDeviceProperty {
     lastUpdate?: Date;
     units?: string;
     faIcon?: string;
-    stream: string;
+    stream?: string;
     color?: string;
     samplesHistory?: IoTSample[];
     samplesHistoryRead: boolean;
@@ -109,7 +109,7 @@ export interface IoTDeviceProperty {
 export interface IoTDevicePropertyDef {
     id: string;
     name: string;
-    stream: string;
+    stream?: string;
     faIcon?: string;
     color?: string;
     units?: string;
