@@ -1,5 +1,6 @@
 import { BUS_FA_ICON, BUS_MARKER_IMAGE, BUSES_PROPERTIES, BUS_PROPERTY_LINE, BUS_PROPERTY_PASSENGERS, BUS_PROPERTY_POWER, BUS_PROPERTY_PRESSURE, BUS_PROPERTY_TEMPERATURE } from '@configs/buses-config';
 import { BusInterface, BusLine } from '@customTypes/bus-types';
+import { IoTDeviceInterface } from '@customTypes/device-types';
 import { IoTDevice } from '@models/IoTDevice';
 
 // Class implementing the Bus interface with getter logic.
@@ -11,7 +12,7 @@ export class Bus extends IoTDevice implements BusInterface {
      * 
      * @param device The IoTDevice the Bus object will be based on.
      */
-    constructor(device: IoTDevice) {
+    constructor(device: IoTDeviceInterface) {
         super(device, BUS_FA_ICON, BUS_MARKER_IMAGE, BUSES_PROPERTIES, BUS_PROPERTY_LINE);
     }
 

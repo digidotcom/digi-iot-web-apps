@@ -1,16 +1,15 @@
 import { APP_GROUPS, DEFAULT_SAMPLES_NUMBER, MONITOR_DATA_POINTS, MONITOR_DEVICES, STREAM_INCIDENCE, VALUE_INCIDENCE } from '@configs/app-config';
 import { STATUS_ERROR, STATUS_LOADED, STATUS_LOADING, STATUS_NOT_LOADED } from '@configs/app-constants';
-import { GROUP_BUSES } from '@configs/buses-config';
 import { IDevice, IoTDeviceInterface, IoTDevicesGroup } from '@customTypes/device-types';
 import { DataPointMonitorSample, DevicesMonitorSample } from '@customTypes/monitor-types';
 import { IStream } from '@customTypes/stream-types';
 import { AppError } from '@models/AppError';
-import { Bus } from '@models/Bus';
 import { IoTDevice } from '@models/IoTDevice';
 import { getDevices } from '@services/drm/devices';
 import { getStreams } from '@services/drm/streams';
 import MonitorsManager from '@services/monitors-manager';
 import RoutesManager from '@services/routes-manager';
+import { createDevice, extractDeviceData } from '@utils/devices-factory';
 import { newAppError } from '@utils/error-utils';
 import logLevel from '@utils/log-utils';
 
@@ -86,7 +85,7 @@ class DevicesManager {
             // Build the device objects.
             drmDevices.forEach(device => {
                 // Create the IoT device and add it to its group.
-                this.createDevice(device);
+                createDevice(device, this.deviceGroups);
             });
             // Build the streams query.
             const streamsQuery = this.deviceGroups.flatMap(group =>
@@ -116,63 +115,6 @@ class DevicesManager {
             this.notifyStatusListeners(STATUS_ERROR);
             throw appError;
         }
-    }
-
-    /**
-     * Extracts device data from the given DRM device.
-     *
-     * @param drmDevice The DRM device to extract data from.
-     * 
-     * @returns An object containing the extracted device data.
-     */
-    private extractDeviceData(drmDevice: IDevice) {
-        const name = drmDevice.name ?? "";
-        const group = drmDevice.group ?? "";
-        const coordinates = drmDevice.geoposition?.coordinates;
-        const position = coordinates && coordinates.length > 1 ? {
-            lat: coordinates[1],
-            lng: coordinates[0]
-        } : undefined;
-        const lastUpdate = drmDevice.last_update ? new Date(drmDevice.last_update) : new Date();
-        const connected = drmDevice.connection_status == 'connected';
-        const maintenance = drmDevice.in_maintenance_window == "yes";
-        const firmwareVersion = drmDevice.firmware_version ?? "";
-        const vendorId = drmDevice.vendor_id ?? 0;
-        return {
-            id: drmDevice.id,
-            name: name,
-            type: drmDevice.type,
-            group: group,
-            connected: connected,
-            maintenance: maintenance,
-            firmwareVersion: firmwareVersion,
-            vendorId: vendorId,
-            position: position,
-            lastUpdate: lastUpdate
-        }
-    }
-
-    /**
-     * Creates an IoT Device instance from the given device data.
-     *
-     * @param drmDevice The DRM device data to create the device from.
-     * 
-     * @return The created IoT device, undfined if no device was created.
-     */
-    private createDevice(drmDevice: IDevice) {
-        // Extract device information.
-        const deviceData: IoTDeviceInterface = this.extractDeviceData(drmDevice);
-        // Build the object.
-        const iotDevice = new IoTDevice(deviceData);
-        // Create the final device and add it to its group.
-        if (iotDevice.group === GROUP_BUSES) {
-            const bus = new Bus(iotDevice);
-            this.deviceGroups.find(group => group.id === GROUP_BUSES)?.devices.push(bus);
-
-            return bus;
-        }
-
-        return undefined;
     }
 
     /**
@@ -259,11 +201,11 @@ class DevicesManager {
         // If the device already exists, update it.
         if (device) {
             // Extract device information.
-            const deviceData: IoTDeviceInterface = this.extractDeviceData(drmDevice);
+            const deviceData: IoTDeviceInterface = extractDeviceData(drmDevice);
             device.updateData(deviceData);
         } else {
             // Device is new, create it and store in its group.
-            device = this.createDevice(drmDevice);
+            device = createDevice(drmDevice, this.deviceGroups);
         }
 
         return device;
