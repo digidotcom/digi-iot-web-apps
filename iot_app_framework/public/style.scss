@@ -815,7 +815,7 @@ input:focus {
 }
 
 .iot-property-value-glowing {
-  color: #d18400;
+  color: #eea527 !important;
 }
 
 .iot-property-value .value {
@@ -862,6 +862,69 @@ input:focus {
   text-align: center;
   color: $failure-red;
   font-style: italic;
+}
+
+// IoT Property card.
+.iot-property-card {
+  display: flex;
+  flex-direction: column;
+  padding: 4px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-left: 4px solid #854820;
+
+  .iot-property-card-icon {
+    color: #854820;
+  }
+}
+
+.iot-property-card-header {
+  display: flex;
+  align-items: center;
+}
+
+.iot-property-card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+}
+
+.iot-property-card-label {
+  font-size: 18px;
+  font-weight: 600;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-left: 5px;
+}
+
+.iot-property-card-value {
+  font-size: 36px;
+  font-weight: 700;
+  color: #2c3e50;
+  line-height: 1.2;
+  margin-left: 10px;
+  transition: color 0.3s ease, box-shadow 0.2s ease;
+}
+
+.iot-property-card-units {
+  font-size: 24px;
+  font-weight: 400;
+  color: #2c3e50;
+  line-height: 1.2;
+  margin-left: 10px;
+  transition: color 0.3s ease, box-shadow 0.2s ease;
+}
+
+.iot-property-card-sublabel {
+  font-size: 13px;
+  color: #6c757d;
+  font-weight: 500;
+  margin-left: 10px;
+  transition: color 0.3s ease, box-shadow 0.2s ease;
 }
 
 // -----------------------------------------------------------------------------
