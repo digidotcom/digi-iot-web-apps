@@ -524,6 +524,15 @@ class DevicesManager {
             this.notifyIncidenceListeners(device, incidence);
         }
     }
+
+    /**
+     * Manually triggers a notification to all device listeners.
+     * This should be called after manually updating device properties
+     * to ensure React components re-render with the new values.
+     */
+    public notifyDeviceUpdate() {
+        this.notifyDeviceListeners();
+    }
 }
 
 // Export the singleton instance
