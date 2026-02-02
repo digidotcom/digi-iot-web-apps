@@ -1,7 +1,7 @@
 import { MONITORS_INVENTORY } from "@services/drm/api-constants";
 import { PARAM_MONITOR_DEF_ID, PARAM_MONITOR_ID } from "@services/drm/monitors";
 import appLog from "@utils/log-utils";
-import { Mutex } from "async-mutex";
+import { Mutex, withTimeout } from "async-mutex";
 import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
 import RemoteManagerMonitorTCPClient from "./monitor-tcp-client";
@@ -35,8 +35,9 @@ const { hostname } = new URL(platform);
 // Map with all monitors for each customer.
 const monitorsMap = new Map<number, Monitor[]>();
 
-// Mutex for safe concurrent access.
-const mutex = new Mutex();
+// Mutex for safe concurrent access with 30 second timeout to prevent deadlocks.
+const MUTEX_TIMEOUT_MS = 30000;
+const mutex = withTimeout(new Mutex(), MUTEX_TIMEOUT_MS);
 
 // Monitor keepalive in seconds. If the env variable is not defined or is 0, no keepalives will be sent.
 const keepaliveInterval = Number(process.env.MONITOR_KEEPALIVE_INTERVAL || "0");
@@ -95,6 +96,7 @@ export const POST: (req: Request) => Promise<Response> = withAuth(async (req) =>
         return NextResponse.json({ error: 'Monitor ID required' }, { status: 400 });
     }
     let monitorId = Number(monId);
+    let tcpClientToStart: RemoteManagerMonitorTCPClient | undefined;
 
     // Get the monitor definition ID from the URL parameters.
     const monDefId = req.nextUrl.searchParams.get(PARAM_MONITOR_DEF_ID);
@@ -102,7 +104,7 @@ export const POST: (req: Request) => Promise<Response> = withAuth(async (req) =>
         return NextResponse.json({ error: 'Monitor definition ID required' }, { status: 400 });
     }
 
-    return await mutex.runExclusive(async () => {
+    const response = await mutex.runExclusive(async () => {
         // Double check there is not a monitor for the given monitor definition ID but with other monitor ID.
         // If so, delete the more recent monitor and re-use the existing one.
         const existingMonitor = monitorsMap.get(customerId)?.find(mon => mon.monitorDefId === monDefId && mon.monitorId != monitorId);
@@ -130,11 +132,18 @@ export const POST: (req: Request) => Promise<Response> = withAuth(async (req) =>
         const writer = writable.getWriter();
         const monitorStream = { readable, writer } as MonitorStream;
 
-        // When the writer is closed, call the corresponding method to remove the stream from the list.
-        writer.closed.then(() => onWriterClosed(customerId, monitorId, monitorStream));
-
         // When the client disconnects, close the writer.
-        req.signal.onabort = () => writer.close();
+        const abortHandler = () => {
+            void safeClose(writer);
+        };
+
+        // When the writer is closed, call the corresponding method to remove the stream from the list.
+        writer.closed.finally(() => {
+            req.signal.removeEventListener("abort", abortHandler);
+            return onWriterClosed(customerId, monitorId, monitorStream);
+        });
+
+        req.signal.addEventListener("abort", abortHandler);
 
         // Add the just created streams to the list for this customer ID and monitor ID.
         const monitor = addStream(customerId, monitorId, monDefId, apiAuth, monitorStream);
@@ -142,7 +151,7 @@ export const POST: (req: Request) => Promise<Response> = withAuth(async (req) =>
         // so initialize the writer and return the corresponding reader to the client.
         if (monitor.tcpClient) {
             log.info(formatLogMsg("TCP client already exists", customerId, monitorId));
-            writer.write("");
+            void safeWrite(writer, "");
             return new NextResponse(readable);
         }
 
@@ -158,8 +167,8 @@ export const POST: (req: Request) => Promise<Response> = withAuth(async (req) =>
             });
             tcpClient.on("disconnected", () => {
                 log.debug(formatLogMsg("Monitor disconnected", customerId, monitorId));
-                // Close all writers.
-                getWriters(customerId, monitorId).forEach(writer => writer.close());
+                // Write an empty chunk before closing to ensure proper chunked encoding termination.
+                void safeWriteAll(customerId, monitorId, "").then(() => safeCloseAll(customerId, monitorId));
             });
             tcpClient.on("connect_response", (status) => {
                 log.debug(formatLogMsg(`Monitor connect response: ${status}`, customerId, monitorId));
@@ -168,10 +177,10 @@ export const POST: (req: Request) => Promise<Response> = withAuth(async (req) =>
                     const errorMessage = "Error connecting monitor " + monId + ": " + status;
                     log.error(formatLogMsg(errorMessage, customerId, monitorId));
                     // Write the error message to all writers.
-                    getWriters(customerId, monitorId).forEach(writer => writer.write(JSON.stringify({error: errorMessage})));
+                    void safeWriteAll(customerId, monitorId, JSON.stringify({ error: errorMessage }));
                 } else {
                     // Initialize the writers.
-                    getWriters(customerId, monitorId).forEach(writer => writer.write(""));
+                    void safeWriteAll(customerId, monitorId, "");
                     // Send keepalives at the configured interval.
                     if (keepaliveInterval > 0) {
                         sendKeepalive(customerId, monitorId, tcpClient);
@@ -182,16 +191,19 @@ export const POST: (req: Request) => Promise<Response> = withAuth(async (req) =>
                 const decoded = new TextDecoder().decode(data);
                 log.trace(formatLogMsg(`Monitor data: ${decoded}`, customerId, monitorId));
                 // Write the received data to all writers.
-                getWriters(customerId, monitorId).forEach(writer => writer.write(decoded));
+                void safeWriteAll(customerId, monitorId, decoded);
             });
 
             // Save the instance of the TCP client.
             monitor.tcpClient = tcpClient;
+            tcpClientToStart = tcpClient;
 
-            // Start the TCP client.
-            tcpClient.start();
+            log.info(formatLogMsg("TCP client created", customerId, monitorId));
 
-            log.info(formatLogMsg("TCP client started", customerId, monitorId));
+            // Initialize the writer with an empty string to prevent proxy timeouts
+            // while waiting for the TCP client to connect and authenticate.
+            // Note: Don't await - the write will complete after the response is returned.
+            void safeWrite(writer, "");
 
             // Return the stream readable to the client.
             return new NextResponse(readable);
@@ -201,6 +213,14 @@ export const POST: (req: Request) => Promise<Response> = withAuth(async (req) =>
             return NextResponse.json({ error: JSON.stringify(error) }, { status: 500 });
         }
     });
+
+    // Start after releasing the lock
+    if (tcpClientToStart && !req.signal.aborted) {
+        tcpClientToStart.start();
+        log.info(formatLogMsg("TCP client started", customerId, monitorId));
+    }
+
+    return response;
 }) as (req: Request) => Promise<Response>;
 
 /**
@@ -345,8 +365,34 @@ const sendKeepalive = (customerId: number, monitorId: number, tcpClient: RemoteM
         }
         // Send an empty message to all writers.
         log.debug(formatLogMsg("Send monitor keepalive", customerId, monitorId));
-        getWriters(customerId, monitorId).forEach(writer => writer.write(""));
+        void safeWriteAll(customerId, monitorId, "");
         // Schedule a new keepalive.
         sendKeepalive(customerId, monitorId, tcpClient);
     }, keepaliveInterval * 1000);
+};
+
+const safeClose = async (writer: WritableStreamDefaultWriter) => {
+    try {
+        await writer.close();
+    } catch {
+        // ignore: already closed / aborted
+    }
+};
+
+const safeWrite = async (writer: WritableStreamDefaultWriter, data: string) => {
+    try {
+        await writer.write(data);
+    } catch {
+        // ignore: client disconnected / stream closed
+    }
+};
+
+const safeWriteAll = async (customerId: number, monitorId: number, data: string) => {
+    const writers = getWriters(customerId, monitorId);
+    await Promise.all(writers.map(w => safeWrite(w, data)));
+};
+
+const safeCloseAll = async (customerId: number, monitorId: number) => {
+    const writers = getWriters(customerId, monitorId);
+    await Promise.all(writers.map(w => safeClose(w)));
 };
