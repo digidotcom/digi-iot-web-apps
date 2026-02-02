@@ -25,6 +25,7 @@
       "@configs/*": ["./src/configs/*"],
       "@contexts/*": ["./src/contexts/*"],
       "@customTypes/*": ["./src/types/*"],
+      "@lib/*": ["./src/lib/*"],
       "@models/*": ["./src/models/*"],
       "@public/*": ["./public/*"],
       "@services/*": ["./src/services/*"],

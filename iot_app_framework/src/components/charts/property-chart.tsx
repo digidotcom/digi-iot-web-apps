@@ -1,9 +1,9 @@
 'use client';
 
-import { ChartOptions } from 'chart.js';
+import type { ChartData, ChartOptions } from 'chart.js';
 import { useEffect, useState } from 'react';
 
-import Chart from '@components/charts/chart';
+import Chart, { TimePoint } from '@components/charts/chart';
 import IconButton from '@components/widgets/icon-button';
 import Loading from '@components/widgets/loading';
 import { DEFAULT_SAMPLES_NUMBER } from '@configs/app-config';
@@ -18,22 +18,22 @@ const CHART_OPTIONS: ChartOptions = {
     responsive: true,
     maintainAspectRatio: false,
     scales: {
-        xAxes: [{
+        x: {
             type: "time",
             time: {
                 unit: "minute",
-                minUnit: "minute",
-                stepSize: 2
+                minUnit: "minute"
             },
             ticks: {
+                stepSize: 2,
                 source: "auto"
             }
-        }],
-        yAxes: [{
+        },
+        y: {
             ticks: {
                 stepSize: 20
             }
-        }]
+        }
     }
 };
 
@@ -78,6 +78,22 @@ const PropertyChart = (props: Props) => {
         }
     };
 
+    const dataPoints: TimePoint[] =
+            property.samplesHistory?.map(sample => ({
+                x: new Date(sample.timeStamp).getTime(),
+                y: Number(sample.value),
+        })) ?? [];
+    
+    const chartData: ChartData<'line', TimePoint[]> = {
+        datasets: [
+        {
+            label: property.name,
+            data: dataPoints,
+            borderColor: property.color,
+        },
+        ],
+    };
+
     return (
         <div className="iot-property-chart-container">
             {errorMessage ? (
@@ -91,18 +107,7 @@ const PropertyChart = (props: Props) => {
                     ) : (
                     <Chart
                         type="line"
-                        data={{
-                            datasets: [
-                                {
-                                    label: property.name,
-                                    data: property.samplesHistory?.map(sample => ({
-                                        x: new Date(sample.timeStamp),
-                                        y: Number(sample.value)
-                                    })),
-                                    borderColor: property.color
-                                }
-                            ]
-                        }}
+                        data={chartData}
                         showLegend={false}
                         options={CHART_OPTIONS}
                     />

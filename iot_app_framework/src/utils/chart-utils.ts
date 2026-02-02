@@ -1,3 +1,4 @@
+import { Chart as ChartJS, ChartType, Plugin } from "chart.js";
 import { ColorStyles } from '@configs/style-constants';
 import { IconLookup, icon } from '@fortawesome/fontawesome-svg-core';
 import { faCircle } from '@fortawesome/free-solid-svg-icons';
@@ -14,7 +15,7 @@ export const CONTAINER_MIN_WIDTH = 300;
  * 
  * @returns A Chart.js plugin object.
  */
-export const createImageCenterPlugin = (faIcon: IconLookup, color: string) => {
+export const createImageCenterPlugin = (faIcon: IconLookup, color: string): Plugin<ChartType> => {
     const chartIcon = icon(faIcon);
     const chartCircleIcon = icon(faCircle);
     const chartImage = new Image();
@@ -44,7 +45,7 @@ export const createImageCenterPlugin = (faIcon: IconLookup, color: string) => {
 
     return {
         id: 'imageCenter',
-        beforeDraw(chart: Chart) {
+        beforeDraw(chart: ChartJS) {
             const { ctx, chartArea } = chart;
             if (!chartArea) {
                 return;

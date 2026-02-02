@@ -77,7 +77,8 @@ const ConnectionStatusChart = (props: Props) => {
 
     // Adjust the legend position based on the container width.
     useResizeObserver(CONTAINER_ID, (width, height) => {
-        chartRef.current?.setLegendPosition(width > CONTAINER_MIN_WIDTH ? "right" : "bottom");
+        const pos = width > CONTAINER_MIN_WIDTH ? "right" : "bottom";
+        chartRef.current?.setLegendPosition(pos);
     });
 
     return (
@@ -105,7 +106,7 @@ const ConnectionStatusChart = (props: Props) => {
                             }}
                             legendPosition={getLegendInitialPosition(CONTAINER_ID)}
                             showCountInLegend={true}
-                            plugins={[imageCenterPlugin]}
+                            chartPlugins={[imageCenterPlugin]}
                         />
                     </div>
                 )}
