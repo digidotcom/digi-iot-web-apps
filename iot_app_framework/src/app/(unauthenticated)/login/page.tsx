@@ -6,7 +6,6 @@ const SignIn = dynamic(
     () => import('./sign-in-page'),
     {
         loading: () => <Loading fullscreen />,
-        ssr: false,
     }
 );
 

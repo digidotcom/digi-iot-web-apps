@@ -5,8 +5,7 @@ import Loading from '@components/widgets/loading';
 const MapPage = dynamic(
     () => import('./map-page'),
     {
-        loading: () => <Loading fullscreen />,
-        ssr: false,
+        loading: () => <Loading fullscreen />
     }
 );
 
