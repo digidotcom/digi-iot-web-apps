@@ -11,8 +11,9 @@ const defaultHost = process.env.UI_DEFAULT_HOST || 'remotemanager.digi.com';
 
 // Interface needed to use an advanced initialization of next-auth using app router.
 // See https://github.com/nextauthjs/next-auth/issues/8243
+// In Next.js 16, params are async
 interface RouteHandlerContext {
-    params: { nextauth: string[] }
+    params: Promise<{ nextauth: string[] }>
 }
 
 // Create the axios instance to communicate with DRM.
@@ -153,22 +154,44 @@ const getAuthOptions = (userIp: string) => ({
     ]
 }) as AuthOptions;
 
-// Authentication handler.
-const handler = async (req: NextRequest, context: RouteHandlerContext) => {
-    // @ts-ignore
-    const protocol = req?.headers?.get('x-forwarded-proto') || defaultScheme;
-    // @ts-ignore
-    const host = req?.headers?.get('host') || defaultHost;
-    if (req.url?.includes('api/auth/error')) {
-        const incomingUrl = new URL(req.url);
-        const logoutUrl = `${protocol}://${host}${BASE_PATH}/logout${incomingUrl.search}`;
-        return NextResponse.redirect(logoutUrl);
-    }
+// Base NextAuth handler factory (App Router: needs req + context)
+// In Next.js 16, we need to handle async params
+const makeAuthHandler = (userIp: string) => {
+    const options = getAuthOptions(userIp);
 
-    const userIp = req?.ip || '';
-    const authOptions = getAuthOptions(userIp);
-
-    return await NextAuth(req, context, authOptions);
+    // NextAuth's types lag a bit for App Router, so we cast the call shape.
+    return async (req: NextRequest, ctx: RouteHandlerContext) => {
+        // Await the params to get the actual values
+        const params = await ctx.params;
+        return NextAuth(req, { params }, options);
+    };
 };
 
-export { handler as GET, handler as POST };
+function handleAuthErrorRedirect(req: NextRequest) {
+    const protocol = req.headers.get('x-forwarded-proto') || defaultScheme;
+    const host = req.headers.get('host') || defaultHost;
+
+    const incomingUrl = new URL(req.url);
+    const logoutUrl = `${protocol}://${host}${BASE_PATH}/logout${incomingUrl.search}`;
+    return NextResponse.redirect(logoutUrl);
+}
+
+export async function GET(req: NextRequest, ctx: RouteHandlerContext) {
+    if (req.url.includes('api/auth/error')) {
+        return handleAuthErrorRedirect(req);
+    }
+
+    const userIp = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || '';
+    const authHandler = makeAuthHandler(userIp);
+    return authHandler(req, ctx);
+}
+
+export async function POST(req: NextRequest, ctx: RouteHandlerContext) {
+    if (req.url.includes('api/auth/error')) {
+        return handleAuthErrorRedirect(req);
+    }
+
+    const userIp = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || '';
+    const authHandler = makeAuthHandler(userIp);
+    return authHandler(req, ctx);
+}
