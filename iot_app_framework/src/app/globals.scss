@@ -1,5 +1,6 @@
-@import "./scss/variables";
-@import "~@coreui/coreui/scss/coreui";
+@use "../styles/variables" as *;
+
+@import "@coreui/coreui/scss/coreui";
 
 html {
   font-family: var(--font-ss3);

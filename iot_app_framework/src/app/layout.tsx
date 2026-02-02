@@ -1,6 +1,6 @@
 'use client';
 
-import '@public/style.scss';
+import './globals.scss';
 import 'font-awesome/css/font-awesome.min.css';
 import 'simple-line-icons/css/simple-line-icons.css';
 

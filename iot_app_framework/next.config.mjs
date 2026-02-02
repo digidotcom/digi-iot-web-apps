@@ -1,3 +1,5 @@
+import path from "path";
+
 /** @type {import('next').NextConfig} */
 const BASE_PATH = "/iot-application-framework";
 
@@ -20,8 +22,14 @@ const nextConfig = {
     },
     reactStrictMode: false,
     experimental: {
-        proxyTimeout: 180000,
-        instrumentationHook: true,
+        proxyTimeout: 180000
+    },
+    sassOptions: {
+        includePaths: [
+            path.join(process.cwd(), "node_modules"),
+            path.join(process.cwd(), "node_modules", "@coreui", "coreui", "scss"),
+        ],
+        silenceDeprecations: ['import', 'global-builtin', 'color-functions', 'legacy-js-api'],
     },
     async headers() {
         return [
