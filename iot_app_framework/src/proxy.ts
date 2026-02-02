@@ -34,7 +34,7 @@ const copyHeaders = (names: string[], from: Headers, to: Headers) => {
  * 
  * @returns The modified response.
  */
-export default async function middleware(request: NextRequest) {
+export default async function proxy(request: NextRequest) {
     const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
 
     if (!token) {
@@ -49,7 +49,12 @@ export default async function middleware(request: NextRequest) {
     const { username, customerId, apiAuth } = token;
     headers.set('Authorization', `Basic ${apiAuth}`);
     const headerSimple = copyHeaders(['Accept', 'Content-Type'], request.headers, headers);
-    const ip = request.ip ?? request.headers.get('x-forwarded-for');
+    const forwardedFor = request.headers.get('x-forwarded-for');
+    const ip =
+        forwardedFor?.split(',')[0]?.trim() ??
+        request.headers.get('x-real-ip') ??
+        request.headers.get('cf-connecting-ip') ??
+        undefined;
 
     if (ip) headers.set('User-IP', ip);
     if (url.indexOf('/ws/v1/monitors') >= 0 && method === 'GET') {
