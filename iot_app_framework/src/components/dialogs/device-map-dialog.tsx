@@ -34,6 +34,7 @@ const DeviceMapDialog = (props: Props) => {
                 <MapComponent
                     devices={[device]}
                     routes={device.route ? [device.route] : []}
+                    groups={[]}
                     forceShowRoutes={true}
                     autoCenter={true}
                     allowSelection={false}

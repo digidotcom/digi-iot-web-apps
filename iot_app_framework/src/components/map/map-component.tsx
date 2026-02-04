@@ -4,7 +4,7 @@ import React, { Ref, useEffect } from 'react';
 import _ from 'lodash';
 
 import MapMenu from '@components/map/map-menu';
-import { IoTRoute } from '@customTypes/device-types';
+import { IoTRoute, IoTDevicesGroup } from '@customTypes/device-types';
 import { DeviceMarker, RoutePath } from '@customTypes/map-types';
 import { MarkerClusterer } from '@googlemaps/markerclusterer';
 import { IoTDevice } from '@models/IoTDevice';
@@ -18,6 +18,7 @@ import { toast } from 'react-toastify';
 
 // Constants.
 const LOCAL_VAR_HIDDEN_PATHS = "hiddenPaths";
+const LOCAL_VAR_HIDDEN_GROUPS = "hiddenGroups";
 const LOCAL_VAR_PREVIOUS_CENTER = "previousMapCenter";
 const LOCAL_VAR_PREVIOUS_ZOOM = "previousMapZoom";
 const LOCAL_VAR_SHOW_PATHS = "showPaths";
@@ -33,6 +34,7 @@ const LIBRARIES: Libraries = ['geometry', 'drawing', 'places'];
 interface Props {
     devices: IoTDevice[],
     routes: IoTRoute[],
+    groups: IoTDevicesGroup[],
     menuTarget?: string,
     autoCenter?: boolean,
     allowSelection?: boolean,
@@ -53,6 +55,7 @@ const MapComponent = React.forwardRef((props: Props, ref: Ref<MapComponentRef>) 
     const {
         devices,
         routes,
+        groups,
         menuTarget,
         autoCenter = false,
         allowSelection = true,
@@ -87,8 +90,14 @@ const MapComponent = React.forwardRef((props: Props, ref: Ref<MapComponentRef>) 
             return storedHiddenPaths ? storedHiddenPaths.split(',') : [];
         }
     );
+    const [hiddenGroups, setHiddenGroups] = React.useState<string[]>(
+        () => {
+            const storedHiddenGroups = localStorage.getItem(LOCAL_VAR_HIDDEN_GROUPS)
+            return storedHiddenGroups ? storedHiddenGroups.split(',') : [];
+        }
+    );
     const [pathsList, setPathsList] = React.useState<RoutePath[]>(getPathsFromRoutes(routes, hiddenPaths));
-    const [markersList, setMarkersList] = React.useState<DeviceMarker[]>(() => getMarkersFromDevices(devices, [], forceShowRoutes ? [] : hiddenPaths, unselectAll));
+    const [markersList, setMarkersList] = React.useState<DeviceMarker[]>(() => getMarkersFromDevices(devices, [], forceShowRoutes ? [] : hiddenPaths, hiddenGroups, unselectAll));
     const [showClusters, setShowClusters] = React.useState(localStorage.getItem(LOCAL_VAR_SHOW_CLUSTERS) === "true");
 
     // Map reference variables.
@@ -157,7 +166,7 @@ const MapComponent = React.forwardRef((props: Props, ref: Ref<MapComponentRef>) 
 
     // Method called whenever the devices list changes to update the markers.
     React.useEffect(() => {
-        setMarkersList(prevMarkersList => getMarkersFromDevices(devices, prevMarkersList, forceShowRoutes ? [] : hiddenPaths, unselectAll));
+        setMarkersList(prevMarkersList => getMarkersFromDevices(devices, prevMarkersList, forceShowRoutes ? [] : hiddenPaths, hiddenGroups, unselectAll));
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [devices]);
 
@@ -302,6 +311,16 @@ const MapComponent = React.forwardRef((props: Props, ref: Ref<MapComponentRef>) 
         map.current?.setZoom(zoom);
     };
 
+    // Method called when the hidden groups value changes in the menu.
+    const onHiddenGroupsChanged = (hiddenGroups: string[]) => {
+        markersList.forEach(marker => {
+            marker.visible = !hiddenGroups.includes(marker.device.group);
+        });
+        localStorage.setItem(LOCAL_VAR_HIDDEN_GROUPS, hiddenGroups.join(","));
+        setHiddenGroups([...hiddenGroups]);
+        setMarkersList([...markersList]);
+    };
+
     // Function to handle a marker selection event.
     const onMarkerSelected = (marker: DeviceMarker, e?: google.maps.MapMouseEvent, showPopover?: boolean) => {
         unselectAll();
@@ -428,11 +447,14 @@ const MapComponent = React.forwardRef((props: Props, ref: Ref<MapComponentRef>) 
                     <MapMenu
                         target={menuTarget}
                         paths={pathsList}
+                        groups={groups}
                         showPaths={showPaths}
                         hiddenPaths={hiddenPaths}
+                        hiddenGroups={hiddenGroups}
                         showClusters={showClusters}
                         onShowPathsChanged={onShowPathsChanged}
                         onHiddenPathsChanged={onHiddenPathsChanged}
+                        onHiddenGroupsChanged={onHiddenGroupsChanged}
                         onShowClustersChanged={onShowClustersChanged}
                     />
                 )}

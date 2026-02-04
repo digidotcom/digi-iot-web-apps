@@ -45,11 +45,12 @@ const getMarkerPopover = (device: IoTDevice, closePopup: () => void) => {
  * @param devices An array of IoTDevice objects that represent devices on the map.
  * @param currentMarkers An array of DeviceMarker containing the current list of map markers.
  * @param hiddenPaths An array with the IDs of the paths that should be hidden.
+ * @param hiddenGroups An array with the IDs of the groups that should be hidden.
  * @param closePopup Method to execute when the marker popover requests to be closed.
  * 
  * @returns An array of DeviceMarker objects to draw in the map.
  */
-export const getMarkersFromDevices = (devices: IoTDevice[], currentMarkers: DeviceMarker[], hiddenPaths: string[], closePopup: () => void): DeviceMarker[] => {
+export const getMarkersFromDevices = (devices: IoTDevice[], currentMarkers: DeviceMarker[], hiddenPaths: string[], hiddenGroups: string[], closePopup: () => void): DeviceMarker[] => {
     const markers = devices.map(device => {
         // Check if there is a marker for the device. In that case just update device related fields.
         let marker = currentMarkers?.find(marker => marker.device.id == device.id);
@@ -59,7 +60,7 @@ export const getMarkersFromDevices = (devices: IoTDevice[], currentMarkers: Devi
         } else {
             marker = {
                 device: device,
-                visible: !device.route || !hiddenPaths.includes(device.route.id.toString()),
+                visible: (!device.route || !hiddenPaths.includes(device.route.id.toString())) && !hiddenGroups.includes(device.group),
                 opacity: 1,
                 popover: getMarkerPopover(device, closePopup)
             };

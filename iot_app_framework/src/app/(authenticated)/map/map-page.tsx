@@ -17,6 +17,18 @@ const MapPage = () => {
     // Reference to the map component.
     const ref = React.useRef<MapComponentRef>(null);
 
+    // Filter routes to only include those that belong to devices in configured groups
+    const filteredRoutes = React.useMemo(() => {
+        // Get all route IDs from devices in configured groups
+        const deviceRouteIds = new Set(
+            devices
+                .filter(device => device.route)
+                .map(device => device.route!.id)
+        );
+        // Return only routes that are associated with devices
+        return routes.filter(route => deviceRouteIds.has(route.id));
+    }, [devices, routes]);
+
     // Register a callback to unselect any selection in the map when clicking anywhere in the page.
     React.useEffect(() => {
         document.body.addEventListener("click", (e) => unselectOnClick(e));
@@ -55,7 +67,8 @@ const MapPage = () => {
                 ref={ref}
                 menuTarget="PopoverLegacy"
                 devices={devices}
-                routes={routes}
+                routes={filteredRoutes}
+                groups={groups}
             />
         </Card>
     );
