@@ -6,12 +6,14 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { STATUS_LOADING, STATUS_LOADED } from '@configs/app-constants';
 import { AppError } from '@models/AppError';
 import { IoTDevice } from '@models/IoTDevice';
+import { IoTDevicesGroup } from '@customTypes/device-types';
 import DevicesManager from '@services/devices-manager';
 import { showError } from '@utils/toast-utils';
 
 // Define the context interface.
 interface DevicesContextType {
     devices: IoTDevice[];
+    groups: IoTDevicesGroup[];
     isLoading: boolean;
 }
 
@@ -21,6 +23,7 @@ const DevicesContext = createContext<DevicesContextType | undefined>(undefined);
 export const DevicesProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const { status } = useSession();
     const [devices, setDevices] = useState<IoTDevice[]>([]);
+    const [groups, setGroups] = useState<IoTDevicesGroup[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(DevicesManager.status !== STATUS_LOADED);
 
     useEffect(() => {
@@ -66,10 +69,11 @@ export const DevicesProvider: React.FC<{ children: React.ReactNode }> = ({ child
      */
     const handleDevicesChange = (devices: IoTDevice[]) => {
         setDevices(devices);
+        setGroups(DevicesManager.groups);
     };
 
     return (
-        <DevicesContext.Provider value={{ devices, isLoading }}>
+        <DevicesContext.Provider value={{ devices, groups, isLoading }}>
             {children}
         </DevicesContext.Provider>
     );

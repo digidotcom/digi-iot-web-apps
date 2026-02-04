@@ -11,7 +11,7 @@ import { faCircleNotch, faCrosshairs, faGears } from '@fortawesome/free-solid-sv
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 const MapPage = () => {
-    const { devices, isLoading } = useDevicesContext();
+    const { devices, groups, isLoading } = useDevicesContext();
     const { routes } = useRoutesContext();
 
     // Reference to the map component.

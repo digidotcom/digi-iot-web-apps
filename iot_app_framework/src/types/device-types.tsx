@@ -144,3 +144,13 @@ export interface IoTDevicesGroup {
     id: string;
     devices: IoTDevice[];
 }
+
+/**
+ * Interface defining metadata for a devices group.
+ */
+export interface DeviceGroupConfig {
+    id: string;
+    name: string;
+    icon: string;
+    color: string;
+}

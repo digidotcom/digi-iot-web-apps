@@ -5,6 +5,12 @@ import { IoTDevicePropertyDef, IoTMarkerImage } from '@customTypes/device-types'
 // Group name.
 export const GROUP_BUSES = "Buses";
 
+// Group display name.
+export const GROUP_BUSES_DISPLAY_NAME = "Buses";
+
+// Group color.
+export const GROUP_BUSES_COLOR = "#85c361";
+
 // Device types.
 export const TYPE_BUS = "bus";
 
