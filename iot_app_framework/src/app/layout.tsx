@@ -9,7 +9,7 @@ import React from 'react';
 
 import TopBar from '@components/navigation/topbar';
 import AuthProvider from '@contexts/auth-provider';
-import { BASE_PATH } from '@configs/app-config';
+import { APP_NAME, BASE_PATH } from '@configs/app-config';
 
 const font = ss3({
     variable: '--font-ss3',
@@ -21,7 +21,7 @@ const font = ss3({
 const RootLayout = ({ children }: React.PropsWithChildren): React.ReactNode => (
     <html lang="en" className={font.variable}>
         <head>
-            <title>Digi IoT Application Framework</title>
+            <title>{APP_NAME}</title>
             <link rel="shortcut icon" href={`${BASE_PATH}/images/favicon.ico`} />
         </head>
         <body>

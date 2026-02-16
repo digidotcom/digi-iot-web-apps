@@ -8,6 +8,7 @@ import { useSWRConfig } from 'swr';
 import PasswordInput from '@components/login/user-password';
 import { faCircleNotch, faLock, faUser } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { APP_NAME } from '@configs/app-config';
 
 type Props = {
     error?: string;
@@ -63,7 +64,7 @@ const LoginPanel = ({ error }: Props): React.ReactElement => {
 
     return (
         <Form action="none" onSubmit={onSubmitLogin} className="position-absolute username-card-body js-username-panel login-panel-content">
-            <h1>Digi IoT Application Framework</h1>
+            <h1>{APP_NAME}</h1>
             {localError && <Alert color="danger">{localError}</Alert>}
             {loggingIn
                 ? (

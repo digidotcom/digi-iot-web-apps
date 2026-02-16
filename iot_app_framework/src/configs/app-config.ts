@@ -9,6 +9,9 @@ import { AppMonitorDef } from '@customTypes/monitor-types';
 // Base path.
 export const BASE_PATH = process.env.BASE_PATH || '';
 
+// App name.
+export const APP_NAME = "Digi IoT Application Framework";
+
 // Groups.
 export const APP_GROUPS: string[] = [
     GROUP_BUSES
