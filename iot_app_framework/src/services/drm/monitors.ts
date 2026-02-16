@@ -11,6 +11,23 @@ import logLevel from '@utils/log-utils';
 const log = logLevel.getLogger('monitors');
 
 const API_MONITOR = `${BASE_PATH}/api/monitor/`;
+
+/**
+ * Safely parses JSON from a response. Returns the parsed object or null if parsing fails.
+ * This handles cases where the server returns HTML (e.g., 504 Gateway Timeout from nginx).
+ * 
+ * @param response The fetch response to parse.
+ * @returns The parsed JSON object, or an object with the raw text as error if parsing fails.
+ */
+const safeParseJson = async (response: Response): Promise<{ error?: string }> => {
+    try {
+        const text = await response.text();
+        return JSON.parse(text);
+    } catch {
+        return { error: `${response.status} ${response.statusText}` };
+    }
+};
+
 export const PARAM_MONITOR_ID = "monitorId";
 export const PARAM_MONITOR_DEF_ID = "monitorDefId";
 
@@ -28,7 +45,7 @@ export const createDRMMonitor = async (monitorDef: AppMonitorDef) => {
         // Check if there exists a monitor for this monitor definition.
         const monitorIdResp = await fetch(`${API_MONITOR}?${PARAM_MONITOR_DEF_ID}=${monitorDef.id}`);
         if (!monitorIdResp.ok) {
-            const error = await monitorIdResp.json();
+            const error = await safeParseJson(monitorIdResp);
             const appError = newAppError(`Error starting monitor '${monitorDef.id}'${error.error ? ": " + error.error : ""}`, monitorIdResp.status);
             log.error(appError.message);
             throw appError;
@@ -49,7 +66,7 @@ export const createDRMMonitor = async (monitorDef: AppMonitorDef) => {
         // Call our API to start the monitor TCP client.
         const response = await fetch(`${API_MONITOR}?${PARAM_MONITOR_ID}=${monitorId}&${PARAM_MONITOR_DEF_ID}=${monitorDef.id}`, { method: "POST" });
         if (!response.ok) {
-            const error = await response.json();
+            const error = await safeParseJson(response);
             const appError = newAppError(`Error starting monitor '${monitorDef.id}' with ID ${monitorId}${error.error ? ": " + error.error : ""}`, response.status);
             log.error(appError.message);
             throw appError;
