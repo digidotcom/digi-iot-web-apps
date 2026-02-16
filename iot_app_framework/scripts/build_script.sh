@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 # Define variables
 APP_NAME="Digi IoT Application Framework"
@@ -25,9 +26,14 @@ echo -n " - Preparing build directory... "
 mkdir -p "${BUILD_DIR}" > /dev/null 2>&1 || { echo "ERROR"; exit 1; }
 echo "OK"
 
-# Install production dependencies
-echo -n " - Installing dependencies... "
-npm install --omit=dev --legacy-peer-deps > /dev/null 2>&1 || { echo "ERROR"; exit 1; }
+# Install all dependencies
+echo -n " - Installing dependencies (full)... "
+if ! npm ci --legacy-peer-deps > /dev/null 2>&1; then
+    if ! npm install --legacy-peer-deps > /dev/null 2>&1; then
+        echo "ERROR"
+        exit 1
+    fi
+fi
 echo "OK"
 
 # Build the Next.js application
@@ -36,15 +42,15 @@ npm run build > /dev/null 2>&1 || { echo "ERROR"; exit 1; }
 echo "OK"
 
 # Copy necessary files and directories to the build directory
-echo -n " - Copying files... "
-cp -r .next "${BUILD_DIR}/" > /dev/null 2>&1 || { echo "ERROR"; exit 1; }
-cp -r public "${BUILD_DIR}/" > /dev/null 2>&1 || { echo "ERROR"; exit 1; }
-cp -r node_modules "${BUILD_DIR}/" > /dev/null 2>&1 || { echo "ERROR"; exit 1; }
-cp -r data "${BUILD_DIR}/" > /dev/null 2>&1 || { echo "ERROR"; exit 1; }
+echo -n " - Copying standalone runtime... "
+mkdir -p "${BUILD_DIR}/.next" > /dev/null 2>&1 || { echo "ERROR"; exit 1; }
+cp -r .next/standalone "${BUILD_DIR}/.next/" > /dev/null 2>&1 || { echo "ERROR"; exit 1; }
+cp -r .next/static "${BUILD_DIR}/.next/" > /dev/null 2>&1 || { echo "ERROR"; exit 1; }
+[ -d public ] && cp -r public "${BUILD_DIR}/" || true
+[ -d data ] && cp -r data "${BUILD_DIR}/" || true
+# Also copy data into standalone folder so process.cwd() works correctly
+[ -d data ] && cp -r data "${BUILD_DIR}/.next/standalone/" || true
 cp package.json "${BUILD_DIR}/" > /dev/null 2>&1 || { echo "ERROR"; exit 1; }
-cp package-lock.json "${BUILD_DIR}/" > /dev/null 2>&1 || { echo "ERROR"; exit 1; }
-cp next.config.mjs "${BUILD_DIR}/" > /dev/null 2>&1 || { echo "ERROR"; exit 1; }
-cp .env "${BUILD_DIR}/" > /dev/null 2>&1 || { echo "ERROR"; exit 1; }
 echo "OK"
 
 # Package the build directory into a zip file

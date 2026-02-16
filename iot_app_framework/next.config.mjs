@@ -16,6 +16,7 @@ const cspPolicies = `
 `;
 
 const nextConfig = {
+    output: 'standalone',
     basePath: BASE_PATH,
     env: {
         BASE_PATH
