@@ -121,6 +121,8 @@ class DevicesManager {
      * Creates the list of groups.
      */
     private createGroups() {
+        // Clear existing groups to prevent duplicates on re-initialization.
+        this.deviceGroups = [];
         APP_GROUPS.forEach(group => {
             this.deviceGroups.push({id: group, devices: []});
         });
