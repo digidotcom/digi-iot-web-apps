@@ -32,7 +32,7 @@ const MapPage = () => {
     // Register a callback to unselect any selection in the map when clicking anywhere in the page.
     React.useEffect(() => {
         document.body.addEventListener("click", (e) => unselectOnClick(e));
-        return () => window.removeEventListener("click", (e) => unselectOnClick(e));
+        return () => document.body.removeEventListener("click", (e) => unselectOnClick(e));
     }, []);
 
     /**
