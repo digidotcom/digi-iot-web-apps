@@ -1,4 +1,4 @@
-'use-client';
+'use client';
 
 import { STATUS_LOADED, STATUS_LOADING } from '@configs/app-constants';
 import { IAlertSummary } from '@customTypes/alert-types';

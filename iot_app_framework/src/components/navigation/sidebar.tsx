@@ -1,4 +1,4 @@
-'use-client';
+'use client';
 
 import _ from 'lodash';
 import Link from 'next/link';

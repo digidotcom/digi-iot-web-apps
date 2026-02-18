@@ -1,4 +1,4 @@
-'use-client';
+'use client';
 
 import React from 'react';
 import { Input, InputGroup, InputGroupText } from 'reactstrap';
