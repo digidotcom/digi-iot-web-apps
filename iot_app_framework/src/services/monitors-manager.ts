@@ -9,6 +9,7 @@ import { newAppError } from '@utils/error-utils';
 import logLevel from '@utils/log-utils';
 
 const CREATE_MONITOR_RETRIES = 3;
+const RECONNECT_DELAY_MS = 5000;
 
 const log = logLevel.getLogger('monitors-manager');
 
@@ -18,6 +19,7 @@ class MonitorsManager {
     private static monitorMutex = new Mutex();
 
     private appMonitors: AppMonitor[] = [];
+    private isShuttingDown: boolean = false;
 
     // Private constructor to ensure singleton pattern
     private constructor() {
@@ -40,6 +42,8 @@ class MonitorsManager {
      * @throws An {@link AppError} if an error occurs while creating the monitor.
      */
     async createMonitor(defID: string) {
+        // Reset shutdown flag when creating a new monitor (e.g., after re-login).
+        this.isShuttingDown = false;
         await MonitorsManager.monitorMutex.runExclusive(async () => {
             let retry = CREATE_MONITOR_RETRIES;
             while (retry > 0) {
@@ -133,7 +137,7 @@ class MonitorsManager {
                         // Add the entry to the cloud log.
                         this.addLogItem(json, appMonitor?.topics ?? []);
                     } catch (error) {
-                        log.debug(`JSON parse error in monitor '${appMonitor.id}'`, error);
+                        log.error(`JSON parse error in monitor '${appMonitor.id}'. Raw data: ${data}`, error);
                     }
                 }
             } catch (e) {
@@ -142,8 +146,28 @@ class MonitorsManager {
                 done = true;
             }
         }
+        // Save callbacks before removing the monitor for potential reconnection.
+        const savedCallbacks = appMonitor.callbacks ? [...appMonitor.callbacks] : [];
+        const monitorId = appMonitor.id;
         // Clean up when the stream is done.
         this.removeMonitor(appMonitor.id);
+        // Attempt to reconnect after a delay, but only if not shutting down.
+        if (savedCallbacks.length > 0 && !this.isShuttingDown) {
+            log.info(`Scheduling reconnection for monitor '${monitorId}' in ${RECONNECT_DELAY_MS}ms`);
+            setTimeout(async () => {
+                try {
+                    log.info(`Attempting to reconnect monitor '${monitorId}'`);
+                    await this.createMonitor(monitorId);
+                    // Re-register the saved callbacks.
+                    savedCallbacks.forEach(callback => {
+                        this.registerMonitorCallback(monitorId, callback);
+                    });
+                    log.info(`Monitor '${monitorId}' reconnected successfully`);
+                } catch (error) {
+                    log.error(`Failed to reconnect monitor '${monitorId}': ${(error as AppError).message}`);
+                }
+            }, RECONNECT_DELAY_MS);
+        }
     };
 
     /**
@@ -255,6 +279,8 @@ class MonitorsManager {
      * Tears down all registered monitors.
      */
     tearDownMonitors() {
+        // Set flag to prevent reconnection attempts.
+        this.isShuttingDown = true;
         // Close all stored readers, which will cause the monitors to be stopped and deleted in the backend.
         this.appMonitors.forEach(appMonitor => appMonitor.reader?.cancel());
     };
