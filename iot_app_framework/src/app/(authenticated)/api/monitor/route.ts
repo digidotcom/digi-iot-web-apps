@@ -289,28 +289,37 @@ const getWriters = (customerId: number, monitorId: number) => {
  * @param stream Monitor stream whose writer has been closed.
  */
 const onWriterClosed = async (customerId: number, monitorId: number, stream: MonitorStream) => {
-    const monitors = monitorsMap.get(customerId);
-    // Sanity checks.
-    if (monitors === undefined || monitors.length == 0) { 
-        return;
-    }
-    const monitor = monitors.find(mon => mon.monitorId === monitorId);
-    if (monitor === undefined) {
-        return;
-    }
-    // Remove the stream from the list of streams.
-    let index = monitor.stream.findIndex(s => s === stream);
-    if (index != -1) {
-        monitor.stream.splice(index, 1);
-    }
-    // If no more clients are subscribed to this monitor, stop the TCP client and delete the monitor.
-    if (monitor.stream.length == 0) {
-        // Stop the TCP client.
-        monitor.tcpClient?.stop();
-        // Delete the DRM monitor.
-        deleteDRMMonitor(monitorId, customerId, monitor.apiAuth);
-        // Remove the monitor from the list of monitors for this customer.
-        monitors.splice(monitors.findIndex(mon => mon.monitorId === monitor.monitorId), 1);
+    // Acquire mutex to safely mutate monitorsMap (prevents race condition with addStream).
+    const cleanupInfo = await mutex.runExclusive(() => {
+        const monitors = monitorsMap.get(customerId);
+        // Sanity checks.
+        if (monitors === undefined || monitors.length == 0) {
+            return null;
+        }
+        const monitor = monitors.find(mon => mon.monitorId === monitorId);
+        if (monitor === undefined) {
+            return null;
+        }
+        // Remove the stream from the list of streams.
+        let index = monitor.stream.findIndex(s => s === stream);
+        if (index != -1) {
+            monitor.stream.splice(index, 1);
+        }
+        // If no more clients are subscribed to this monitor, return cleanup info.
+        if (monitor.stream.length == 0) {
+            // Stop the TCP client.
+            monitor.tcpClient?.stop();
+            // Remove the monitor from the list of monitors for this customer.
+            monitors.splice(monitors.findIndex(mon => mon.monitorId === monitor.monitorId), 1);
+            // Return info needed for async cleanup outside the mutex.
+            return { apiAuth: monitor.apiAuth };
+        }
+        return null;
+    });
+
+    // Delete the DRM monitor outside the mutex to avoid holding the lock during network I/O.
+    if (cleanupInfo) {
+        await deleteDRMMonitor(monitorId, customerId, cleanupInfo.apiAuth);
     }
 };
 
