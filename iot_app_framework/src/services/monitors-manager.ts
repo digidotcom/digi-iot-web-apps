@@ -10,6 +10,7 @@ import logLevel from '@utils/log-utils';
 
 const CREATE_MONITOR_RETRIES = 3;
 const RECONNECT_DELAY_MS = 5000;
+const MAX_BUFFER_SIZE = 100 * 1024; // 100 KB max buffer size to prevent unbounded growth
 
 const log = logLevel.getLogger('monitors-manager');
 
@@ -94,6 +95,7 @@ class MonitorsManager {
     private async startMonitorStreamReader(appMonitor: AppMonitor, stream: ReadableStream<Uint8Array>) {
         const decoder = new TextDecoder();
         let done = false;
+        let buffer = ''; // Buffer to accumulate partial JSON data across chunks.
 
         // Create monitor reader.
         appMonitor.reader = stream.getReader();
@@ -103,41 +105,53 @@ class MonitorsManager {
                 const { value, done: streamDone } = await appMonitor.reader.read();
                 done = streamDone;
                 if (value && !done) {
-                    // Read data from the reader. Skip empty data.
-                    const data = decoder.decode(value, { stream: true }).trim();
-                    if (!data) {
+                    // Read data from the reader and append to buffer.
+                    buffer += decoder.decode(value, { stream: true });
+                    // Check buffer size limit to prevent unbounded memory growth.
+                    if (buffer.length > MAX_BUFFER_SIZE) {
+                        log.error(`Buffer overflow in monitor '${appMonitor.id}'. Buffer size: ${buffer.length} bytes. Discarding buffer.`);
+                        buffer = '';
                         continue;
                     }
-                    // Try to parse the monitor data and only notify it if it contains a valid payload.
-                    try {
-                        let json = JSON.parse(data);
-                        // Filter out some monitor data.
-                        if (Array.isArray(json)) {
-                            if (json.length === 1 && json[0]?.end === 1) { // The data is just `[{"end": 1}]` (Terminator for DataPoint monitor, ignore)
-                                continue;
-                            } else if (json.length > 0) { // Filter 'Monitor' and 'web-service' monitor alerts.
-                                json = json.filter(entry => (
-                                    entry.source == null ||
-                                    (!entry.source.startsWith("Monitor:") && !entry.source.startsWith("web-service"))
-                                ));
-                                // Final check, all entries might have been removed.
-                                if (json.length === 0) {
+                    // Process complete JSON messages from the buffer.
+                    // Messages are separated by newlines (\r\n).
+                    let newlineIndex;
+                    while ((newlineIndex = buffer.indexOf('\r\n')) !== -1) {
+                        const data = buffer.substring(0, newlineIndex).trim();
+                        buffer = buffer.substring(newlineIndex + 2); // Skip past \r\n
+                        if (!data) {
+                            continue;
+                        }
+                        try {
+                            let json = JSON.parse(data);
+                            // Filter out some monitor data.
+                            if (Array.isArray(json)) {
+                                if (json.length === 1 && json[0]?.end === 1) { // The data is just `[{"end": 1}]` (Terminator for DataPoint monitor, ignore)
                                     continue;
+                                } else if (json.length > 0) { // Filter 'Monitor' and 'web-service' monitor alerts.
+                                    json = json.filter(entry => (
+                                        entry.source == null ||
+                                        (!entry.source.startsWith("Monitor:") && !entry.source.startsWith("web-service"))
+                                    ));
+                                    // Final check, all entries might have been removed.
+                                    if (json.length === 0) {
+                                        continue;
+                                    }
                                 }
                             }
+                            // Notify the content via callbacks.
+                            appMonitor.callbacks?.forEach((callback: (arg0: undefined, arg1: undefined) => void) => {
+                                if (json.error) {
+                                    callback(undefined, json.error);
+                                } else {
+                                    callback(json, undefined);
+                                }
+                            });
+                            // Add the entry to the cloud log.
+                            this.addLogItem(json, appMonitor?.topics ?? []);
+                        } catch (error) {
+                            log.error(`JSON parse error in monitor '${appMonitor.id}'. Raw data: ${data}`, error);
                         }
-                        // Notify the content via callbacks.
-                        appMonitor.callbacks?.forEach((callback: (arg0: undefined, arg1: undefined) => void) => {
-                            if (json.error) {
-                                callback(undefined, json.error);
-                            } else {
-                                callback(json, undefined);
-                            }
-                        });
-                        // Add the entry to the cloud log.
-                        this.addLogItem(json, appMonitor?.topics ?? []);
-                    } catch (error) {
-                        log.error(`JSON parse error in monitor '${appMonitor.id}'. Raw data: ${data}`, error);
                     }
                 }
             } catch (e) {
