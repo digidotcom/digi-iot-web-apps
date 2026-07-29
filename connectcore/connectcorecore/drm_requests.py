@@ -815,7 +815,7 @@ def get_device_information(request, device_id):
 
     try:
         resp = send_request(dc_session, device_id, TARGET_DEVICE_INFO, data="")
-        if resp is None or "not registered" in resp:
+        if resp is None or "not registered" in resp or "Error while handling request" in resp:
             info[ID_ERROR] = ERROR_DEVICE_NOT_ANSWER
             return info
         if "CCAPI Error" in resp:
